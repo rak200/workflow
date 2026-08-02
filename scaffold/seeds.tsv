@@ -1,6 +1,6 @@
 # variant	form	seed	destination
 #
-# variant     all | none | php | php-config | ts | github — `all` applies everywhere, the rest match
+# variant     all | none | php | php-config | ts | ts-config | github — `all` applies everywhere, the rest match
 #             the repository's declared variant.
 # form        exact       byte-identical
 #             prefix:N    the first N lines are the seed; the rest is per-repo history
@@ -37,6 +37,10 @@ php-config	exact	php-config/.gitattributes	.gitattributes
 php-config	exact	php/.gitignore	.gitignore
 php-config	exact	php/dependabot.yml	.github/dependabot.yml
 php-config	masked:@[0-9]+\.[0-9]+\.[0-9]+	php-config/ci.yml	.github/workflows/ci.yml
+ts-config	exact	ts-config/.gitattributes	.gitattributes
+ts-config	exact	ts-config/.gitignore	.gitignore
+ts-config	exact	ts-config/dependabot.yml	.github/dependabot.yml
+ts-config	masked:@[0-9]+\.[0-9]+\.[0-9]+	ts-config/ci.yml	.github/workflows/ci.yml
 ts	exact	ts/.gitattributes	.gitattributes
 ts	exact	ts/.gitignore	.gitignore
 ts	exact	ts/dependabot.yml	.github/dependabot.yml

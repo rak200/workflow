@@ -2,7 +2,7 @@
 #
 # new-repo.sh — scaffold a conformant rak200 repository.
 #
-#   scripts/new-repo.sh <name> <variant: php|php-config|ts|none|github> <conventions-tag> ["description"]
+#   scripts/new-repo.sh <name> <variant: php|php-config|ts|ts-config|none|github> <conventions-tag> ["description"]
 #
 # This is the executable form of LIFECYCLE.md section 8.1. The order below is not
 # stylistic: archiving aside, two steps in it are load-bearing and were measured.
@@ -31,7 +31,7 @@ REPO="$OWNER/$NAME"
 WORKFLOW_URL="https://github.com/rak200/workflow.git"
 BASE_REPO="rak200/.github"
 
-case "$VARIANT" in php|php-config|ts|none|github) ;; *) echo "unknown variant: $VARIANT" >&2; exit 64 ;; esac
+case "$VARIANT" in php|php-config|ts|ts-config|none|github) ;; *) echo "unknown variant: $VARIANT" >&2; exit 64 ;; esac
 
 say() { printf '\n\033[1m>>> %s\033[0m\n' "$*"; }
 die() { printf '\n\033[31m!!! %s\033[0m\n' "$*" >&2; exit 1; }

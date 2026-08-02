@@ -20,12 +20,6 @@
 /ROADMAP.md              export-ignore
 /ARCHITECTURE.md         export-ignore
 
-# npm packs from package.json's `files`, not from export-ignore — this list governs
-# `git archive` only, which is what a git-dependency consumer receives.
-/tsconfig.json                  export-ignore
-/eslint.config.js               export-ignore
-/vitest.config.ts               export-ignore
-/stryker.config.json            export-ignore
-/.prettierrc.json               export-ignore
-/release-please-config.json     export-ignore
-/.release-please-manifest.json  export-ignore
+# Deliberately NOT export-ignored here, and this is the whole reason the file is
+# per-variant: in a configuration package the shared configs and CONVENTIONS.md are
+# the product. The `ts` variant hides exactly what this one must ship.
