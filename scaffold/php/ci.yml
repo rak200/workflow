@@ -11,8 +11,16 @@ on:
   # a workflow that publishes a required check carries no filter (non-negotiable 3).
   workflow_dispatch:
 
+# A caller CAPS the permissions of the workflow it calls: a job in the reusable
+# workflow that asks for more than this gets `startup_failure` and publishes NO
+# check at all — the required check simply never appears and the PR waits forever.
+# The PHP pipeline uploads SARIF and authenticates to Codecov by OIDC, so those two
+# are granted here and narrowed per job on the other side.
 permissions:
   contents: read
+  security-events: write   # SARIF upload from the scanner
+  actions: read            # codeql-action reads the run (private repos)
+  id-token: write          # Codecov OIDC
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
