@@ -466,20 +466,35 @@ gh pr comment <n> --body "@dependabot recreate"   # rebuild the PR from scratch
 
 Do not push commits to a Dependabot branch: it stops managing the PR from then on.
 
-### 4.7 The submodule pin is stale
+### 4.7 The submodule pin is obsolete
 
-Symptom: a convention or a label documented elsewhere is absent here. The pin is explicit, so this
-is visible rather than mysterious.
+Symptom: `ci / conformance` fails on **The pinned scaffold is not obsolete**, naming the seeds
+that moved. Fix:
 
 ```bash
 git -C .rak200 fetch --tags
-git -C .rak200 checkout 0.3.0
-git add .rak200 && git commit -m "build: bump .rak200 to 0.3.0"
+git -C .rak200 checkout <latest tag>
+# then re-copy the seeds it named, from .rak200/scaffold/, and commit both together
+git add .rak200 <the seeds> && git commit -m "build: bump .rak200 to <tag>"
 ```
 
-Normally Dependabot does this for you. A stale pin is safe **because the conventions are prose and
-the label sync is additive** — an old pin can fail to add something, never remove it. Any future
-executable file added to `.rak200/` must preserve that property.
+**A stale pin used to be safe and is not any more.** This page said so for as long as `.rak200/`
+held prose and labels: *an old pin can fail to add something, never remove it.* That stopped being
+true the moment the submodule started carrying `scaffold/`, the seeds CI grades against. A
+repository grades itself against **its own pinned copy**, so an old pin does not merely miss an
+addition — it makes the repository judge itself by an obsolete rulebook **and pass**. The check
+built to detect drift was the thing concealing it.
+
+Measured on `rak200/utils`: pinned eight releases behind, `release-please-config.json` changed
+underneath it, gate green, and its next release would have been tagged `utils-4.6.0` — which
+Composer does not read as a version, making the release invisible to every consumer. The
+conformance step above now catches this, and it fails only when a seed **this variant consumes**
+actually changed, so an old pin with nothing moving under it stays quiet.
+
+Two properties follow, and anything added to `.rak200/` must preserve both: the pin is a **tag**,
+never a bare commit (a commit has no version to reason about, and the step rejects it); and
+whatever the submodule carries must be comparable between two tags, or staleness becomes
+undetectable again.
 
 ### 4.8 The branch is behind `master`
 
