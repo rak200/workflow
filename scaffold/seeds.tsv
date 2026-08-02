@@ -32,6 +32,7 @@ php	exact	php/.gitignore	.gitignore
 php	exact	php/dependabot.yml	.github/dependabot.yml
 php	masked:@[0-9]+\.[0-9]+\.[0-9]+	php/ci.yml	.github/workflows/ci.yml
 php	exact	php/release-please-config.json	release-please-config.json
+php	masked:@[0-9]+\.[0-9]+\.[0-9]+	php/release.yml	.github/workflows/release.yml
 php-config	exact	php-config/.gitattributes	.gitattributes
 php-config	exact	php/.gitignore	.gitignore
 php-config	exact	php/dependabot.yml	.github/dependabot.yml
@@ -41,3 +42,4 @@ ts	exact	ts/.gitignore	.gitignore
 ts	exact	ts/dependabot.yml	.github/dependabot.yml
 ts	masked:@[0-9]+\.[0-9]+\.[0-9]+	ts/ci.yml	.github/workflows/ci.yml
 ts	exact	ts/release-please-config.json	release-please-config.json
+ts	masked:@[0-9]+\.[0-9]+\.[0-9]+	ts/release.yml	.github/workflows/release.yml

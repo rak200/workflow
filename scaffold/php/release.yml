@@ -1,0 +1,16 @@
+name: release
+
+# Cuts releases from master: release-please reads the commit history, opens and
+# maintains a Release PR, and merging that PR cuts the bare tag and the GitHub
+# Release. The version is derived here and typed nowhere.
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    uses: rak200/.github/.github/workflows/release.yml@1.4.0
