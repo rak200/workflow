@@ -651,26 +651,33 @@ git init -b master
 git submodule add https://github.com/rak200/workflow.git .rak200
 git -C .rak200 checkout <tag>
 
-mkdir -p .github/workflows
-cp .rak200/scaffold/common/.editorconfig .rak200/scaffold/common/.gitattributes \
-   .rak200/scaffold/common/.git-blame-ignore-revs .rak200/scaffold/common/.gitignore \
-   .rak200/scaffold/common/LICENSE .rak200/scaffold/common/CLAUDE.md .
-cp .rak200/scaffold/common/CODEOWNERS .github/CODEOWNERS
-cp .rak200/scaffold/common/dependabot.yml .github/dependabot.yml
-cp .rak200/scaffold/common/ci.yml .github/workflows/ci.yml
-cp -a ".rak200/scaffold/<variant>/." .
+mkdir -p .github/workflows .githooks
+
+# scaffold/seeds.tsv IS the list — never a hand-written one here. It names the
+# variant, the check form, the seed and its destination, and the same file drives
+# the CI conformance check, so a copy loop that reads it cannot disagree with the
+# check that grades it. `scripts/new-repo.sh` is this loop, executable.
+while IFS=$'\t' read -r v form seed dest; do
+  case "$v" in ''|'#'*) continue ;; esac
+  [ "$v" = all ] || [ "$v" = "<variant>" ] || continue
+  mkdir -p "$(dirname "$dest")"
+  cp -a ".rak200/scaffold/$seed" "$dest"
+done < .rak200/scaffold/seeds.tsv
+chmod +x .githooks/pre-push
 
 printf '# %s\n\n<one line>\n' "<repo>" > README.md   # not a seed: per-repo content
 ```
 
-> **`cp -a <dir>/.` and not `<dir>/*`.** The glob skips dotfiles, and the language variants are
+> **Copy per row, never with a glob.** `cp <dir>/*` skips dotfiles, and the language variants are
 > mostly dotfiles — `.release-please-manifest.json` above all. It copies nothing, says nothing,
 > and the repo is born without the file `release-please` bootstraps from.
 
-The scaffold is **flat**: `scaffold/common/ci.yml`, not
-`scaffold/common/.github/workflows/ci.yml`. Seeds live under one directory per variant and each
-has its own destination, so mirroring the destination tree inside the scaffold implies a
-correspondence that does not exist.
+The scaffold is **flat**: `scaffold/php/ci.yml`, not
+`scaffold/php/.github/workflows/ci.yml`. Seeds live under one directory per variant — `all`,
+`none`, `github`, `php`, `php-config`, `ts` — and each row carries its own destination, so
+mirroring the destination tree inside the scaffold would imply a correspondence that does not
+exist. `all` is not a variant a repository declares; it is the row marker for seeds that apply
+everywhere.
 
 `.gitmodules` needs **no `branch =` line**: Dependabot falls back to the source repository's
 default branch, and it bumps to the latest **tag** reachable there, skipping untagged commits.
@@ -718,7 +725,19 @@ Apply `.rak200/labels.yml` with the label-sync action or by hand; **never prune*
 outside the canonical set belong to automations (Dependabot creates `dependencies` and
 `github_actions` on its own within minutes). GitHub's stock labels (`bug`, `enhancement`,
 `good first issue`, …) are deleted **once, by hand, now** — this is the only moment the repo has no
-history to lose.
+history to lose. Three of them (`bug`, `duplicate`, `wontfix`) are canonical too, so the sweep is
+followed by re-applying `labels.yml`, which puts those three back with the ecosystem's colours and
+descriptions.
+
+On an **existing** repository the "no history to lose" premise is not free — check it before
+deleting, because a label removed here disappears from every issue and pull request that carries it:
+
+```bash
+gh api "repos/rak200/<repo>/issues?state=all&per_page=100" \
+  --jq '[.[]|select(.labels|length>0)|{n:.number,labels:[.labels[].name]}]'
+```
+
+An empty result means the sweep costs nothing. Anything else is a decision, not a step.
 
 **7. Rulesets — after step 4, never before.**
 
@@ -734,12 +753,18 @@ gh api repos/rak200/<repo>/rulesets --jq '[.[] | {name,target,enforcement}]'
 The JSON is the canonical copy in [`rak200/.github`](https://github.com/rak200/.github/tree/master/rulesets) — clone it or fetch the two files; they are versioned there, not here. Order matters: the branch ruleset's
 `pull_request` rule would reject the very push in step 4 that establishes the default branch.
 
-Both rulesets carry a **`bypass_actors` entry for the repository admin, in `bypass_mode:
-pull_request`**, kept for the Release PR's absent-check deadlock (§3.8). The mode is the narrow
-part and must be read back as such: `always` would permit a **direct push** to `master`, which this
+**The branch ruleset** carries a `bypass_actors` entry for the repository admin, in `bypass_mode:
+pull_request`, kept for the Release PR's absent-check deadlock (§3.8). The mode is the narrow part
+and must be read back as such: `always` would permit a **direct push** to `master`, which this
 design does not want. Within the PR path the entry is wide — it exempts every API call the actor
 makes — which is why merges go through `gh pr merge` (rule 10) and why an `--admin` merge can cross
 a red required check.
+
+**The tag ruleset carries no bypass at all**, and not by choice: GitHub rejects the narrow mode on
+a tag ruleset outright — *"bypass mode must not be 'PULL_REQUEST' for tag rulesets"* — which left
+`always` or nothing. Nothing is correct here. Its rules block **moving and deleting** a tag, never
+creating one, so `release-please` cuts releases untouched, and moving a released tag is exactly
+what a bad release procedure does.
 
 **8. Release bootstrap.** A greenfield repo seeds `.release-please-manifest.json` at
 `{".": "0.0.0"}`; with `bump-minor-pre-major`, the first `feat:` releases `0.1.0`. An existing repo
@@ -750,13 +775,21 @@ is a different procedure — §8.2.
 ```bash
 git config core.hooksPath .githooks
 git config blame.ignoreRevsFile .git-blame-ignore-revs
-# install gitleaks if absent — the pre-push hook fails loudly without it
+gitleaks version || winget install --id Gitleaks.Gitleaks --exact   # or the platform's equivalent
 ```
 
+The hook **refuses to push** when gitleaks is absent rather than skipping the scan, so a missing
+install is loud. Two things about the install are worth knowing: winget puts the package directory
+on the **user** PATH rather than a shim in `WinGet\Links`, so already-open terminals keep failing
+until they are restarted; and `core.hooksPath` pointing at a directory that does not exist is
+silent, which buys the appearance of a hook and none of the scanning — so set it only once
+`.githooks/pre-push` is actually there.
+
 **10. Fire a canary before calling it conformant.** Open a PR that drifts one seed on purpose
-(append a line to `.gitattributes`). Required: check `gate` **FAILURE**, `mergeStateStatus`
-**BLOCKED**, and a plain `gh pr merge --squash` refused with *"the base branch policy prohibits the
-merge"*. Then close the PR and delete the branch.
+(append a line to `.gitattributes`). Required: **`ci / gate` FAILURE** — the full name, and it must
+have *run* rather than been skipped — `mergeStateStatus` **BLOCKED**, and a plain
+`gh pr merge --squash` refused with *"the base branch policy prohibits the merge"*. Then close the
+PR and delete the branch.
 
 ```bash
 gh pr view <n> --json mergeStateStatus,statusCheckRollup \
@@ -776,8 +809,34 @@ status` clean at `<tag>`; `ci` green on `master`.
 Same procedure minus steps 1–4 (the repo and its default branch already exist), plus the
 `release-please` bootstrap for a repo that already has tags and a hand-written `CHANGELOG.md` — the
 measured procedure is in the RFC's *Release bootstrap*. Verify the dist surface
-(`git archive HEAD | tar -t` against the `export-ignore` list) and land the `eol=lf` normalisation
-as a `style:` commit so it registers itself in `.git-blame-ignore-revs`.
+(`git archive HEAD | tar -t` against the `export-ignore` list).
+
+Four things differ, and every one of them was found by running this section rather than reading it.
+
+**The copy loop in step 3 destroys a `prefix:N` seed.** `cp` is right for an `exact` seed and wrong
+for a prefix one, where only the header is the seed and everything below it is the repository's own
+history. Copying the seed over `.git-blame-ignore-revs` silently erased two recorded style
+revisions. Restore the tail after the loop, or skip the row and splice:
+
+```bash
+{ head -n 4 .rak200/scaffold/all/.git-blame-ignore-revs
+  git show HEAD:.git-blame-ignore-revs | tail -n +5
+} > .git-blame-ignore-revs.new && mv .git-blame-ignore-revs.new .git-blame-ignore-revs
+```
+
+**The label sweep needs the check in step 6.** A new repository has nothing to lose; this one might.
+
+**Rulesets come after the onboarding PR merges, not before it.** The branch ruleset requires
+`ci / gate`, and that check does not exist until the pipeline the PR introduces has run on the
+default branch once. Applying the ruleset first deadlocks the very PR that would satisfy it.
+
+**The `eol=lf` normalisation is conditional.** Land it as a `style:` commit *if it changes
+anything* — a repository that already carried `* text=auto eol=lf` normalises nothing, and a
+`style:` commit recording no revision is noise in `.git-blame-ignore-revs`. Check first:
+
+```bash
+git ls-files -z | xargs -0 grep -lIU $'\r'   # empty output: nothing to normalise
+```
 
 > **A template repository is not used for either path** — see the RFC's *New-repo creation*. Template
 > generation copies files faithfully, submodule gitlink included, but carries **no** rulesets, no
