@@ -5,9 +5,20 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+  # The full mutation run. A pull request mutates only its changed files, so the
+  # cross-file drift a diff structurally cannot see is caught here — run it before a
+  # significant release. Not a `paths:` filter and not on the required-check path:
+  # a workflow that publishes a required check carries no filter (non-negotiable 3).
+  workflow_dispatch:
 
+# A caller CAPS the permissions of the workflow it calls: a job in the reusable
+# workflow that asks for more than this gets `startup_failure` and publishes NO
+# check at all — the required check simply never appears and the PR waits forever.
 permissions:
   contents: read
+  security-events: write   # SARIF upload from the scanner
+  actions: read            # codeql-action reads the run (private repos)
+  id-token: write          # Codecov OIDC
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -17,6 +28,6 @@ jobs:
   # The job MUST be named `ci` and the reusable workflow's last job `gate`: together
   # they publish the required check `ci / gate`. Pin an exact tag, never a moving alias.
   ci:
-    uses: rak200/.github/.github/workflows/js.yml@1.1.0
+    uses: rak200/.github/.github/workflows/js.yml@1.5.0
     with:
       node-versions: '["22", "24"]'
