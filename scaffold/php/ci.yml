@@ -5,6 +5,11 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+  # The full mutation run. A pull request mutates only its changed lines, so the
+  # cross-file drift a diff structurally cannot see is caught here — run it before a
+  # significant release. Not a `paths:` filter and not on the required-check path:
+  # a workflow that publishes a required check carries no filter (non-negotiable 3).
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,6 +22,6 @@ jobs:
   # The job MUST be named `ci` and the reusable workflow's last job `gate`: together
   # they publish the required check `ci / gate`. Pin an exact tag, never a moving alias.
   ci:
-    uses: rak200/.github/.github/workflows/php.yml@1.1.0
+    uses: rak200/.github/.github/workflows/php.yml@1.2.0
     with:
       php-versions: '["8.4", "8.5"]'

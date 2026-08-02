@@ -18,3 +18,12 @@
 /CLAUDE.md               export-ignore
 /ROADMAP.md              export-ignore
 /ARCHITECTURE.md         export-ignore
+
+# PHP tool configuration. A library consumes none of it, and a tarball that ships
+# it hands the consumer a phpunit.xml that will never be run.
+/phpunit.xml                    export-ignore
+/phpstan.neon.dist              export-ignore
+/.php-cs-fixer.dist.php         export-ignore
+/infection.json5.dist           export-ignore
+/release-please-config.json     export-ignore
+/.release-please-manifest.json  export-ignore
