@@ -57,7 +57,14 @@ while IFS=$'\t' read -r v _form seed dest; do
   cp -a ".rak200/scaffold/$seed" "$dest"
 done < .rak200/scaffold/seeds.tsv
 chmod +x .githooks/pre-push
-cp -a .rak200/scaffold/templates/CLAUDE.md CLAUDE.md
+# The Layer 2 import is language-specific, so the template is too. A `-config`
+# variant takes its language's template: it consumes the standard it publishes.
+case "$VARIANT" in
+  php|php-config) template=php ;;
+  ts|ts-config)   template=ts ;;
+  *)              template=none ;;
+esac
+cp -a ".rak200/scaffold/templates/CLAUDE.$template.md" CLAUDE.md
 printf '# %s\n\n%s\n' "$NAME" "$DESC" > README.md
 # Driven by what the seeds actually laid down, not by the variant's name: only a
 # variant carrying release-please-config.json has a manifest to bootstrap.
