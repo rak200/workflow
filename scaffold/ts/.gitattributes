@@ -18,3 +18,9 @@
 /CLAUDE.md               export-ignore
 /ROADMAP.md              export-ignore
 /ARCHITECTURE.md         export-ignore
+
+# npm packs from package.json's `files`, not from export-ignore — this list governs
+# `git archive` only. The TypeScript tool configs are added when the first TS
+# repository exists; nothing here is guessed ahead of one.
+/release-please-config.json     export-ignore
+/.release-please-manifest.json  export-ignore

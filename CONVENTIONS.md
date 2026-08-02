@@ -102,6 +102,13 @@ Layer 1 owns the vocabulary, Layer 2 owns what each word does.
   killed by strengthening the test; it is *ignored* only when provably equivalent — no input
   distinguishes it — and then with the narrowest possible annotation. **The threshold is never
   lowered to accommodate a survivor.**
+- **Mutation runs over the changed lines on a pull request, and in full off that path.** A full
+  run is tens of minutes on a real library, and a required check that slow is one people learn to
+  route around. The threshold is identical in both; only *what* is mutated differs. The full run
+  is the safety net the diff structurally cannot be — a change in one file can stop a test from
+  killing a mutant in a file the diff never touched — and is triggered manually before a
+  significant release. The vocabulary still holds one mutation verb: Layer 1 owns the word, the
+  pipeline owns when and over what it runs.
 - **Coverage floor: a per-repo absolute in `.coverage-floor`,** hard-floored at 95%, monotonic —
   it ratchets up as coverage improves and never down. It is per-repo state, not a seed.
 
@@ -137,7 +144,9 @@ enforces it against the PR's `Closes #N`.
   included. Development happens on Windows and CI on Linux; without it the tree is
   platform-dependent and fixers rewrite lines for their endings.
 - **The distribution tarball carries consumption, not development.** `export-ignore` on tests,
-  docs, CI configuration, tool configs and the `.rak200` gitlink.
+  docs, CI configuration, tool configs and the `.rak200` gitlink. `.gitattributes` is therefore a
+  **per-variant** seed, not a shared one: the list names one language's tool configs, and a
+  package whose product *is* configuration must export the very files a library hides.
 - **Bulk reformatting commits are recorded in `.git-blame-ignore-revs`** so `git blame` skips
   them. GitHub honours the file automatically; enable it locally with
   `git config blame.ignoreRevsFile .git-blame-ignore-revs`.
@@ -175,6 +184,11 @@ Prefer a verifiable badge over a vanity metric.
   never through template interpolation.
 - **`gitleaks` runs twice**: locally in `.githooks/pre-push` (prevention) and in CI (the
   backstop). A hit in CI means the credential is already in history.
+- **The `scan` verb is bound to `semgrep` in every language**, with the ruleset varying by
+  language and nothing else. One scanner across the ecosystem beats hunting for a native
+  equivalent per language: the findings, the SARIF and the suppression syntax stay one thing to
+  learn. It is a Python tool, so a development environment installs it outside the language's own
+  package manager, and CI installs it explicitly — nothing in a Composer or npm graph brings it.
 
 ## Non-negotiables
 

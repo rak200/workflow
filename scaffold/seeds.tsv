@@ -10,25 +10,33 @@
 #   .release-please-manifest.json   per-repo state, not a seed
 #   .coverage-floor                 per-repo state, ratcheted
 #   CLAUDE.md                       seeded once from templates/, then per-repo content
+#
+# .gitattributes is per-variant, not `all`: its export-ignore list names the tool
+# configs of one language, and a package that SHIPS configuration must export the
+# very files a library hides. One `all` copy could only be right for one of them.
 all	exact	all/.editorconfig	.editorconfig
-all	exact	all/.gitattributes	.gitattributes
 all	exact	all/CODEOWNERS	.github/CODEOWNERS
 all	exact	all/LICENSE	LICENSE
 all	exact	all/.githooks/pre-push	.githooks/pre-push
 all	prefix:4	all/.git-blame-ignore-revs	.git-blame-ignore-revs
+none	exact	none/.gitattributes	.gitattributes
 none	exact	none/.gitignore	.gitignore
 none	exact	none/dependabot.yml	.github/dependabot.yml
 none	masked:@[0-9]+\.[0-9]+\.[0-9]+	none/ci.yml	.github/workflows/ci.yml
+github	exact	github/.gitattributes	.gitattributes
 github	exact	github/.gitignore	.gitignore
 github	exact	github/dependabot.yml	.github/dependabot.yml
 github	masked:@[0-9]+\.[0-9]+\.[0-9]+	github/ci.yml	.github/workflows/ci.yml
+php	exact	php/.gitattributes	.gitattributes
 php	exact	php/.gitignore	.gitignore
 php	exact	php/dependabot.yml	.github/dependabot.yml
 php	masked:@[0-9]+\.[0-9]+\.[0-9]+	php/ci.yml	.github/workflows/ci.yml
 php	exact	php/release-please-config.json	release-please-config.json
+php-config	exact	php-config/.gitattributes	.gitattributes
 php-config	exact	php/.gitignore	.gitignore
 php-config	exact	php/dependabot.yml	.github/dependabot.yml
 php-config	masked:@[0-9]+\.[0-9]+\.[0-9]+	php-config/ci.yml	.github/workflows/ci.yml
+ts	exact	ts/.gitattributes	.gitattributes
 ts	exact	ts/.gitignore	.gitignore
 ts	exact	ts/dependabot.yml	.github/dependabot.yml
 ts	masked:@[0-9]+\.[0-9]+\.[0-9]+	ts/ci.yml	.github/workflows/ci.yml

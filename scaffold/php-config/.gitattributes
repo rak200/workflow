@@ -18,3 +18,7 @@
 /CLAUDE.md               export-ignore
 /ROADMAP.md              export-ignore
 /ARCHITECTURE.md         export-ignore
+
+# Deliberately NOT export-ignored here, and this is the whole reason the file is
+# per-variant: in a configuration package the .dist files and CONVENTIONS.md are
+# the product. The `php` variant hides exactly what this one must ship.

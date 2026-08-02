@@ -2,7 +2,7 @@
 #
 # new-repo.sh — scaffold a conformant rak200 repository.
 #
-#   scripts/new-repo.sh <name> <variant: php|ts|none> <conventions-tag> ["description"]
+#   scripts/new-repo.sh <name> <variant: php|php-config|ts|none|github> <conventions-tag> ["description"]
 #
 # This is the executable form of LIFECYCLE.md section 8.1. The order below is not
 # stylistic: archiving aside, two steps in it are load-bearing and were measured.
@@ -31,7 +31,7 @@ REPO="$OWNER/$NAME"
 WORKFLOW_URL="https://github.com/rak200/workflow.git"
 BASE_REPO="rak200/.github"
 
-case "$VARIANT" in php|ts|none) ;; *) echo "unknown variant: $VARIANT" >&2; exit 64 ;; esac
+case "$VARIANT" in php|php-config|ts|none|github) ;; *) echo "unknown variant: $VARIANT" >&2; exit 64 ;; esac
 
 say() { printf '\n\033[1m>>> %s\033[0m\n' "$*"; }
 die() { printf '\n\033[31m!!! %s\033[0m\n' "$*" >&2; exit 1; }
@@ -59,7 +59,9 @@ done < .rak200/scaffold/seeds.tsv
 chmod +x .githooks/pre-push
 cp -a .rak200/scaffold/templates/CLAUDE.md CLAUDE.md
 printf '# %s\n\n%s\n' "$NAME" "$DESC" > README.md
-if [ "$VARIANT" != none ]; then printf '{ ".": "0.0.0" }\n' > .release-please-manifest.json; fi
+# Driven by what the seeds actually laid down, not by the variant's name: only a
+# variant carrying release-please-config.json has a manifest to bootstrap.
+if [ -f release-please-config.json ]; then printf '{ ".": "0.0.0" }\n' > .release-please-manifest.json; fi
 
 say "4/9  first commit, and push master FIRST — this is what sets the default branch"
 git add -A
