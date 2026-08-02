@@ -1,0 +1,32 @@
+# variant	form	seed	destination
+#
+# variant     all | none | php | ts | github — `all` applies everywhere, the rest match
+#             the repository's declared variant.
+# form        exact       byte-identical
+#             prefix:N    the first N lines are the seed; the rest is per-repo history
+#             masked:RE   identical after RE is blanked on both sides
+#
+# Excluded by design, and recorded here so the absence is not read as an oversight:
+#   .release-please-manifest.json   per-repo state, not a seed
+#   .coverage-floor                 per-repo state, ratcheted
+#   CLAUDE.md                       seeded once from templates/, then per-repo content
+all	exact	all/.editorconfig	.editorconfig
+all	exact	all/.gitattributes	.gitattributes
+all	exact	all/CODEOWNERS	.github/CODEOWNERS
+all	exact	all/LICENSE	LICENSE
+all	exact	all/.githooks/pre-push	.githooks/pre-push
+all	prefix:4	all/.git-blame-ignore-revs	.git-blame-ignore-revs
+none	exact	none/.gitignore	.gitignore
+none	exact	none/dependabot.yml	.github/dependabot.yml
+none	masked:@[0-9]+\.[0-9]+\.[0-9]+	none/ci.yml	.github/workflows/ci.yml
+github	exact	github/.gitignore	.gitignore
+github	exact	github/dependabot.yml	.github/dependabot.yml
+github	masked:@[0-9]+\.[0-9]+\.[0-9]+	github/ci.yml	.github/workflows/ci.yml
+php	exact	php/.gitignore	.gitignore
+php	exact	php/dependabot.yml	.github/dependabot.yml
+php	masked:@[0-9]+\.[0-9]+\.[0-9]+	php/ci.yml	.github/workflows/ci.yml
+php	exact	php/release-please-config.json	release-please-config.json
+ts	exact	ts/.gitignore	.gitignore
+ts	exact	ts/dependabot.yml	.github/dependabot.yml
+ts	masked:@[0-9]+\.[0-9]+\.[0-9]+	ts/ci.yml	.github/workflows/ci.yml
+ts	exact	ts/release-please-config.json	release-please-config.json

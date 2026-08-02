@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # The job MUST be named `ci` and the reusable workflow's last job `gate`: together
+  # they publish the required check `ci / gate`. Pin an exact tag, never a moving alias.
+  ci:
+    uses: rak200/.github/.github/workflows/php.yml@1.1.0
+    with:
+      php-versions: '["8.4", "8.5"]'

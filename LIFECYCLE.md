@@ -1,0 +1,849 @@
+# Development lifecycle
+
+> **Seed artifact for `rak200/workflow`.** This file is drafted inside RFC 0017 and moves to the
+> root of `rak200/workflow` when that repository is built (Rollout step 2). Consumers then read it
+> at `.rak200/LIFECYCLE.md`, pinned to the conventions tag that repo chose.
+
+This is the **primary reference** for how work moves through any `rak200` repository, from an idea
+to a released tag. It is written to be followed by a human reading it once, by an **agent**
+executing it as instructions, and by a **new contributor** who has never seen this ecosystem.
+
+Where a rule exists because a mechanism behaves in a non-obvious way, the reason is stated inline.
+Those reasons are not commentary — they were established empirically, and removing the rule
+reintroduces the failure.
+
+**Two copies of this document exist and they are not the same.** The `CONTRIBUTING.md` propagated
+from `rak200/.github` links to the **current** version in `rak200/workflow` — right for a
+drive-by reader. The copy at `.rak200/LIFECYCLE.md` inside a repository is the version **that
+repository pinned**, and it is the one that governs work done there. When they disagree, the
+pinned one wins locally, and the disagreement is closed by bumping the submodule.
+
+---
+
+## 1. Cast
+
+| Actor | Who | GitHub identity | What it may do alone |
+| --- | --- | --- | --- |
+| **Maintainer** | the human | `@rak200` | everything, including bypass |
+| **Agent** | AI working the code | **`@rak200`** — the same account | open branches and PRs; never merge |
+| **Dependabot** | dependency bot | `dependabot` | open update PRs |
+| **release-please** | release bot | `github-actions[bot]` | open and maintain the Release PR |
+| **CI** | the reusable workflow | repo `GITHUB_TOKEN` | run gates, report `ci / gate` |
+| **Platform** | rulesets, Actions policy, repo settings | — | refuse anything that violates them |
+
+**The agent and the maintainer share one identity.** Everything downstream follows from this: the
+platform cannot tell them apart, so the separation is procedural. See §6.
+
+---
+
+## 2. Before you start
+
+A conformant repository already has all of this. If any is missing, the repo has not been
+onboarded — see §8.
+
+| Concern | Where it lives | How it arrives |
+| --- | --- | --- |
+| Ecosystem conventions | `.rak200/CONVENTIONS.md` | git submodule, tag-pinned |
+| This document | `.rak200/LIFECYCLE.md` | same submodule |
+| RFC template | `.rak200/proposals/TEMPLATE.md` | same submodule |
+| Canonical labels | `.rak200/labels.yml` | same submodule, applied additively |
+| Editor settings | `.editorconfig` | copied from the scaffold |
+| Agent instructions | `CLAUDE.md` | per-repo; imports `@.rak200/CONVENTIONS.md` |
+| PHP lint/analysis config | `rak200/coding-standard-php` | Composer dev dependency |
+| TS lint/analysis config | `@rak200/coding-standard-ts` | npm dev dependency |
+| CI pipeline | `rak200/.github/.github/workflows/{base,php,js}.yml` | referenced by the caller, at an exact tag |
+| CI caller | `.github/workflows/ci.yml` | per-repo, thin |
+| Dependency automation | `.github/dependabot.yml` | per-repo, committed |
+| Code owners | `.github/CODEOWNERS` | per-repo — **does not propagate** |
+| PR template, issue templates | `rak200/.github` | GitHub-native propagation |
+| Branch and tag rules | per-repo rulesets | canonical JSON in `rak200/.github`, applied by API at onboarding, verified by read-back |
+| Local secret gate | `.githooks/pre-push` (`gitleaks`) | seeded from the scaffold; `core.hooksPath` set per clone at onboarding |
+| Line endings & dist surface | `.gitattributes` (`text=auto eol=lf`, `export-ignore`) | copied from the scaffold |
+| License | `LICENSE` (MIT) | copied from the scaffold — **does not propagate** |
+| Blame noise | `.git-blame-ignore-revs` | header seeded (prefix-checked); entries appended by bot PR; `blame.ignoreRevsFile` set per clone |
+
+Seeded copies (the *copied* / *per-repo* rows) are **conformance-checked by CI** against the
+pinned `.rak200/scaffold/` — a drifted copy reds the gate. The check compares against the
+*pinned* version, so it turns red only when a submodule bump changes a seed (§3.9), never from
+standing still.
+
+```bash
+# clone a conformant repo with its conventions
+git clone --recurse-submodules https://github.com/rak200/<repo>.git
+
+# already cloned without them
+git submodule update --init --recursive
+
+# per clone, once — both are local git config, not committed state
+git config core.hooksPath .githooks
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
+> **The pre-push hook is the preventive half of secret scanning.** It runs `gitleaks` over what
+> is about to leave the machine and refuses the push on a hit — loudly, including when
+> `gitleaks` is not installed (installing it is an onboarding step). CI's `gitleaks` step is the
+> backstop for clones that skipped onboarding; a hit *there* means the credential is already in
+> history — see §4.4.
+
+> **Why `--recurse-submodules` matters.** Without it `.rak200/` is empty, and anything reading a
+> file from it fails. That failure is loud by design — the label sync reports
+> `Can't access config file` and the job fails rather than silently syncing nothing.
+
+---
+
+## 3. The cycle
+
+### 3.1 Issue — *maintainer or agent*
+
+Every change traces to an issue. Use the issue templates; they apply the issue-side labels
+(`bug`, `feature`, `needs-triage`).
+
+```bash
+gh issue create --title "Foo breaks when bar is empty" --label bug
+```
+
+An RFC is required only for a change that alters the ecosystem's design — see
+`.rak200/proposals/TEMPLATE.md`. Ordinary bugs and features do not need one.
+
+**If the work is already on `ROADMAP.md`**, the entry carries its issue number — that reference is
+what lets the delivering PR retire the entry (§3.4). If it is not on the roadmap, nothing to do.
+
+### 3.2 Branch — *maintainer or agent*
+
+Short-lived, off the trunk.
+
+```bash
+git switch master && git pull
+git switch -c fix/empty-bar-crash      # <type>/<slug>, recommended — not enforced
+```
+
+**The name is a recommendation, not a rule.** `<type>/<slug>` using the commit types (`feat`, not
+`feature`) makes the branch announce the title it will carry, and that is the whole of its value:
+squash-only discards the branch's commits, the **PR title** is the enforced unit, and
+`delete_branch_on_merge` deletes the branch afterwards. Nothing reads the name. Leave the machine
+namespaces alone — `dependabot/*`, `release-please--branches--*`, `claude/*` — and keep
+`release/x.y` for maintenance branches.
+
+> **Direct pushes to `master` are refused by the platform**, for every actor including the owner:
+> the `bypass_actors` entry is in **`pull_request` mode**, which grants nothing to a push. The
+> branch is not a convention you may skip.
+
+### 3.3 Work — *agent, usually*
+
+Follow `.rak200/CONVENTIONS.md` (Layer 1) and the language conventions (Layer 2). Run the gates
+locally before pushing — they are the same ones CI runs, and finding a failure here costs seconds
+instead of a round trip.
+
+The verbs are the same in every repo and in every language — only the prefix changes
+(`composer <verb>` in PHP, `npm run <verb>` in TS), and they are the pipeline's steps in order:
+
+```bash
+composer validate       # manifest
+composer lint           # style, read-only  (composer fix writes)
+composer analyse        # static analysis
+composer test           # suite
+composer coverage       # suite + report; compare the total against .coverage-floor
+composer scan           # security scanners
+composer mutation       # floors live in the config, never on the command line
+```
+
+**The coverage floor is the number in `.coverage-floor`.** CI fails below it *and* more than a
+point above it — so if your work raised coverage, raise the number **in the same PR**. It never
+goes down. The mutation floor is `minCoveredMsi: 100`; a repo at literal-100% coverage may also
+set `minMsi: 100`. A surviving mutant is killed by strengthening the test — never by lowering a
+threshold.
+
+**In-branch commit messages are unconstrained** — they are squashed away. Only the PR title is
+enforced. Commit as often as is useful.
+
+### 3.4 Pull request — *maintainer or agent*
+
+**The PR title is the load-bearing artifact of this whole process.** It becomes the squash commit
+on `master`, and that commit is what the release tooling reads to compute the next version and
+write the changelog. Everything else in the PR is discarded at merge.
+
+```
+type(scope)?: subject
+```
+
+with `type` from the fixed set (`feat`, `fix`, `perf`, `refactor`, `style`, `docs`, `test`,
+`build`, `ci`, `chore`, `revert`) — the stock `@commitlint/config-conventional` set, no override.
+`style` is rare by design: day-to-day formatting is enforced by the lint gate, so its referent is
+the bulk reformat that follows a **fixer-config revision** — typed `style` and recorded in
+`.git-blame-ignore-revs` **by a bot, after the merge**: the squash SHA does not exist before it,
+so a workflow watching `master` opens a follow-up PR appending the SHA. That PR runs no CI (it is
+opened with the repo's own `GITHUB_TOKEN`) and merges by the same `--admin` path as the Release
+PR — the only two PRs that do. A breaking change is either `type!` or a `BREAKING CHANGE:` footer
+**in the PR body**. `revert` releases a **patch** — measured, not assumed; a revert-only window
+still cuts a superseding release (see §4.9).
+
+**Before you type `!`, check whether the break is allowed to be one yet.** From `1.0.0` on, a
+rename or a removal must have been **deprecated in an earlier minor** — the alias survives the
+whole major and goes in the next one, and deprecating plus removing inside the same major is not
+allowed. A *behavioural* change has nothing to alias: it ships as the major, with the
+`BREAKING CHANGE:` footer and a changelog entry stating old and new behaviour. Raising the
+language floor (`"php"`, Node `engines`) is a breaking change too, even when no API moves. Below
+`1.0.0` none of this binds — `0.x` promises nothing, breaking bumps the **minor** there, and
+`1.0.0` arrives only when you ask for it with `Release-As: 1.0.0`.
+
+```bash
+git push -u origin HEAD
+gh pr create --title "fix(bar): guard against an empty bar" --body-file .github/pr.md
+```
+
+Fill the Definition of Done in the PR template. It is a checklist, not decoration: the items map
+one-to-one onto gates that will run.
+
+**`Closes #N` in the body does two jobs**: it retires the issue on merge, and it tells the gate to
+check that you also **removed that item from `ROADMAP.md`**. Delivering a roadmap entry and
+leaving it listed is a red check, not a release-day chore.
+
+> **Why the body matters too.** The squash message is the PR **body**, so a `BREAKING CHANGE:`
+> footer written there reaches the commit and correctly produces a major bump. Written anywhere
+> else it is lost, and a major silently ships as a minor.
+
+### 3.5 CI — *automatic*
+
+Opening or updating the PR runs the pipeline. One check is required: **`ci / gate`**.
+
+```bash
+gh pr checks --watch
+```
+
+The pipeline is: validate → install → lint → static analysis → tests + coverage → coverage floor →
+scanners (Semgrep or CodeQL, plus `gitleaks`) → mutation floor, over a version matrix, with a
+final `gate` job aggregating everything. Both floors are enforced **inside the job** — the
+coverage floor from `.coverage-floor` and the report, the mutation floor from the Infection
+config — so the required check never waits on a third party (Codecov is reporting only).
+
+Four conformance steps ride along in `base.yml`: the seeded files are diffed against
+`.rak200/scaffold/`; each **mirror badge** in `README.md` is diffed against the source it
+claims to mirror (runtime constraint, analyser level, mutation floor, license field, release
+version); every **public symbol** in `src/` is asserted to appear somewhere in `docs/`; and a PR
+that closes an issue is asserted to have **removed that issue's `ROADMAP.md` entry**. If you
+changed one of those sources, added a public unit, or delivered a roadmap item, update the badge,
+the page or the roadmap in the same PR — the check is what remembers.
+
+You will also see per-matrix checks (`ci / matrix (8.4)`) and, on public repos, a code-scanning
+check (`Semgrep OSS`). **Neither is required by name** — they are version- and visibility-
+dependent. Only `ci / gate` gates the merge.
+
+The matrix runs `fail-fast: false`, so a failure on one version does not cancel the others — read
+*which* cells went red before assuming the change is broken everywhere. Jobs carry an explicit
+`timeout-minutes` (20; 60 for the full-mutation run), which is a runaway guard: a job that hits it
+was hung, not slow, and rerunning it without finding out why will hang again. The OS is
+`ubuntu-latest`; a repo may opt in to more through the caller's `runs-on` input, and none does
+today.
+
+### 3.6 Review — *maintainer*
+
+**This step branches on who authored the PR.** The difference is not stylistic; it is how GitHub
+computes the review requirement.
+
+**Path A — authored by the maintainer or an agent** (the common case, since agents use the
+maintainer's identity):
+
+GitHub requests **no** code owner, because the sole code owner is the author — and the required
+approval count is **0**, so nothing on the review side blocks. The merge is ordinary, and
+**`ci / gate` gates it mechanically**: green merges, red is refused by the platform.
+
+```bash
+gh pr merge --squash --auto --delete-branch   # merges when ci / gate turns green
+```
+
+> **No `--admin` on this path — if you find yourself typing it, something is wrong.** A red gate
+> refusing the merge is the system working; fix the branch instead. The one place `--admin` is
+> legitimate is the Release PR (§3.8). And merge through `gh` only, never the raw REST endpoint —
+> the maintainer is a bypass actor for the Release PR's sake, and the server honours that bypass
+> on **any** unflagged API call, so a raw-endpoint merge would cross a red gate silently (§5,
+> rule 10).
+
+**Path B — authored by a bot** (Dependabot, release-please):
+
+The author is a separate identity, so code-owner review is genuinely required and the maintainer's
+approval satisfies it. No bypass is needed.
+
+```bash
+gh pr checks
+gh pr review --approve
+gh pr merge --squash --auto --delete-branch
+```
+
+`--auto` exists because a merge attempted immediately after opening is refused while the required
+check is still queued. It merges when the gate turns green.
+
+**Requesting changes.** On either path, review comments and `gh pr review --request-changes` work
+normally. A new push **dismisses the existing approval** — deliberately, so an approval never
+carries over to code it did not see. Conversations must be resolved before merge.
+
+### 3.7 Merge — *maintainer*
+
+Squash only. The result is exactly one Conventional Commit on `master`, titled with the PR title.
+The branch is deleted automatically.
+
+### 3.8 Release — *release-please, then the maintainer*
+
+`release-please` watches `master` and maintains an open **Release PR** accumulating every
+releasable commit since the last tag, with the derived version bump and generated `CHANGELOG.md`.
+It also rewrites the latest-release badge in `README.md`, through the `extra-files` entry and its
+`x-release-please-version` annotation — that badge is maintained by this PR, never by hand.
+It carries the `autorelease: pending` label, which is **functional state** — never remove it.
+
+The Release PR **runs no CI**: it was opened with the repository's own `GITHUB_TOKEN`, which does
+not trigger workflows. Its required check is therefore *absent*, which the ruleset treats as a
+deadlock rather than a failure — the PR sits `BLOCKED — waiting` forever.
+
+```bash
+gh pr merge <release-pr> --squash --admin --delete-branch
+```
+
+This is the intended path, not a workaround. The content being merged is *derived* from commits
+that each already passed the gate, so the missing run costs little. Merging cuts the tag and the
+GitHub Release; the tag is then immutable.
+
+For TS repos, a separate `on: release: published` job publishes to npm with OIDC provenance.
+
+> **Nothing is pruned here.** The old manual checklist ended with "remove delivered entries from
+> the roadmap"; that step now happens in the PR that delivered them (§3.4), where the knowledge
+> is. A release cuts a tag and a changelog — it does not know what a roadmap entry was.
+
+### 3.9 Propagation — *Dependabot, then the maintainer*
+
+A new release reaches consumers as a Dependabot bump PR — `composer`, `npm`, `github-actions`
+(for `steps[].uses` action pins) or `gitsubmodule`. These are **Path B** PRs: CI runs, code-owner
+review applies, the maintainer approves, merge is normal. A new conventions tag on
+`rak200/workflow` arrives the same way.
+
+**One pin Dependabot does not move: the CI caller's reusable-workflow reference.** Measured
+(round 3): the updater ignores `jobs.<id>.uses`, tag or Release, even though the dependency graph
+parses it. After a `rak200/.github` release, the pin is bumped **manually** in each consumer — an
+ordinary PR the maintainer or an agent opens:
+
+```bash
+git switch -c build/bump-ci-pipeline
+sed -i 's#\(uses: rak200/.github/.github/workflows/[a-z]*\.yml\)@[v0-9.]*#\1@1.5.0#' .github/workflows/ci.yml
+git commit -am "wip" && git push -u origin HEAD
+gh pr create --title "build(ci): bump pipeline to 1.5.0"
+```
+
+The PR runs that repo's own CI against the new pipeline before it lands — the property that makes
+the exact pin worth its manual cost.
+
+**A conventions bump may red its own PR — by design.** CI conformance-checks every seeded copy
+(`.editorconfig`, `dependabot.yml`, the CI caller's shape with its pin line masked, …) against
+the **pinned** `.rak200/scaffold/`. A submodule bump whose new tag changed a seed stays red until
+the **same PR** re-copies the changed file — the sync is atomic with the bump, and drift cannot
+land quietly. (`.release-please-manifest.json` is per-repo state, not a seed; it is never
+compared.)
+
+**Rulesets are not files and follow a different path.** After a `rak200/.github` release that
+changes the canonical ruleset JSON, run the sweep: re-apply per repo via `gh api`, then **read
+back** (§5, rule 9). No scheduled audit exists — that would need a stored admin credential.
+
+---
+
+## 4. Contingencies
+
+### 4.1 `ci / gate` is red
+
+Read the failing job, not the summary.
+
+```bash
+gh run view --log-failed
+gh run view <run-id> --json jobs \
+  --jq '.jobs[].steps[] | "\(.name)\t\(.outcome)"'
+```
+
+> **Read `outcome`, never `conclusion`.** A step marked `continue-on-error` reports its
+> `conclusion` as `success` even when it failed; only `outcome` holds the truth. A summary that
+> looks green can contain a failed step.
+
+Fix on the branch and push. The gate re-runs; the previous approval, if any, is dismissed.
+
+### 4.2 `ci / gate` never appears and the PR waits forever
+
+This is the **absent check** deadlock, and it is the most dangerous state in this system because
+it looks like patience rather than failure. Two known causes:
+
+1. **The workflow did not start at all** — `startup_failure` with zero checks. Usually an invalid
+   workflow file or a repository Actions policy refusing it.
+2. **The workflow was filtered out** — a `paths:` filter excluded every file the PR touched. A
+   workflow producing a required check must carry **no** `paths:` filter; if you find one, that is
+   the bug.
+
+```bash
+gh pr view <n> --json mergeStateStatus,statusCheckRollup \
+  --jq '"\(.mergeStateStatus)  checks=\(.statusCheckRollup|length)"'
+gh run list --branch <branch> --limit 5
+```
+
+`checks=0` with `BLOCKED` is the signature. A Release PR shows the same signature legitimately
+(§3.8).
+
+### 4.3 A gate is green and should not be
+
+Suspect this whenever a change to the pipeline, the ruleset, or a platform setting has landed.
+Verify by **making the gate fail on purpose**:
+
+| Gate | Canary |
+| --- | --- |
+| aggregator | a matrix job forced to fail |
+| PR title check | a PR titled `wip` |
+| scanner | a fixture with `eval($_POST[…])` |
+| `gitleaks` | a planted credential |
+| coverage floor | a deliberate coverage drop — and, for the ratchet, a gain left unrecorded |
+| badge conformance | a mirrored source moved with its badge left behind |
+| docs coverage | a new public class documented nowhere |
+| roadmap pruning | a PR closing an issue whose roadmap entry it left behind |
+
+A gate that has never failed has never been tested. Three of the five defects this rule exists to
+catch were invisible in the GitHub UI.
+
+### 4.4 A credential leaked
+
+**Rotate. Do not revert.** A revert removes the credential from the tip, not from history, and
+not from anywhere the history has already been fetched. Reverting and moving on leaves a live
+credential in a public place.
+
+1. Revoke the credential at its source, immediately.
+2. Issue a replacement.
+3. Then clean the repository if you wish — this is cleanup, not remediation.
+
+`gitleaks` runs in every repo for exactly this reason: GitHub's own secret scanning covers only
+validated provider patterns, and misses private keys and generic secrets entirely.
+
+### 4.5 A merge landed with the wrong commit message
+
+If a squash commit reaches `master` with a non-conventional message, the release tooling cannot
+parse it and the damage is **permanent** — nothing short of a history rewrite removes it. The
+release will simply skip that change.
+
+Check the repository settings that cause this before assuming it was human error:
+
+```bash
+gh api repos/:owner/:repo \
+  --jq '{title: .squash_merge_commit_title, message: .squash_merge_commit_message}'
+# expected: {"title": "PR_TITLE", "message": "PR_BODY"}
+```
+
+The GitHub default (`COMMIT_OR_PR_TITLE`) uses the *branch commit's* message whenever the branch
+holds a single commit — the most common shape there is.
+
+### 4.6 A Dependabot PR fails CI
+
+Treat it as a real failure — it is telling you the dependency broke something.
+
+```bash
+gh pr comment <n> --body "@dependabot rebase"     # branch is behind master
+gh pr comment <n> --body "@dependabot recreate"   # rebuild the PR from scratch
+```
+
+Do not push commits to a Dependabot branch: it stops managing the PR from then on.
+
+### 4.7 The submodule pin is stale
+
+Symptom: a convention or a label documented elsewhere is absent here. The pin is explicit, so this
+is visible rather than mysterious.
+
+```bash
+git -C .rak200 fetch --tags
+git -C .rak200 checkout 0.3.0
+git add .rak200 && git commit -m "build: bump .rak200 to 0.3.0"
+```
+
+Normally Dependabot does this for you. A stale pin is safe **because the conventions are prose and
+the label sync is additive** — an old pin can fail to add something, never remove it. Any future
+executable file added to `.rak200/` must preserve that property.
+
+### 4.8 The branch is behind `master`
+
+Required checks are **strict**: the gate must be green against the actual merge result, not
+against a stale base.
+
+```bash
+gh pr update-branch          # or: git rebase master && git push --force-with-lease
+```
+
+### 4.9 A bad release shipped
+
+Tags are immutable (§3.8) — rollback does not exist. The path is **forward**: a new version that
+supersedes the bad one, plus marking so nobody keeps resolving it meanwhile. If a credential is
+involved, §4.4 comes first — rotate before anything here.
+
+1. **Supersede.** Open a `revert:` PR reverting the bad squash commit(s):
+
+   ```bash
+   git switch master && git pull && git switch -c fix/revert-bad-release
+   git revert <bad-squash-sha> --no-edit
+   git push -u origin HEAD
+   gh pr create --title "revert: <original PR title>" --body "This reverts commit <bad-squash-sha>."
+   ```
+
+   Merging it opens a **patch** Release PR (measured — `revert` is a releasable type; the
+   changelog lists it under `### Reverts`); merging that cuts the superseding tag. A `fix:` PR
+   does the same where a surgical fix beats a revert; a `Release-As: x.y.z` footer in the PR
+   **body** forces a specific version when neither type fits.
+
+   > **A revert never subtracts.** If the bad commit is still *unreleased* — sitting in an open
+   > Release PR — reverting it does **not** cancel the pending bump or remove its entry: the
+   > release ships with the pair listed and a nil net diff. Cosmetic; merge anyway.
+
+2. **Mark the bad release** — this changes what GitHub answers (humans, the API's `latest`, the
+   UI badge), **not** what Composer resolves:
+
+   ```bash
+   gh release edit <bad-tag> --notes "⚠️ Defective — use <good-tag>. See #<issue>." --prerelease
+   # the latest pointer is eventually consistent — re-read after a few seconds, not immediately
+   gh api repos/:owner/:repo/releases/latest --jq .tag_name
+   ```
+
+   Optionally, once the superseding release exists, set it explicitly:
+   `gh api -X PATCH repos/:owner/:repo/releases/<id> -f make_latest=true`.
+
+3. **Registry layer — asymmetric, and stated rather than implied.** TS packages:
+   `npm deprecate <pkg>@<bad-version> "Defective — upgrade to <good-version>"` (per-version,
+   shown on every install). PHP: **Packagist has no per-version yank** — the bad version stays
+   installable forever; the release-note warning and the superseding tag are the only signals a
+   pinned consumer gets.
+
+4. **Consumers.** Ecosystem repos receive the superseding tag as an ordinary Dependabot bump PR
+   (§3.9) — nothing extra to do. If the defect is a **vulnerability**, additionally publish a
+   GitHub Security Advisory: that is the only channel that alerts dependents beyond this
+   ecosystem.
+
+### 4.10 A branch was renamed and its protection stayed behind
+
+Renaming a branch (`POST /repos/:owner/:repo/branches/:branch/rename`) moves what you expect and
+one thing you do not:
+
+- Open PRs **retarget themselves** to the new name and stay open.
+- A ruleset whose condition is **`~DEFAULT_BRANCH`** follows the role — nothing to do.
+- A ruleset whose condition names the branch — `["refs/heads/main"]` — **does not follow.** It
+  stays `enforcement: active`, reports no error, and now protects a ref that does not exist.
+
+So after any rename, list every ruleset and read its condition, not its status:
+
+```bash
+for id in $(gh api repos/:owner/:repo/rulesets --jq '.[].id'); do
+  gh api repos/:owner/:repo/rulesets/$id --jq '{name, include: .conditions.ref_name.include}'
+done
+```
+
+Then `PATCH` the stale condition to the new ref and read it back. This is why the seeded branch
+ruleset targets `~DEFAULT_BRANCH`; name-targeted rulesets are for branches that have no role to
+target — a maintenance branch such as `release/1.x` — and they are exactly the ones that fail
+quietly here. The rename API also **404s on a repository with no commits**, so it is a remedy for
+an existing repo and never part of scaffolding (§8.1 step 4).
+
+---
+
+## 5. Rules that are not negotiable
+
+These exist because each was violated once and the failure was silent.
+
+1. A workflow producing a required check carries **no `paths:` filter**.
+2. The aggregator job carries **`if: always()`** — without it a skipped gate counts as *satisfied*
+   and a red PR merges.
+3. The aggregator asserts **equality with `success`**, never inequality with `failure` — equality
+   folds failure, cancelled and skipped alike into a failure.
+4. A scanner is **three ordered steps**: scan (never fails) → publish (never decides) → enforce
+   (the only step that can fail). Capturing an exit code without acting on it disarms the gate.
+5. Only **`ci / gate`** is ever required by name. Never a matrix check, never a code-scanning
+   analysis check.
+6. Third-party actions are **pinned by full commit SHA** — enforced by the platform, not by
+   review.
+7. Untrusted values — PR titles, branch names, issue bodies — reach a script through `env:` and
+   are quoted. Never interpolated into `run:`.
+8. `secrets: inherit` is forbidden in reusable-workflow callers.
+9. Every API-driven setting is **read back** after writing. A settings write can return `200` and
+   change nothing.
+10. A merge goes through **`gh pr merge`**, never the raw REST endpoint. The bypass entry that
+    exists for the Release PR exempts the maintainer's **every** unflagged API call from the PR
+    rules — measured: a plain API merge crossed a red `ci / gate` — and only the `gh` client
+    refuses to do that without `--admin`.
+
+---
+
+## 6. What actually keeps a human in the loop
+
+Two different things, and naming them separately is the point.
+
+**The CI gate is mechanical, on every path.** A red `ci / gate` refuses the merge — for the
+maintainer, for an agent on the maintainer's identity, for a bot. This is the platform, not
+discipline (the review count being 0 is what makes it so: nothing on the common path routes
+through the bypass — see the RFC's *Review requirement*).
+
+**The review is real only where the author is a separate identity.** On the common path the
+maintainer authors the PR and GitHub requests no code owner — there, what keeps the human in the
+loop is that **the human is present while the agent works** and merges deliberately. The review
+mechanism is real for bot-authored PRs and for anything arriving from an identity that is not the
+maintainer's.
+
+The residual trust is narrow and named: the bypass entry (kept for the Release PR) exempts the
+maintainer's unflagged API calls from all PR rules, which is why rule 10 exists; and *who* runs
+the merge command is procedural, not enforced. If agents are ever given **distinct identities**,
+their PRs move to Path B and code-owner review begins to cover them with no new mechanism.
+
+---
+
+## 7. Quick reference
+
+```bash
+# start
+git switch master && git pull && git switch -c fix/<slug>
+
+# ship
+git push -u origin HEAD
+gh pr create --title "fix(scope): subject"
+gh pr checks --watch
+
+# merge — own PR (mechanically gated by ci / gate; never --admin here)
+gh pr merge --squash --auto --delete-branch
+
+# merge — bot PR
+gh pr review --approve && gh pr merge --squash --auto --delete-branch
+
+# merge — Release PR and blame-registration PR (absent check; the only legitimate --admin)
+gh pr merge --squash --admin --delete-branch
+
+# diagnose
+gh run view --log-failed
+gh pr view --json mergeStateStatus,statusCheckRollup --jq '"\(.mergeStateStatus) checks=\(.statusCheckRollup|length)"'
+```
+
+---
+
+## 8. Onboarding a repository
+
+### 8.1 A new repository
+
+Run top to bottom. Every step that writes is followed by a step that reads it back — a response
+code is not evidence (rule 9). Substitute `<repo>`, `<variant>` (`php` or `ts`) and `<tag>` (the
+`rak200/workflow` version to pin).
+
+**1. Create it empty.**
+
+```bash
+gh repo create rak200/<repo> --public --description "<one line>"
+```
+
+> **Never pass `--add-readme`, `--license` or `--gitignore`.** Each forces an initial commit that
+> is not the scaffold commit, on whatever branch name the account is configured for — and the last
+> two write **GitHub's** templates, which are not the seeds: its MIT text carries a year and
+> copyright line the seed deliberately omits. The repo would be born drifted and red its own gate
+> on the first PR. `LICENSE` and `.gitignore` arrive in step 3.
+
+The empty repository reports a `default_branch` while having **no branches at all** — a name for
+something that does not exist, taken from an account-level setting that **no endpoint reads or
+writes**. Read nothing into it either way: it is not evidence that the repo is on `master`, and the
+only way to observe that setting at all is to create a repository and ask *it*. Step 4 settles the
+branch, and step 4 is the one that gets verified.
+
+**2. Build the tree locally, on `master`.**
+
+```bash
+git init -b master
+```
+
+**3. Pin the conventions, then copy the seeds out of them.**
+
+```bash
+git submodule add https://github.com/rak200/workflow.git .rak200
+git -C .rak200 checkout <tag>
+
+mkdir -p .github/workflows
+cp .rak200/scaffold/common/.editorconfig .rak200/scaffold/common/.gitattributes \
+   .rak200/scaffold/common/.git-blame-ignore-revs .rak200/scaffold/common/.gitignore \
+   .rak200/scaffold/common/LICENSE .rak200/scaffold/common/CLAUDE.md .
+cp .rak200/scaffold/common/CODEOWNERS .github/CODEOWNERS
+cp .rak200/scaffold/common/dependabot.yml .github/dependabot.yml
+cp .rak200/scaffold/common/ci.yml .github/workflows/ci.yml
+cp -a ".rak200/scaffold/<variant>/." .
+
+printf '# %s\n\n<one line>\n' "<repo>" > README.md   # not a seed: per-repo content
+```
+
+> **`cp -a <dir>/.` and not `<dir>/*`.** The glob skips dotfiles, and the language variants are
+> mostly dotfiles — `.release-please-manifest.json` above all. It copies nothing, says nothing,
+> and the repo is born without the file `release-please` bootstraps from.
+
+The scaffold is **flat**: `scaffold/common/ci.yml`, not
+`scaffold/common/.github/workflows/ci.yml`. Seeds live under one directory per variant and each
+has its own destination, so mirroring the destination tree inside the scaffold implies a
+correspondence that does not exist.
+
+`.gitmodules` needs **no `branch =` line**: Dependabot falls back to the source repository's
+default branch, and it bumps to the latest **tag** reachable there, skipping untagged commits.
+
+**4. Commit, and push `master` first. This is the step that sets the default branch.**
+
+```bash
+git add -A
+git commit -m "feat: scaffold the repository from the rak200 baseline"
+git remote add origin https://github.com/rak200/<repo>.git
+git push -u origin master
+
+gh api repos/rak200/<repo> --jq '.default_branch'   # expect: master
+```
+
+**The first branch pushed into an empty repository becomes its default.** Nothing else in this
+procedure puts the repo on `master`, and no second push moves it afterwards. If the read-back says
+anything but `master`, stop — do not continue and rename later; delete the repo and start again
+from step 1, because a rename leaves name-targeted rules pointing at the old name (§4.10).
+
+**5. Platform settings, then read them back.**
+
+```bash
+gh api -X PATCH repos/rak200/<repo> \
+  -F allow_squash_merge=true -F allow_merge_commit=false -F allow_rebase_merge=false \
+  -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=PR_BODY \
+  -F delete_branch_on_merge=true
+gh api -X PUT repos/rak200/<repo>/actions/permissions/workflow \
+  -f default_workflow_permissions=read -F can_approve_pull_request_reviews=true
+gh api -X PUT repos/rak200/<repo>/private-vulnerability-reporting
+
+gh api repos/rak200/<repo> --jq '{allow_squash_merge,allow_merge_commit,allow_rebase_merge,squash_merge_commit_title,squash_merge_commit_message,delete_branch_on_merge}'
+gh api repos/rak200/<repo>/actions/permissions/workflow
+gh api repos/rak200/<repo>/private-vulnerability-reporting
+```
+
+The squash message sources are not cosmetic: on GitHub's defaults the squash commit takes the
+*branch's* message rather than the PR title, which breaks `release-please` silently (§4.5).
+`can_approve_pull_request_reviews` is `release-please`'s prerequisite — without it the Release PR
+is never opened, and the failure arrives late and dirty.
+
+**6. Labels — additively, then the one-shot deletion.**
+
+Apply `.rak200/labels.yml` with the label-sync action or by hand; **never prune**, because labels
+outside the canonical set belong to automations (Dependabot creates `dependencies` and
+`github_actions` on its own within minutes). GitHub's stock labels (`bug`, `enhancement`,
+`good first issue`, …) are deleted **once, by hand, now** — this is the only moment the repo has no
+history to lose.
+
+**7. Rulesets — after step 4, never before.**
+
+```bash
+# the canonical JSON lives in rak200/.github, a different repository — fetch, then apply
+for r in branch tag; do
+  gh api "repos/rak200/.github/contents/rulesets/$r.json" -H "Accept: application/vnd.github.raw" > "/tmp/$r.json"
+  gh api -X POST "repos/rak200/<repo>/rulesets" --input "/tmp/$r.json"
+done
+gh api repos/rak200/<repo>/rulesets --jq '[.[] | {name,target,enforcement}]'
+```
+
+The JSON is the canonical copy in [`rak200/.github`](https://github.com/rak200/.github/tree/master/rulesets) — clone it or fetch the two files; they are versioned there, not here. Order matters: the branch ruleset's
+`pull_request` rule would reject the very push in step 4 that establishes the default branch.
+
+Both rulesets carry a **`bypass_actors` entry for the repository admin, in `bypass_mode:
+pull_request`**, kept for the Release PR's absent-check deadlock (§3.8). The mode is the narrow
+part and must be read back as such: `always` would permit a **direct push** to `master`, which this
+design does not want. Within the PR path the entry is wide — it exempts every API call the actor
+makes — which is why merges go through `gh pr merge` (rule 10) and why an `--admin` merge can cross
+a red required check.
+
+**8. Release bootstrap.** A greenfield repo seeds `.release-please-manifest.json` at
+`{".": "0.0.0"}`; with `bump-minor-pre-major`, the first `feat:` releases `0.1.0`. An existing repo
+is a different procedure — §8.2.
+
+**9. Per-clone local state** — not committed, not inheritable, and therefore owed by every clone:
+
+```bash
+git config core.hooksPath .githooks
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+# install gitleaks if absent — the pre-push hook fails loudly without it
+```
+
+**10. Fire a canary before calling it conformant.** Open a PR that drifts one seed on purpose
+(append a line to `.gitattributes`). Required: check `gate` **FAILURE**, `mergeStateStatus`
+**BLOCKED**, and a plain `gh pr merge --squash` refused with *"the base branch policy prohibits the
+merge"*. Then close the PR and delete the branch.
+
+```bash
+gh pr view <n> --json mergeStateStatus,statusCheckRollup \
+  --jq '{state:.mergeStateStatus, checks:[.statusCheckRollup[]|{name,conclusion}]}'
+```
+
+Branch the canary **from the current tip of `master`**. Under `strict_required_status_checks_policy`
+a stale branch is refused for being behind, which looks identical to being refused for the red
+gate — and proves nothing.
+
+**11. Final read-back.** `default_branch` = `master`; two rulesets `active`; the six merge/permission
+fields as written in step 5; the canonical labels present and the stock ones gone; `git submodule
+status` clean at `<tag>`; `ci` green on `master`.
+
+### 8.2 An existing repository
+
+Same procedure minus steps 1–4 (the repo and its default branch already exist), plus the
+`release-please` bootstrap for a repo that already has tags and a hand-written `CHANGELOG.md` — the
+measured procedure is in the RFC's *Release bootstrap*. Verify the dist surface
+(`git archive HEAD | tar -t` against the `export-ignore` list) and land the `eol=lf` normalisation
+as a `style:` commit so it registers itself in `.git-blame-ignore-revs`.
+
+> **A template repository is not used for either path** — see the RFC's *New-repo creation*. Template
+> generation copies files faithfully, submodule gitlink included, but carries **no** rulesets, no
+> labels, no secrets and no repo settings, and silently restores GitHub's default merge
+> configuration. Steps 5–7 would be owed regardless, which leaves the template a second artifact to
+> version and keep conformant in exchange for a file copy step 3 already does.
+
+---
+
+## 9. Retiring a repository
+
+**Archive. Never delete.** Deleting breaks every pinned consumer, every submodule gitlink and
+every tag reference at once, and nothing about it is reversible. Archiving breaks none of them:
+an archived repository still **clones**, still serves as a **submodule source**, and its **tags
+still resolve**, so consumers are untouched.
+
+**The order below is not a suggestion.** Archiving makes the repository **read-only** — `git push`
+answers `403 This repository was archived so it is read-only`, and so does the issues API. Anything
+you meant to write afterwards cannot be written. Everything lands first; the flag is last.
+
+### 9.1 Retiring it for good
+
+1. **Decide the replacement**, if there is one. It goes in the marker in step 2 and in the README
+   notice.
+2. **One final PR**, through the normal flow, carrying all of:
+   - `"abandoned": "<replacement>"` (or `true`) in `composer.json` — see 9.3;
+   - a notice at the top of `README.md` saying it is retired, since when, and what to use instead;
+   - a `CHANGELOG.md` entry;
+   - an emptied `ROADMAP.md` (the pruning check has nothing to say about a repository with no
+     roadmap, but a stale one outlives the project);
+   - `SECURITY.md` stating that **no version is supported**.
+3. **Cut a final release** through the standard path (§3.8). This is the step people skip: the
+   marker only reaches consumers if it ships **in a tag they resolve**.
+4. **Close open issues and pull requests deliberately.** Archiving freezes them exactly as they
+   are — an open PR on an archived repository is a question nobody can ever answer.
+5. **Remove the dependency from its consumers** — bump them off it or drop it. Every consumer in
+   this ecosystem is one you control (RFC, *Maintaining an old major*).
+6. **Archive, then read it back.**
+
+```bash
+gh api -X PATCH repos/rak200/<repo> -F archived=true
+gh api repos/rak200/<repo> --jq '.archived'      # expect: true
+```
+
+> **Do not read the workflow list to confirm it.** Workflows on an archived repository still report
+> `state: active` although nothing can trigger them. The authoritative field is `archived` on the
+> repository itself — read back, per rule 9.
+
+### 9.2 Undoing it
+
+```bash
+gh api -X PATCH repos/rak200/<repo> -F archived=false
+```
+
+Write access returns immediately (verified). Archiving is a reversible decision, which is the
+second reason it is the only one on offer.
+
+### 9.3 Deprecating without retiring
+
+A library that is discouraged but still accepts fixes takes the marker alone — step 2's
+`"abandoned"` key, released as a normal patch. **It reaches consumers without a registry:** under
+this ecosystem's VCS resolution, a consuming `composer update` prints
+
+```
+Package rak200/<repo> is abandoned, you should avoid using it. Use <replacement> instead.
+```
+
+so the signal does not wait on publication. Archiving is what makes the state permanent; the marker
+is what makes it visible.
