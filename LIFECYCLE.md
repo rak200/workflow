@@ -172,8 +172,8 @@ with `type` from the fixed set (`feat`, `fix`, `perf`, `refactor`, `style`, `doc
 the bulk reformat that follows a **fixer-config revision** — typed `style` and recorded in
 `.git-blame-ignore-revs` **by a bot, after the merge**: the squash SHA does not exist before it,
 so a workflow watching `master` opens a follow-up PR appending the SHA. That PR runs no CI (it is
-opened with the repo's own `GITHUB_TOKEN`) and merges by the same `--admin` path as the Release
-PR — the only two PRs that do. A breaking change is either `type!` or a `BREAKING CHANGE:` footer
+opened with the repo's own `GITHUB_TOKEN`) and merges with `--admin` — since the Release PR turned
+out to have a *held* check rather than an absent one (§3.8), it is now the **only** PR that does. A breaking change is either `type!` or a `BREAKING CHANGE:` footer
 **in the PR body**. `revert` releases a **patch** — measured, not assumed; a revert-only window
 still cuts a superseding release (see §4.9).
 
@@ -253,8 +253,9 @@ gh pr merge --squash --auto --delete-branch   # merges when ci / gate turns gree
 
 > **No `--admin` on this path — if you find yourself typing it, something is wrong.** A red gate
 > refusing the merge is the system working; fix the branch instead. The one place `--admin` is
-> legitimate is the Release PR (§3.8). And merge through `gh` only, never the raw REST endpoint —
-> the maintainer is a bypass actor for the Release PR's sake, and the server honours that bypass
+> legitimate is the blame-registration PR (§3.4) — **not** the Release PR, whose check is held
+> rather than absent and is cleared by approving the run (§3.8). And merge through `gh` only,
+> never the raw REST endpoint — the maintainer is a bypass actor, and the server honours that bypass
 > on **any** unflagged API call, so a raw-endpoint merge would cross a red gate silently (§5,
 > rule 10).
 
@@ -289,19 +290,39 @@ It also rewrites the latest-release badge in `README.md`, through the `extra-fil
 `x-release-please-version` annotation — that badge is maintained by this PR, never by hand.
 It carries the `autorelease: pending` label, which is **functional state** — never remove it.
 
-The Release PR **runs no CI**: it was opened with the repository's own `GITHUB_TOKEN`, which does
-not trigger workflows. Its required check is therefore *absent*, which the ruleset treats as a
-deadlock rather than a failure — the PR sits `BLOCKED — waiting` forever.
+The Release PR's CI is **held, not absent** — and this page said the opposite until the first
+release was actually cut. The run is created, actor `github-actions[bot]`, and it completes its
+first attempt with the conclusion `action_required` without executing a step. So there *is* a
+check to satisfy, and the way to satisfy it is to **approve the run**:
 
 ```bash
-gh pr merge <release-pr> --squash --admin --delete-branch
+# the held run is the one whose actor is the bot and whose conclusion is action_required
+gh run list --branch release-please--branches--master --limit 5 \
+  --json databaseId,conclusion,event --jq '.[] | select(.conclusion=="action_required")'
 ```
 
-This is the intended path, not a workaround. The content being merged is *derived* from commits
-that each already passed the gate, so the missing run costs little. Merging cuts the tag and the
-GitHub Release; the tag is then immutable.
+Approve it from the PR's checks tab (*Approve and run*), wait for green, then merge it like any
+other PR:
 
-For TS repos, a separate `on: release: published` job publishes to npm with OIDC provenance.
+```bash
+gh pr merge <release-pr> --squash --delete-branch
+```
+
+**Do not reach for `--admin` here.** It works, and it skips exactly the verification the approval
+was about to buy. Merging cuts the tag and the GitHub Release; the tag is then immutable.
+
+For a TS repo the **publish rides in that same run** — `npm-publish.yml`, gated on
+`release-please`'s `release_created` output, publishing over OIDC with provenance and no stored
+token. It cannot be an `on: release: published` job: a Release created with the repository's own
+`GITHUB_TOKEN` starts no new workflow, so such a job would never fire. A PHP repo has no publish
+job at all, because Packagist resolves from the git tag — there the tag *is* the publication.
+
+Publishing has one **per-package, one-time human setup**, and until it is done every release
+ends at the tag: on npmjs.com, *Packages → the package → Settings → Trusted publishing*, register
+the repository and the workflow filename **`release.yml`**. Register the *caller*, not
+`npm-publish.yml` — npm validates the workflow that started the run, not the reusable one that
+runs the command. The package must already exist, so the very first version is published by hand
+from a maintainer's machine; every version after that is automatic.
 
 > **Nothing is pruned here.** The old manual checklist ended with "remove delivered entries from
 > the roadmap"; that step now happens in the PR that delivered them (§3.4), where the knowledge
@@ -377,8 +398,13 @@ gh pr view <n> --json mergeStateStatus,statusCheckRollup \
 gh run list --branch <branch> --limit 5
 ```
 
-`checks=0` with `BLOCKED` is the signature. A Release PR shows the same signature legitimately
-(§3.8).
+`checks=0` with `BLOCKED` is the signature.
+
+There is a **third state that is not this one**, and telling them apart is the whole point of
+looking: a check that exists and is *held*. `gh pr checks` shows it as pending and
+`gh run list` gives it the conclusion `action_required`. That is a run waiting for a human to
+approve it, not a run that never happened — count the checks before concluding anything. A
+Release PR is the routine case (§3.8).
 
 ### 4.3 A gate is green and should not be
 
@@ -557,10 +583,10 @@ These exist because each was violated once and the failure was silent.
 8. `secrets: inherit` is forbidden in reusable-workflow callers.
 9. Every API-driven setting is **read back** after writing. A settings write can return `200` and
    change nothing.
-10. A merge goes through **`gh pr merge`**, never the raw REST endpoint. The bypass entry that
-    exists for the Release PR exempts the maintainer's **every** unflagged API call from the PR
-    rules — measured: a plain API merge crossed a red `ci / gate` — and only the `gh` client
-    refuses to do that without `--admin`.
+10. A merge goes through **`gh pr merge`**, never the raw REST endpoint. The bypass entry in the
+    ruleset exempts the maintainer's **every** unflagged API call from the PR rules — measured: a
+    plain API merge crossed a red `ci / gate` — and only the `gh` client refuses to do that
+    without `--admin`.
 
 ---
 
@@ -603,7 +629,10 @@ gh pr merge --squash --auto --delete-branch
 # merge — bot PR
 gh pr review --approve && gh pr merge --squash --auto --delete-branch
 
-# merge — Release PR and blame-registration PR (absent check; the only legitimate --admin)
+# merge — Release PR (approve the HELD run first, then merge normally; not --admin)
+gh pr merge --squash --delete-branch
+
+# merge — blame-registration PR (absent check; the only legitimate --admin)
 gh pr merge --squash --admin --delete-branch
 
 # diagnose
@@ -754,7 +783,10 @@ The JSON is the canonical copy in [`rak200/.github`](https://github.com/rak200/.
 `pull_request` rule would reject the very push in step 4 that establishes the default branch.
 
 **The branch ruleset** carries a `bypass_actors` entry for the repository admin, in `bypass_mode:
-pull_request`, kept for the Release PR's absent-check deadlock (§3.8). The mode is the narrow part
+pull_request`. It was granted for the Release PR's absent-check deadlock, and that deadlock turned
+out not to exist — the Release PR's check is held, not absent (§3.8), and approving the run clears
+it without any bypass. The entry stays for the blame-registration PR and as a safety net, on
+weaker grounds than it was granted. The mode is the narrow part
 and must be read back as such: `always` would permit a **direct push** to `master`, which this
 design does not want. Within the PR path the entry is wide — it exempts every API call the actor
 makes — which is why merges go through `gh pr merge` (rule 10) and why an `--admin` merge can cross
@@ -767,8 +799,36 @@ creating one, so `release-please` cuts releases untouched, and moving a released
 what a bad release procedure does.
 
 **8. Release bootstrap.** A greenfield repo seeds `.release-please-manifest.json` at
-`{".": "0.0.0"}`; with `bump-minor-pre-major`, the first `feat:` releases `0.1.0`. An existing repo
-is a different procedure — §8.2.
+`{".": "0.0.0"}`, and the seeded `release-please-config.json` does the rest — but only because it
+names two settings that would otherwise default against this design, and both were found the hard
+way on the first release ever cut here:
+
+- `initial-version: "0.1.0"`. `bump-minor-pre-major` governs bumps *from* a version and says
+  nothing about the first one, which release-please defaults to **`1.0.0`**. Without this line
+  every new repository is handed the unchosen `1.0.0` that the versioning policy exists to prevent.
+- `include-component-in-tag: false`. `include-v-in-tag: false` controls the `v` and nothing else;
+  the component defaults to **on** and prefixes the package name, so the first tag comes out
+  `mypackage-0.0.0`.
+
+Neither is visible in a diff of a well-formed version. **Read the first Release PR's title before
+merging it** — it is the only place either mistake shows.
+
+An existing repo is a different procedure — §8.2.
+
+**8b. Registry publishing — TS repos only, and only the first time.** Until this is done the
+release ends at the git tag and the package is installable by nobody. On npmjs.com, *Packages →
+the package → Settings → Trusted publishing*: register this repository and the workflow filename
+**`release.yml`** — the caller, never `npm-publish.yml`, because npm validates the workflow that
+started the run. The package must exist before it can be configured, so publish the first version
+by hand:
+
+```bash
+npm publish            # from a clean checkout of the tag, with publishConfig.access set
+```
+
+`package.json` needs `"publishConfig": { "access": "public" }`: a scoped package publishes as
+restricted by default and the publish fails on a free plan. PHP repos have nothing to do here —
+Packagist resolves from the git tag.
 
 **9. Per-clone local state** — not committed, not inheritable, and therefore owed by every clone:
 

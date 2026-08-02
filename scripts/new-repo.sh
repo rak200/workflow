@@ -158,6 +158,25 @@ cat <<EOF
   Then fire a canary before calling the repository conformant: open a PR that drifts one
   seed on purpose, confirm 'gate' is FAILURE and the merge is refused, and close it.
   A gate that has never failed has never been tested.
+EOF
+
+case "$VARIANT" in ts|ts-config)
+cat <<EOF
+  This is a TypeScript repo, so one more thing stands between it and a usable release —
+  without it every release stops at the git tag and the package installs for nobody:
+
+      1. add  "publishConfig": { "access": "public" }  to package.json
+      2. publish the first version by hand (the package must exist to be configured)
+      3. npmjs.com -> Packages -> <pkg> -> Settings -> Trusted publishing:
+         this repo, workflow filename  release.yml  — the CALLER, not npm-publish.yml.
+         npm validates the workflow that STARTED the run, not the one that publishes.
+
+  Every version after the first publishes itself, over OIDC, with no stored token.
+EOF
+;;
+esac
+
+cat <<EOF
 
   Working tree: $work
 EOF
