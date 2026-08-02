@@ -77,8 +77,17 @@ never waits on a third party. Coverage reporting (Codecov) is reporting only.
 ## The shared task vocabulary
 
 Eight verbs, one per pipeline step, bound natively (`composer <verb>` / `npm run <verb>`). A
-repository's manifest must declare every one; CI asserts their **presence**, not their bodies —
-Layer 1 owns the vocabulary, Layer 2 owns what each word does.
+repository's manifest declares every verb **the package manager does not already provide**; CI
+asserts their presence, not their bodies — Layer 1 owns the vocabulary, Layer 2 owns what each
+word does.
+
+**The exception is `validate`, and it is a hard one.** Composer ships a native `validate`
+command and **refuses to run** any script of that name: `composer validate` and even
+`composer run-script validate` both print *"A script named validate would override a Composer
+command and has been skipped"* and fall through to the native command. Declaring the verb there
+would be configuration that can never execute — so in PHP the verb is the native command, and the
+manifest must **not** declare it. CI asserts that absence as strictly as it asserts the others'
+presence: a script that cannot run is worse than a missing one, because it reads as covered.
 
 | Verb | Step |
 | --- | --- |
