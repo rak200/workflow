@@ -877,8 +877,20 @@ a tag ruleset outright — *"bypass mode must not be 'PULL_REQUEST' for tag rule
 creating one, so `release-please` cuts releases untouched, and moving a released tag is exactly
 what a bad release procedure does.
 
-**8. Release bootstrap.** A greenfield repo seeds `.release-please-manifest.json` at
-`{".": "0.0.0"}`, and the seeded `release-please-config.json` does the rest — but only because it
+**8. Release bootstrap.** **Every variant releases** — including the prose ones. A repository
+whose tags are typed by hand is a repository whose version is typed, which the whole versioning
+policy exists to prevent, and it matters most in the baseline repositories because their tags are
+what every other repository pins. It also matters now in a way it did not before: submodule bumps
+arrive daily (§3.9), and a bump PR from a repository with no `CHANGELOG.md` says nothing about
+what it changes.
+
+A greenfield repo seeds `.release-please-manifest.json` at `{".": "0.0.0"}` — plus `version.txt`
+where the config says `release-type: simple`, since a repository with no package manifest needs
+somewhere for the version to live. `release-please` owns that file from the first release on; it
+is derived state that happens to be one line long, not a number anyone types. `CHANGELOG.md` is
+never seeded: the first Release PR writes it.
+
+The seeded `release-please-config.json` does the rest — but only because it
 names two settings that would otherwise default against this design, and both were found the hard
 way on the first release ever cut here:
 
