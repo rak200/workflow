@@ -290,10 +290,12 @@ It also rewrites the latest-release badge in `README.md`, through the `extra-fil
 `x-release-please-version` annotation — that badge is maintained by this PR, never by hand.
 It carries the `autorelease: pending` label, which is **functional state** — never remove it.
 
-The Release PR's CI is **held, not absent** — and this page said the opposite until the first
-release was actually cut. The run is created, actor `github-actions[bot]`, and it completes its
-first attempt with the conclusion `action_required` without executing a step. So there *is* a
-check to satisfy, and the way to satisfy it is to **approve the run**:
+The Release PR's CI is **held for approval**, and this page used to say it never ran at all. The
+run is created, actor `github-actions[bot]`, and completes its first attempt with the conclusion
+`action_required` without executing a step. On the PR page the required check reads
+`Expected — Waiting for status to be reported` — identical to an absent check — while a separate
+banner says *1 workflow awaiting approval*. That banner is the whole difference, and the way past
+it is to **approve the run**, not to bypass the rule:
 
 ```bash
 # the held run is the one whose actor is the bot and whose conclusion is action_required
@@ -400,11 +402,27 @@ gh run list --branch <branch> --limit 5
 
 `checks=0` with `BLOCKED` is the signature.
 
-There is a **third state that is not this one**, and telling them apart is the whole point of
-looking: a check that exists and is *held*. `gh pr checks` shows it as pending and
-`gh run list` gives it the conclusion `action_required`. That is a run waiting for a human to
-approve it, not a run that never happened — count the checks before concluding anything. A
-Release PR is the routine case (§3.8).
+A **third cause produces the identical signature** and has an entirely different fix, so read this
+before concluding either of the two above:
+
+3. **The run is held for approval.** GitHub created the run and is waiting for a maintainer to
+   start it. The required check is genuinely *not reported* — the PR page shows
+   `ci / gate  Expected — Waiting for status to be reported`, character for character what an
+   absent check shows — and the only thing distinguishing it sits in a **separate** banner:
+   *1 workflow awaiting approval*, with an **Approve workflows to run** button. Counting checks
+   cannot tell these apart, because in all three cases the count is zero. Look for the run:
+
+   ```bash
+   gh run list --branch <branch> --limit 5 --json conclusion,event,databaseId \
+     --jq '.[] | select(.conclusion=="action_required")'
+   ```
+
+   A hit means approve and wait, not diagnose. The Release PR is the routine case (§3.8) — its run
+   is held on every release, by design rather than by fault.
+
+An earlier version of this section called that state "a check that exists and is held". It does
+not exist: the *run* is held, and the check it would publish is missing exactly as if the run had
+never been created. The distinction matters because it is the one the diagnosis turns on.
 
 ### 4.3 A gate is green and should not be
 
