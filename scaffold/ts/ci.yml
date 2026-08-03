@@ -28,6 +28,6 @@ jobs:
   # The job MUST be named `ci` and the reusable workflow's last job `gate`: together
   # they publish the required check `ci / gate`. Pin an exact tag, never a moving alias.
   ci:
-    uses: rak200/.github/.github/workflows/js.yml@1.8.0
+    uses: rak200/.github/.github/workflows/js.yml@1.10.0
     with:
       node-versions: '["22", "24"]'

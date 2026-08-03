@@ -782,10 +782,31 @@ printf '# %s\n\n<one line>\n' "<repo>" > README.md   # not a seed: per-repo cont
 
 The scaffold is **flat**: `scaffold/php/ci.yml`, not
 `scaffold/php/.github/workflows/ci.yml`. Seeds live under one directory per variant — `all`,
-`none`, `github`, `php`, `php-config`, `ts` — and each row carries its own destination, so
-mirroring the destination tree inside the scaffold would imply a correspondence that does not
-exist. `all` is not a variant a repository declares; it is the row marker for seeds that apply
-everywhere.
+`none`, `github`, `php`, `php-config`, `ts`, `ts-config` — and each row carries its own
+destination, so mirroring the destination tree inside the scaffold would imply a correspondence
+that does not exist. `all` is not a variant a repository declares; it is the row marker for seeds
+that apply everywhere.
+
+**Which pipeline a variant calls.** `none` and `github` call `base.yml`, the language-agnostic
+half: they have no package to install. Every other variant calls its language pipeline —
+**including `php-config` and `ts-config`**. A configuration package is a package: it ships
+executable code, and a package whose CI never installs it has no CI. Both `-config` variants
+called `base.yml` for a while, on the reasoning that a config package has no source. That was
+true when it was written and stopped being true without anything re-examining it, leaving two
+repositories green for weeks that had never run a test, an analyser or a mutant — while shipping
+the binary that enforces everyone else's coverage floor. **A pipeline that is never asked the
+question gives no wrong answers.** The language pipelines take a `variant:` input for exactly
+this: a `-config` package must be graded against its own seed set, which *exports* the tool
+configs the library variants hide.
+
+> **A seed destination is a claim that the repository owns that path.** It is not a filename.
+> The `github` variant's release caller was seeded to `.github/workflows/release.yml` — free in
+> every other repository, and in `rak200/.github` the path holding the **reusable release
+> workflow the whole estate pins**. The seed did not sit beside it; it overwrote it, and every
+> tag from `1.8.1` shipped an `on: push` caller under the name everyone calls. Four releases,
+> unnoticed, because the only repository that could break was pinning `@1.8.0` — past its own
+> breakage. When adding a seed, check the destination against what the *target* repository
+> already keeps there, not against what the other variants happen to leave free.
 
 `.gitmodules` needs **no `branch =` line**: Dependabot falls back to the source repository's
 default branch, and it bumps to the latest **tag** reachable there, skipping untagged commits.
