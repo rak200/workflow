@@ -16,5 +16,10 @@ permissions:
   pull-requests: write
 
 jobs:
+  # Relative, like ci.yml in this variant, and NOT a pinned `rak200/.github/...@tag`.
+  # The `github` variant is rak200/.github itself: an absolute self-reference can
+  # never name a current tag, because the release it is part of has not been cut yet.
+  # It sat at 1.8.0 while the repository released 1.9.1, and the pin-staleness check
+  # found it on its own first run.
   release:
-    uses: rak200/.github/.github/workflows/release.yml@1.8.0
+    uses: ./.github/workflows/release.yml
