@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.4](https://github.com/rak200/workflow/compare/0.18.3...0.18.4) (2026-08-03)
+
+
+### Bug Fixes
+
+* the baseline's release caller overwrote the reusable release workflow ([#26](https://github.com/rak200/workflow/issues/26)) ([dafbeb2](https://github.com/rak200/workflow/commit/dafbeb2f2b10ee51f80f2afca85fb6275601ac0f))
+
 ## [0.18.3](https://github.com/rak200/workflow/compare/0.18.2...0.18.3) (2026-08-03)
 
 
