@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.5](https://github.com/rak200/workflow/compare/0.18.4...0.18.5) (2026-08-03)
+
+
+### Features
+
+* the config variants run their language pipeline ([#28](https://github.com/rak200/workflow/issues/28)) ([d6f121b](https://github.com/rak200/workflow/commit/d6f121be7094905c22cf72cdda7fd861d09921e5))
+
 ## [0.18.4](https://github.com/rak200/workflow/compare/0.18.3...0.18.4) (2026-08-03)
 
 
