@@ -337,6 +337,22 @@ A new release reaches consumers as a Dependabot bump PR — `composer`, `npm`, `
 review applies, the maintainer approves, merge is normal. A new conventions tag on
 `rak200/workflow` arrives the same way.
 
+**`gitsubmodule` runs daily; everything else runs weekly.** The asymmetry is deliberate and it is
+recent. Since conformance began failing on an obsolete pin (§4.7), the baseline is the only
+dependency whose staleness **blocks a merge** rather than merely lagging: between a baseline
+release and the next Dependabot pass, every pull request in an affected repository opens red, and
+the only way through is a hand-written bump. Weekly made that window seven days wide, against a
+baseline that has cut seven tags in a single day. An outdated library is outdated; an outdated
+baseline stops the work.
+
+**Not yet observed in production, and worth watching the first time it fires.** Every repository
+declares `gitsubmodule`, and to date the updater has opened bump PRs for `composer`, `npm` and
+`github-actions` — and **none** for a submodule. Nothing is known to be wrong: its only pass so
+far predated the pins existing. What the first real pass has to confirm is that it targets a
+**version tag** and not the branch tip, which is what the design assumes and what a simulation,
+not this estate, established. A bump PR pointing at an untagged commit means the tag-pinned
+property is fiction, and conformance will say so out loud (§4.7).
+
 **One pin Dependabot does not move: the CI caller's reusable-workflow reference.** Measured
 (round 3): the updater ignores `jobs.<id>.uses`, tag or Release, even though the dependency graph
 parses it. After a `rak200/.github` release, the pin is bumped **manually** in each consumer — an
