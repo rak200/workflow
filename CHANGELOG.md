@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.3](https://github.com/rak200/workflow/compare/0.18.2...0.18.3) (2026-08-03)
+
+
+### Bug Fixes
+
+* the config variants package only the product, and the baseline stops pinning itself ([#24](https://github.com/rak200/workflow/issues/24)) ([f27ebeb](https://github.com/rak200/workflow/commit/f27ebebb2f0b40d2092b623010882b9d401f17c1))
+
 ## [0.18.2](https://github.com/rak200/workflow/compare/0.18.1...0.18.2) (2026-08-03)
 
 
