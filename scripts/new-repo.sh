@@ -66,9 +66,18 @@ case "$VARIANT" in
 esac
 cp -a ".rak200/scaffold/templates/CLAUDE.$template.md" CLAUDE.md
 printf '# %s\n\n%s\n' "$NAME" "$DESC" > README.md
-# Driven by what the seeds actually laid down, not by the variant's name: only a
-# variant carrying release-please-config.json has a manifest to bootstrap.
-if [ -f release-please-config.json ]; then printf '{ ".": "0.0.0" }\n' > .release-please-manifest.json; fi
+# Driven by what the seeds actually laid down, not by the variant's name: every variant
+# now carries release-please-config.json, and the two pieces of per-repo release state
+# are bootstrapped from what it says rather than from $VARIANT.
+if [ -f release-please-config.json ]; then
+  printf '{ ".": "0.0.0" }\n' > .release-please-manifest.json
+  # `release-type: simple` keeps the version in version.txt, because a prose repository
+  # has no package manifest to keep it in. release-please owns the file from here on —
+  # it is derived state that happens to be one line long, not a number anyone types.
+  if grep -q '"release-type": "simple"' release-please-config.json; then
+    printf '0.0.0\n' > version.txt
+  fi
+fi
 
 say "4/9  first commit, and push master FIRST — this is what sets the default branch"
 git add -A
