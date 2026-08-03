@@ -1,0 +1,39 @@
+name: self-release
+
+# Cuts releases from master: release-please reads the commit history, opens and
+# maintains a Release PR, and merging that PR cuts the bare tag and the GitHub
+# Release. The version is derived here and typed nowhere.
+#
+# NAMED `self-release.yml`, AND THAT IS LOAD-BEARING. Every other variant seeds this
+# caller to `.github/workflows/release.yml`, which is free in an ordinary repository.
+# It is not free here: the `github` variant IS rak200/.github, where that exact path
+# holds the REUSABLE release workflow the whole estate pins as
+# `rak200/.github/.github/workflows/release.yml@<tag>`.
+#
+# Seeding the caller to that path did not sit beside the reusable workflow — it
+# overwrote it. rak200/.github adopted this seed at 1.8.1 and the definition has been
+# gone from every tag since; the caller kept working only because it pinned @1.8.0,
+# the last revision where the file it needed still existed. Nothing noticed for four
+# releases, because the one repository that would break is the one that was pinning
+# past the breakage.
+#
+# A seed destination is not a filename, it is a claim that the repository owns that
+# path. This was the first place that claim was false.
+
+on:
+  push:
+    branches: [master]
+
+# The caller caps what the called workflow may request. release-please cuts the tag
+# and the Release, and opens the Release PR, so it needs both — capped at read here,
+# it would `startup_failure` and never publish anything to notice.
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # Relative, and NOT a pinned `rak200/.github/...@tag`: an absolute self-reference
+  # can never name a current tag, because the release it is part of has not been cut
+  # yet. It sat at 1.8.0 while the repository released 1.9.1.
+  release:
+    uses: ./.github/workflows/release.yml
