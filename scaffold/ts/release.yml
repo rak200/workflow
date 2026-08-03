@@ -18,6 +18,22 @@ name: release
 on:
   push:
     branches: [master]
+  # Republishing a tag whose publish failed. A release that was cut but never reached
+  # the registry is a real state with no other way out: the tag is immutable, so the
+  # alternatives are publishing by hand — which abandons the automation at the one
+  # moment it matters — or burning a version number to work around a CI failure, which
+  # writes the failure into the changelog forever. Measured need, not a hypothetical:
+  # rak200/ui 0.1.1 was cut and its publish failed on an `.npmrc` defect.
+  #
+  # It stays on THIS file rather than moving to its own, because npm's trusted
+  # publisher is registered against this filename. A dispatch from release.yml still
+  # presents release.yml as the workflow that started the run.
+  workflow_dispatch:
+    inputs:
+      republish:
+        description: 'Tag to publish to npm, e.g. 0.1.1. Only for a release already cut whose publish failed.'
+        type: string
+        required: true
 
 # The caller caps what the called workflow may request. release-please cuts the tag
 # and the Release, and opens the Release PR, so it needs both — capped at read here,
@@ -30,14 +46,25 @@ permissions:
 
 jobs:
   release:
-    uses: rak200/.github/.github/workflows/release.yml@1.6.0
+    if: github.event_name == 'push'
+    uses: rak200/.github/.github/workflows/release.yml@1.8.0
 
   publish:
     needs: release
-    if: needs.release.outputs.release_created == 'true'
+    # `always()` is load-bearing and for the same reason it is on every gate here: on a
+    # dispatch the release job is SKIPPED, and a needs-dependency on a skipped job skips
+    # this one too. With it, both paths have to be stated positively — a dispatch never
+    # reaches the release branch, and a push never reaches the republish branch, so
+    # neither can publish the wrong thing by falling through.
+    if: >-
+      always() && (
+        (github.event_name == 'push' && needs.release.result == 'success'
+          && needs.release.outputs.release_created == 'true')
+        || github.event_name == 'workflow_dispatch'
+      )
     permissions:
       contents: read
       id-token: write
-    uses: rak200/.github/.github/workflows/npm-publish.yml@1.6.0
+    uses: rak200/.github/.github/workflows/npm-publish.yml@1.8.0
     with:
-      tag: ${{ needs.release.outputs.tag_name }}
+      tag: ${{ github.event_name == 'workflow_dispatch' && inputs.republish || needs.release.outputs.tag_name }}

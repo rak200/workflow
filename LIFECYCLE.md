@@ -175,7 +175,7 @@ so a workflow watching `master` opens a follow-up PR appending the SHA. That PR 
 opened with the repo's own `GITHUB_TOKEN`) and merges with `--admin` — since the Release PR turned
 out to have a *held* check rather than an absent one (§3.8), it is now the **only** PR that does. A breaking change is either `type!` or a `BREAKING CHANGE:` footer
 **in the PR body**. `revert` releases a **patch** — measured, not assumed; a revert-only window
-still cuts a superseding release (see §4.9).
+still cuts a superseding release (see §4.10).
 
 **Before you type `!`, check whether the break is allowed to be one yet.** From `1.0.0` on, a
 rename or a removal must have been **deprecated in an earlier minor** — the alias survives the
@@ -539,7 +539,37 @@ against a stale base.
 gh pr update-branch          # or: git rebase master && git push --force-with-lease
 ```
 
-### 4.9 A bad release shipped
+### 4.9 The release was cut and the publish failed — TS repos
+
+Symptom: the tag and the GitHub Release exist, `npm view <pkg> version` is behind them, and the
+`publish` job in the release run is red. The release happened; only the registry does not know.
+
+This is **not** §4.10's situation. Nothing is wrong with the released code, so a superseding
+version would burn a version number to route around a CI failure and write that failure into the
+changelog permanently. The tag is immutable and correct — republish it:
+
+```bash
+gh workflow run release.yml -f republish=<tag>
+gh run watch          # then confirm the registry, never the exit code
+npm view <pkg> version
+```
+
+Fix the cause first, or the republish reproduces it. Every plausible cause reports the same
+misleading `404 Not Found - PUT` (npm masking 401/403, upstream `npm/cli#9088`), which is why the
+publish job asserts its preconditions **before** publishing and names the one that failed:
+
+| what it asserts | what breaks it |
+|---|---|
+| `npm >= 11.5.1` | Node 22 ships npm 10, which cannot do the OIDC exchange |
+| an OIDC endpoint in the environment | `id-token: write` missing from **either** side of the `workflow_call` |
+| no `_authToken` in any npmrc | `setup-node`'s `registry-url`, which writes an empty one |
+
+A fourth cause it cannot assert from inside the job: the **trusted publisher must be registered**
+on npmjs.com, against the repository and the workflow filename `release.yml` — the caller, since
+npm validates the workflow that *started* the run. npm does not validate that configuration when
+it is saved, so a wrong or missing one surfaces only here, as the same 404.
+
+### 4.10 A bad release shipped
 
 Tags are immutable (§3.8) — rollback does not exist. The path is **forward**: a new version that
 supersedes the bad one, plus marking so nobody keeps resolving it meanwhile. If a credential is
@@ -586,7 +616,7 @@ involved, §4.4 comes first — rotate before anything here.
    GitHub Security Advisory: that is the only channel that alerts dependents beyond this
    ecosystem.
 
-### 4.10 A branch was renamed and its protection stayed behind
+### 4.11 A branch was renamed and its protection stayed behind
 
 Renaming a branch (`POST /repos/:owner/:repo/branches/:branch/rename`) moves what you expect and
 one thing you do not:
@@ -774,7 +804,7 @@ gh api repos/rak200/<repo> --jq '.default_branch'   # expect: master
 **The first branch pushed into an empty repository becomes its default.** Nothing else in this
 procedure puts the repo on `master`, and no second push moves it afterwards. If the read-back says
 anything but `master`, stop — do not continue and rename later; delete the repo and start again
-from step 1, because a rename leaves name-targeted rules pointing at the old name (§4.10).
+from step 1, because a rename leaves name-targeted rules pointing at the old name (§4.11).
 
 **5. Platform settings, then read them back.**
 
