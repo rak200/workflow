@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.8](https://github.com/rak200/workflow/compare/0.18.7...0.18.8) (2026-08-04)
+
+
+### Documentation
+
+* the submodule measurement, and why it is circular by construction ([#36](https://github.com/rak200/workflow/issues/36)) ([e769a63](https://github.com/rak200/workflow/commit/e769a63e01f8242ab079e9e1a58d20a939c0b67c))
+
 ## [0.18.7](https://github.com/rak200/workflow/compare/0.18.6...0.18.7) (2026-08-04)
 
 
