@@ -175,7 +175,7 @@ so a workflow watching `master` opens a follow-up PR appending the SHA. That PR 
 opened with the repo's own `GITHUB_TOKEN`) and merges with `--admin` — since the Release PR turned
 out to have a *held* check rather than an absent one (§3.8), it is now the **only** PR that does. A breaking change is either `type!` or a `BREAKING CHANGE:` footer
 **in the PR body**. `revert` releases a **patch** — measured, not assumed; a revert-only window
-still cuts a superseding release (see §4.10).
+still cuts a superseding release (see §4.11).
 
 **Before you type `!`, check whether the break is allowed to be one yet.** From `1.0.0` on, a
 rename or a removal must have been **deprecated in an earlier minor** — the alias survives the
@@ -360,13 +360,20 @@ ordinary PR the maintainer or an agent opens:
 
 ```bash
 git switch -c build/bump-ci-pipeline
-sed -i 's#\(uses: rak200/.github/.github/workflows/[a-z]*\.yml\)@[v0-9.]*#\1@1.5.0#' .github/workflows/ci.yml
-git commit -am "wip" && git push -u origin HEAD
-gh pr create --title "build(ci): bump pipeline to 1.5.0"
+sed -i -E 's#(uses: rak200/\.github/\.github/workflows/[a-z0-9-]+\.yml)@[0-9.]+#\1@1.10.0#' \
+  .github/workflows/*.yml
+git commit -am "build: bump the pipeline to 1.10.0" && git push -u origin HEAD
+gh pr create --title "build: bump the pipeline to 1.10.0"
 ```
 
 The PR runs that repo's own CI against the new pipeline before it lands — the property that makes
 the exact pin worth its manual cost.
+
+**Since `rak200/.github` 1.10.0 this bump is enforced, not remembered.** Conformance fails on a
+stale pipeline pin the way it fails on a stale submodule pin, and for the same reason: with no
+Dependabot pass to lean on, *manual* had meant *forgotten* — four distinct pins across five
+repositories, the scaffold's own source six releases behind. `every workflow in .github/workflows/`
+is the scope, not just `ci.yml`: `release.yml` pins one or two of its own. See §4.8.
 
 **A conventions bump may red its own PR — by design.** CI conformance-checks every seeded copy
 (`.editorconfig`, `dependabot.yml`, the CI caller's shape with its pin line masked, …) against
@@ -530,7 +537,50 @@ never a bare commit (a commit has no version to reason about, and the step rejec
 whatever the submodule carries must be comparable between two tags, or staleness becomes
 undetectable again.
 
-### 4.8 The branch is behind `master`
+### 4.8 The pipeline pin is obsolete
+
+Symptom: `ci / conformance` fails on **The pinned pipeline is not obsolete**, naming the workflow
+and what moved underneath it:
+
+```
+::error::php.yml is pinned at 1.7.0 and php.yml base.yml changed between 1.7.0 and 1.10.0
+        — this repository is running an obsolete pipeline
+```
+
+Fix — bump every `rak200/.github` reference in `.github/workflows/`, not only the one it named:
+
+```bash
+git switch -c build/bump-ci-pipeline
+sed -i -E 's#(uses: rak200/\.github/\.github/workflows/[a-z0-9-]+\.yml)@[0-9.]+#\1@1.10.0#' \
+  .github/workflows/*.yml
+git commit -am "build: bump the pipeline to 1.10.0" && git push -u origin HEAD
+```
+
+**This is §4.7 one level up, and it stayed open longer because the mask that keeps §4.7 quiet is
+what hid it.** A seed's pin line is graded `masked:` — deliberately, so bumping it in the scaffold
+does not redden every repository at once — and that mask was the only thing in the estate that
+ever looked at a pin. Measured on 2026-08-03, before the check existed: four distinct pins across
+five repositories, and `rak200/workflow`, which distributes the seed, was **six releases behind
+the version its own seed named**.
+
+The rule is §4.7's rule: it fails when something the repository **actually runs** moved, following
+the closure — `js.yml` and `php.yml` both delegate to `base.yml`, so a change there reaches a
+caller whose own file never moved. A pin behind by a release that touched another language stays
+quiet.
+
+**A pin that is not a release tag fails outright**, separately from staleness. A branch name would
+otherwise pass every comparison, being never unequal to itself, so *pin an exact tag, never a
+moving alias* had nothing enforcing it (§5, rule 11).
+
+Two related failures from the same step, both in `rak200/.github` alone:
+
+- **`the scaffold tells repositories to call <name>.yml, and it does not exist here`** — or *it
+  declares no `workflow_call` trigger*. The reusable workflows are whatever the seeds pin, and one
+  of them was overwritten by a seed for four releases. See §5, rule 12.
+- The check reads `uses:` directives, not the string. Prose that quotes a pin —
+  `` `…/release.yml@<tag>` `` — is not a pin, and an earlier version of the step read it as one.
+
+### 4.9 The branch is behind `master`
 
 Required checks are **strict**: the gate must be green against the actual merge result, not
 against a stale base.
@@ -539,12 +589,12 @@ against a stale base.
 gh pr update-branch          # or: git rebase master && git push --force-with-lease
 ```
 
-### 4.9 The release was cut and the publish failed — TS repos
+### 4.10 The release was cut and the publish failed — TS repos
 
 Symptom: the tag and the GitHub Release exist, `npm view <pkg> version` is behind them, and the
 `publish` job in the release run is red. The release happened; only the registry does not know.
 
-This is **not** §4.10's situation. Nothing is wrong with the released code, so a superseding
+This is **not** §4.11's situation. Nothing is wrong with the released code, so a superseding
 version would burn a version number to route around a CI failure and write that failure into the
 changelog permanently. The tag is immutable and correct — republish it:
 
@@ -569,7 +619,7 @@ on npmjs.com, against the repository and the workflow filename `release.yml` —
 npm validates the workflow that *started* the run. npm does not validate that configuration when
 it is saved, so a wrong or missing one surfaces only here, as the same 404.
 
-### 4.10 A bad release shipped
+### 4.11 A bad release shipped
 
 Tags are immutable (§3.8) — rollback does not exist. The path is **forward**: a new version that
 supersedes the bad one, plus marking so nobody keeps resolving it meanwhile. If a credential is
@@ -616,7 +666,7 @@ involved, §4.4 comes first — rotate before anything here.
    GitHub Security Advisory: that is the only channel that alerts dependents beyond this
    ecosystem.
 
-### 4.11 A branch was renamed and its protection stayed behind
+### 4.12 A branch was renamed and its protection stayed behind
 
 Renaming a branch (`POST /repos/:owner/:repo/branches/:branch/rename`) moves what you expect and
 one thing you do not:
@@ -666,6 +716,17 @@ These exist because each was violated once and the failure was silent.
     ruleset exempts the maintainer's **every** unflagged API call from the PR rules — measured: a
     plain API merge crossed a red `ci / gate` — and only the `gh` client refuses to do that
     without `--admin`.
+11. A reusable workflow is referenced by **exact tag**, never a branch or a moving alias. A branch
+    name is never unequal to itself, so every staleness comparison passes and the reference
+    silently follows whatever lands on that branch.
+12. A **seed destination is a claim that the repository owns that path** — checked against what
+    the *target* repository already keeps there, not against what the other variants happen to
+    leave free. The `github` variant's release caller was seeded to
+    `.github/workflows/release.yml`: free everywhere else, and in `rak200/.github` the path
+    holding the reusable release workflow the whole estate pins. The seed did not sit beside it,
+    it **overwrote** it, and every tag from `1.8.1` shipped an `on: push` caller under the name
+    everyone calls. Four releases, unnoticed, because the only repository that could break was
+    pinning `@1.8.0` — past its own breakage.
 
 ---
 
@@ -825,7 +886,7 @@ gh api repos/rak200/<repo> --jq '.default_branch'   # expect: master
 **The first branch pushed into an empty repository becomes its default.** Nothing else in this
 procedure puts the repo on `master`, and no second push moves it afterwards. If the read-back says
 anything but `master`, stop — do not continue and rename later; delete the repo and start again
-from step 1, because a rename leaves name-targeted rules pointing at the old name (§4.11).
+from step 1, because a rename leaves name-targeted rules pointing at the old name (§4.12).
 
 **5. Platform settings, then read them back.**
 
