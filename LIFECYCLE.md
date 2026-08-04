@@ -337,21 +337,41 @@ A new release reaches consumers as a Dependabot bump PR — `composer`, `npm`, `
 review applies, the maintainer approves, merge is normal. A new conventions tag on
 `rak200/workflow` arrives the same way.
 
-**`gitsubmodule` runs daily; everything else runs weekly.** The asymmetry is deliberate and it is
-recent. Since conformance began failing on an obsolete pin (§4.7), the baseline is the only
-dependency whose staleness **blocks a merge** rather than merely lagging: between a baseline
-release and the next Dependabot pass, every pull request in an affected repository opens red, and
-the only way through is a hand-written bump. Weekly made that window seven days wide, against a
-baseline that has cut seven tags in a single day. An outdated library is outdated; an outdated
-baseline stops the work.
+**`gitsubmodule` runs daily; everything else runs weekly.** The asymmetry is deliberate. Since
+conformance began failing on an obsolete pin (§4.7), the baseline is the only dependency whose
+staleness **blocks a merge** rather than merely lagging: between a baseline release and the next
+Dependabot pass, every pull request in an affected repository opens red, and the only way through
+is a hand-written bump. Weekly made that window seven days wide, against a baseline that has cut
+seven tags in a single day. An outdated library is outdated; an outdated baseline stops the work.
 
-**Not yet observed in production, and worth watching the first time it fires.** Every repository
-declares `gitsubmodule`, and to date the updater has opened bump PRs for `composer`, `npm` and
-`github-actions` — and **none** for a submodule. Nothing is known to be wrong: its only pass so
-far predated the pins existing. What the first real pass has to confirm is that it targets a
-**version tag** and not the branch tip, which is what the design assumes and what a simulation,
-not this estate, established. A bump PR pointing at an untagged commit means the tag-pinned
-property is fiction, and conformance will say so out loud (§4.7).
+> **The daily schedule is a mitigation that does not currently work, and until it does, every
+> submodule bump in this estate is hand-written.** Measured 2026-08-03: across six repositories
+> the updater has opened bump PRs for `composer`, `npm` and `github-actions`, and **zero** for a
+> submodule — ever — while `utils` sat five releases behind on `.rak200` and `ui` five as well,
+> both declaring `gitsubmodule` daily the whole time. Every pin that is current was brought there
+> by hand.
+>
+> The design's assumption — that with no `branch =` line the updater falls back to the source
+> repository's default branch and bumps to the latest **tag** reachable there — was established by
+> *simulation* and has never been observed. It is the leading suspect and it is unverified; do not
+> treat it as diagnosed. Two things still have to be confirmed the first time a bump PR does
+> appear: that it targets a **version tag** and not the branch tip, and that the tag it picks is
+> the newest rather than the oldest reachable. A bump PR pointing at an untagged commit means the
+> tag-pinned property is fiction, and conformance will say so out loud (§4.7).
+>
+> `rak200/workflow` is not evidence either way: it has **no** `.gitmodules`, being the scaffold
+> source, and its daily job errored daily — `Dependabot couldn't find the submodule /.gitmodules`
+> — until the `none` variant stopped declaring an ecosystem that cannot apply. A red mark every
+> day for a condition that is correct is the background a real failure has to be noticed against.
+
+**`docs:` cuts a release in the `none` variant, and nowhere else.** That variant is
+`rak200/workflow` itself, where the product **is** prose: `LIFECYCLE.md` and `CONVENTIONS.md`
+reach consumers only inside a tag, so a documentation change that never gets one never arrives.
+`release-please` releases on `feat:` and `fix:` by default and a `docs:` commit produces nothing —
+correct everywhere the product is code, and silently wrong here. It is enabled by listing `docs`
+un-hidden in `changelog-sections`; a hidden section neither appears in the changelog nor triggers
+a release, and the two properties are the same switch. Note that `changelog-sections` **replaces**
+the defaults rather than extending them, so the seed spells out all twelve types.
 
 **One pin Dependabot does not move: the CI caller's reusable-workflow reference.** Measured
 (round 3): the updater ignores `jobs.<id>.uses`, tag or Release, even though the dependency graph
