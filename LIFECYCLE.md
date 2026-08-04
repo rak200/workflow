@@ -351,20 +351,37 @@ Dependabot pass, every pull request in an affected repository opens red, and the
 is a hand-written bump. Weekly made that window seven days wide, against a baseline that has cut
 seven tags in a single day. An outdated library is outdated; an outdated baseline stops the work.
 
-> **The daily schedule is a mitigation that does not currently work, and until it does, every
-> submodule bump in this estate is hand-written.** Measured 2026-08-03: across six repositories
-> the updater has opened bump PRs for `composer`, `npm` and `github-actions`, and **zero** for a
-> submodule — ever — while `utils` sat five releases behind on `.rak200` and `ui` five as well,
-> both declaring `gitsubmodule` daily the whole time. Every pin that is current was brought there
-> by hand.
+> **Zero submodule bump PRs had ever been opened in this estate, and the job log says why.**
+> Forced on `rak200/utils` 2026-08-04 with the pin five releases behind — every reason to act —
+> the run finished green with `No PRs affected`:
 >
-> The design's assumption — that with no `branch =` line the updater falls back to the source
-> repository's default branch and bumps to the latest **tag** reachable there — was established by
-> *simulation* and has never been observed. It is the leading suspect and it is unverified; do not
-> treat it as diagnosed. Two things still have to be confirmed the first time a bump PR does
-> appear: that it targets a **version tag** and not the branch tip, and that the tag it picks is
-> the newest rather than the oldest reachable. A bump PR pointing at an untagged commit means the
-> tag-pinned property is fiction, and conformance will say so out loud (§4.7).
+> ```
+> Checking if .rak200 81aad451… needs updating
+> Fetching release info for Git Submodules: .rak200
+> GET /repos/rak200/workflow/commits?per_page=100&sha=HEAD
+> Filtered out 26 versions due to cooldown
+> All versions filtered by cooldown for .rak200, falling back to current version 81aad451…
+> No update needed for .rak200
+> ```
+>
+> **Cooldown.** Nothing in any `dependabot.yml` here configured one — the schema documents the
+> feature as opt-in — so one is being applied that was never asked for, and `rak200/workflow` is
+> two days old, which puts its **entire history** inside any window. A baseline that cuts several
+> releases a day cannot wait out a feature built to let versions settle. The seeds now carry
+> `cooldown: { exclude: ["*"] }`; `default-days: 0` is not expressible, because the schema puts
+> `minimum: 1` on every `*-days` field but `semver-patch-days`.
+>
+> **The same log falsifies a claim this document used to make.** It said the updater bumps to the
+> latest **tag** reachable on the default branch. It does not: it calls `/commits`, and it reports
+> `Latest version is <sha>`. For this updater a submodule version **is a commit**. The claim came
+> from simulation and survived because nothing had ever watched the mechanism run.
+>
+> That leaves an open contradiction, and it is the thing to watch when the first bump PR appears:
+> the conformance step **rejects a pin that is not a tag** (§4.7), so a PR pinning a bare commit is
+> one CI refuses by design. It has not been observed yet — today `master` and the newest tag are
+> the same commit on `rak200/workflow`, so a bump right now would land on a tag by coincidence and
+> prove nothing. **Do not treat the contradiction as resolved until a bump PR is seen against a
+> `master` that carries a commit past its last tag.**
 >
 > `rak200/workflow` is not evidence either way: it has **no** `.gitmodules`, being the scaffold
 > source, and its daily job errored daily — `Dependabot couldn't find the submodule /.gitmodules`
