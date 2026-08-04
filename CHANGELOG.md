@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.18.6](https://github.com/rak200/workflow/compare/0.18.5...0.18.6) (2026-08-04)
+
+
+### Bug Fixes
+
+* prose does not release, and an ecosystem that cannot apply errors daily ([#32](https://github.com/rak200/workflow/issues/32)) ([15a8a79](https://github.com/rak200/workflow/commit/15a8a790106186168efa70c8260b9b742b606c98))
+
+
+### Documentation
+
+* LIFECYCLE records the pipeline pin as enforced, not remembered ([#30](https://github.com/rak200/workflow/issues/30)) ([03dff56](https://github.com/rak200/workflow/commit/03dff56684d2bf0f82fbfada6d3a967b53d89b1c))
+* LIFECYCLE stops pointing at the proposal, and says why ([#31](https://github.com/rak200/workflow/issues/31)) ([69e73d9](https://github.com/rak200/workflow/commit/69e73d97b2aebe271612538d0e960ea242aee333))
+
 ## [0.18.5](https://github.com/rak200/workflow/compare/0.18.4...0.18.5) (2026-08-03)
 
 
