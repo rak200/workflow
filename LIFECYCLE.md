@@ -1,8 +1,15 @@
 # Development lifecycle
 
-> **Seed artifact for `rak200/workflow`.** This file is drafted inside RFC 0017 and moves to the
-> root of `rak200/workflow` when that repository is built (Rollout step 2). Consumers then read it
-> at `.rak200/LIFECYCLE.md`, pinned to the conventions tag that repo chose.
+> **This document is self-contained, and that is a rule rather than a courtesy.** It was drafted
+> inside a design proposal and moved here when `rak200/workflow` was built; the proposal recorded
+> what was *decided*, this file records what is *true*. The two parted company the moment the
+> first pilot ran, because building the thing found what no amount of reasoning about it had.
+> Nothing here points at the proposal for a procedure. When a decision recorded there turns out
+> to be wrong in practice, the correction lands here — and the proposal keeps the reasoning as
+> history, not as instructions anyone is meant to follow.
+>
+> Consumers read this at `.rak200/LIFECYCLE.md`, pinned to the conventions tag their repository
+> chose.
 
 This is the **primary reference** for how work moves through any `rak200` repository, from an idea
 to a released tag. It is written to be followed by a human reading it once, by an **agent**
@@ -736,8 +743,19 @@ Two different things, and naming them separately is the point.
 
 **The CI gate is mechanical, on every path.** A red `ci / gate` refuses the merge — for the
 maintainer, for an agent on the maintainer's identity, for a bot. This is the platform, not
-discipline (the review count being 0 is what makes it so: nothing on the common path routes
-through the bypass — see the RFC's *Review requirement*).
+discipline, and **the review count being 0 is what makes it so.**
+
+That number looks like a weakening and is the opposite. GitHub's own authorship logic supplies the
+conditionality a ruleset cannot express: with `required_approving_review_count: 0` and
+`require_code_owner_review: true`, a PR authored by the sole code owner requests **no** review, so
+nothing blocks it but `ci / gate` — it merges on green with **no bypass involved**, and is refused
+on red naming the check. A PR from a separate identity (Dependabot, `github-actions[bot]`) still
+demands the code owner, with `dismiss_stale` binding on push.
+
+At count 1 the required approval was **unsatisfiable on a self-authored PR** — the path that
+carries all human and agent work — so every merge went through the bypass, and the bypass covers
+status checks as well as reviews. The stricter-looking setting turned the gate procedural on the
+only path that matters.
 
 **The review is real only where the author is a separate identity.** On the common path the
 maintainer authors the PR and GitHub requests no code owner — there, what keeps the human in the
@@ -1039,12 +1057,68 @@ status` clean at `<tag>`; `ci` green on `master`.
 
 ### 8.2 An existing repository
 
-Same procedure minus steps 1–4 (the repo and its default branch already exist), plus the
-`release-please` bootstrap for a repo that already has tags and a hand-written `CHANGELOG.md` — the
-measured procedure is in the RFC's *Release bootstrap*. Verify the dist surface
-(`git archive HEAD | tar -t` against the `export-ignore` list).
+Same procedure minus steps 1–4 (the repo and its default branch already exist). Verify the dist
+surface (`git archive HEAD | tar -t` against the `export-ignore` list).
 
-Four things differ, and every one of them was found by running this section rather than reading it.
+#### Bootstrapping `release-please` on a repo that already has tags
+
+**Seed `.release-please-manifest.json` at the last tagged version. Never `bootstrap-sha`.**
+
+```bash
+gh api repos/rak200/<repo>/tags --jq '.[0].name'     # e.g. 0.3.0
+printf '{ ".": "0.3.0" }\n' > .release-please-manifest.json
+```
+
+That seed alone bounds the commit window: the pre-convention history above it is never parsed, so
+a repository with years of unstructured messages needs nothing done to them. The bare tag is found
+even with **zero GitHub Releases present** — `release-please` looks for Releases first, then falls
+back to `looking for tagName`.
+
+The manifest is **per-repo state, not a seed**; conformance never compares it. `new-repo.sh` writes
+`0.0.0` for a repository with no history, which is exactly wrong here — a manifest below the real
+tags makes the next release re-cut a version that already exists.
+
+`release-please-config.json` *is* a seed and arrives with step 3 already correct: `include-v-in-tag`
+and `include-component-in-tag` both `false`, `initial-version` explicit, and for a repo still in
+`0.x` both `bump-minor-pre-major` and `bump-patch-for-minor-pre-major` `true`. None of those are
+safe to leave defaulted — see the box below.
+
+**No `extra-files` entry, and do not add one.** The design called for one so the Release PR could
+rewrite a hard-coded version badge in `README.md`. The badge is dynamic instead —
+`shields.io/github/v/tag/rak200/<repo>?sort=semver` reads the tag at render time — so there is
+nothing to rewrite, and an `extra-files` rule pointing at a string that no longer exists is a
+release step that silently does nothing.
+
+Three things to do in the same onboarding PR, each of them a failure someone already hit:
+
+- **PHP: drop the `"version"` field from `composer.json`.** The version comes from the tag.
+  `release-please` honours its absence end-to-end; leaving it means two sources of truth and one of
+  them hand-typed. **TypeScript: leave `package.json`'s `version` in place** — npm requires it, and
+  `release-please` maintains it. What must be true there is that it **already matches the latest
+  tag**: `coding-standard-ts` carried `0.1.0` across four hand-cut tags, and a manual publish would
+  have put `0.1.0` on npm immutably, below the real version.
+- **Reconcile the hand-written unreleased `CHANGELOG.md` section**, or the first release ships a
+  duplicate of it.
+- **Expect one-time reserialization noise** in the first Release PR — `composer.json` reformatted,
+  `package.json` key order changed. Pre-normalise if the diff would obscure the review.
+
+Bootstrap from **committed state**. A "version ahead of tag" on `utils` turned out to be an
+uncommitted working-tree edit, and an in-flight `release/4.5.0` branch was bumping the very pin the
+bootstrap drops.
+
+> **The tag format and the first version are what a release automation gets wrong silently**,
+> because nothing anywhere rejects a well-formed wrong version. Two defaults, both measured on
+> `rak200/ui`, the first release this pipeline cut from zero: a manifest at `0.0.0` plus
+> `bump-minor-pre-major` does **not** yield `0.1.0` — those options govern bumps *from* an existing
+> version, and the first one is governed by `initial-version`, which defaults to **`1.0.0`**. And
+> `include-component-in-tag` defaults to **`true`**, prefixing the tag with the package name
+> (`ui-0.0.0`) even with `include-v-in-tag: false` set: one option controls the `v`, another
+> controls the component, and setting only the first *looks* like it settled the tag format.
+> A component-prefixed tag is not a version Composer reads, which makes the release invisible to
+> every consumer while everything reports success.
+
+Four more things differ, and every one of them was found by running this section rather than
+reading it.
 
 **The copy loop in step 3 destroys a `prefix:N` seed.** `cp` is right for an `exact` seed and wrong
 for a prefix one, where only the header is the seed and everything below it is the repository's own
@@ -1071,11 +1145,20 @@ anything* — a repository that already carried `* text=auto eol=lf` normalises 
 git ls-files -z | xargs -0 grep -lIU $'\r'   # empty output: nothing to normalise
 ```
 
-> **A template repository is not used for either path** — see the RFC's *New-repo creation*. Template
-> generation copies files faithfully, submodule gitlink included, but carries **no** rulesets, no
-> labels, no secrets and no repo settings, and silently restores GitHub's default merge
-> configuration. Steps 5–7 would be owed regardless, which leaves the template a second artifact to
-> version and keep conformant in exchange for a file copy step 3 already does.
+> **A template repository is not used for either path, and `gh repo create --template` was
+> deliberately dropped.** Template generation copies files faithfully, submodule gitlink included,
+> but carries **no** rulesets, no labels, no secrets and no repo settings, and silently restores
+> GitHub's default merge configuration. Steps 5–7 would be owed regardless, which leaves the
+> template a second artifact to version and keep conformant in exchange for a file copy step 3
+> already does.
+>
+> The default branch is settled the same way — **by mechanism, not by a setting**. The
+> account-level default branch name was `main` when measured, it is writable **only through the
+> UI**, and **no endpoint reads it**: `GET /user` has no such field. An empty repository reports
+> that name while `GET /repos/…/branches` returns `[]` — a name for a branch that does not exist.
+> Depending on it would have put the very first step outside rule 9 (read back what you write).
+> It is not depended on: **the first branch pushed into an empty repository becomes the default**,
+> which is why step 4 pushes `master` before anything else.
 
 ---
 
@@ -1106,7 +1189,14 @@ you meant to write afterwards cannot be written. Everything lands first; the fla
 4. **Close open issues and pull requests deliberately.** Archiving freezes them exactly as they
    are — an open PR on an archived repository is a question nobody can ever answer.
 5. **Remove the dependency from its consumers** — bump them off it or drop it. Every consumer in
-   this ecosystem is one you control (RFC, *Maintaining an old major*).
+   this ecosystem is one you control: none of these libraries is published to a public registry,
+   and they resolve as VCS dependencies from repositories in this account. That is also why there
+   is **no maintenance branch** for an old major anywhere here — the consumer is upgraded instead.
+   Nine majors have shipped across the estate and not one `release/x.y` has ever existed. What
+   happened instead, and nothing recorded it: consumers were left frozen — `sql-builder` requiring
+   `utils ^1.0.0` while `utils` was at `4.5.0`, `devr` requiring `caster ^1.0.0` while `caster` was
+   at `3.x`. The old major was never patched **and** the consumer was never upgraded; the version
+   simply froze. A maintenance branch would not have prevented that.
 6. **Archive, then read it back.**
 
 ```bash
