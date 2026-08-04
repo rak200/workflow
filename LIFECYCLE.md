@@ -371,17 +371,51 @@ seven tags in a single day. An outdated library is outdated; an outdated baselin
 > `cooldown: { exclude: ["*"] }`; `default-days: 0` is not expressible, because the schema puts
 > `minimum: 1` on every `*-days` field but `semver-patch-days`.
 >
-> **The same log falsifies a claim this document used to make.** It said the updater bumps to the
-> latest **tag** reachable on the default branch. It does not: it calls `/commits`, and it reports
-> `Latest version is <sha>`. For this updater a submodule version **is a commit**. The claim came
-> from simulation and survived because nothing had ever watched the mechanism run.
+> **The same log unsettles a claim this document used to make**, without replacing it. It said the
+> updater bumps to the latest **tag** reachable on the default branch — a claim that came from
+> simulation and survived because nothing had ever watched the mechanism run. What the log
+> establishes is narrower than either answer:
 >
-> That leaves an open contradiction, and it is the thing to watch when the first bump PR appears:
-> the conformance step **rejects a pin that is not a tag** (§4.7), so a PR pinning a bare commit is
-> one CI refuses by design. It has not been observed yet — today `master` and the newest tag are
-> the same commit on `rak200/workflow`, so a bump right now would land on a tag by coincidence and
-> prove nothing. **Do not treat the contradiction as resolved until a bump PR is seen against a
-> `master` that carries a commit past its last tag.**
+> - It queries `/commits`, not `/tags`. That is real evidence and it points one way.
+> - `Latest version is <sha>` is **not** evidence, though it reads like it. That line is the
+>   fallback to the *current* version, and the current version is a SHA because that is how a
+>   submodule pin is recorded. It says nothing about what the candidates were.
+> - `Filtered out 26 versions` matches **nothing** in the repository at that moment: 17 commits
+>   newer than the pin, 15 tags newer, 24 tags in total, 34 commits in total. Whatever it counted,
+>   it was not any of those.
+>
+> So the honest state is: the mechanism looks commit-shaped and is not confirmed to be. Do not
+> write down either answer until the measurement below returns one.
+>
+> **The contradiction that hangs on it.** Conformance **rejects a pin that is not a tag** (§4.7),
+> so if the updater does target commits, every bump PR it opens is one CI refuses by design — an
+> automation and a gate in this estate flatly disagreeing, with the bot losing every time.
+>
+> **The measurement, and why it is circular by construction.** A repository only receives the
+> cooldown exemption by adopting the seed that carries it — and adopting the seed bumps `.rak200`
+> to current, which is exactly the state in which there is nothing to bump. Every repository loses
+> the condition it needs to be measured in the act of becoming measurable. That is why nothing had
+> been observed after the fix any more than before it, and it is not a mistake anyone made; it
+> follows from the pin and the fix travelling in the same file.
+>
+> The way out is that **the discriminating case is not a newer tag, it is a newer commit**. Set it
+> up deliberately:
+>
+> 1. A consumer holds a pin equal to `rak200/workflow`'s newest tag, and carries
+>    `cooldown: exclude: ["*"]`.
+> 2. `rak200/workflow`'s `master` moves **one commit past that tag** — which is the ordinary state
+>    between any merge and the merge of its Release PR, and the permanent state after a commit
+>    whose type cuts no release.
+> 3. Force a `gitsubmodule` run on the consumer (*Insights → Dependency graph → Dependabot →
+>    Check for updates*), and read the answer off the outcome:
+>
+> | outcome | what it means |
+> | --- | --- |
+> | a bump PR pinning the untagged commit | it targets **commits**; the contradiction above is live and must be resolved |
+> | `No PRs affected` | it targets **tags**; the original claim stands and mine was wrong |
+>
+> Nothing has to be manufactured for this — step 2 arrives on its own — but it does have to be
+> caught, because step 2 is transient whenever the Release PR follows quickly.
 >
 > `rak200/workflow` is not evidence either way: it has **no** `.gitmodules`, being the scaffold
 > source, and its daily job errored daily — `Dependabot couldn't find the submodule /.gitmodules`
