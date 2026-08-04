@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.7](https://github.com/rak200/workflow/compare/0.18.6...0.18.7) (2026-08-04)
+
+
+### Bug Fixes
+
+* the baseline is exempt from cooldown, which is why it never updated ([#34](https://github.com/rak200/workflow/issues/34)) ([3ff9396](https://github.com/rak200/workflow/commit/3ff93962829a13bdddc6d2f826d539e0ae5d4834))
+
 ## [0.18.6](https://github.com/rak200/workflow/compare/0.18.5...0.18.6) (2026-08-04)
 
 
