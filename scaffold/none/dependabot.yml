@@ -7,12 +7,17 @@ updates:
     groups:
       actions:
         patterns: ["*"]
-  # Daily, while every other ecosystem here is weekly, and the asymmetry is the point:
-  # this is the only pin whose staleness BLOCKS A MERGE. Conformance fails when a seed
-  # the repository consumes changed under an old pin, so the gap between a baseline
-  # release and the next Dependabot pass is a gap where every pull request opens red.
-  # An outdated library is merely outdated; an outdated baseline stops the work.
-  - package-ecosystem: "gitsubmodule"
-    directory: "/"
-    schedule:
-      interval: "daily"
+
+# NO `gitsubmodule` ENTRY, and its absence is why this file is per-variant.
+#
+# Every other variant pins `.rak200` and needs the updater. This one is
+# `rak200/workflow` itself — the source of the scaffold, which cannot import itself and
+# therefore has no `.gitmodules` at all. Dependabot does not read that as "nothing to
+# do": it errors with `Dependabot couldn't find the submodule /.gitmodules`, and on the
+# daily schedule the other variants use it errored once a day for as long as the entry
+# was here. A red mark every day for a condition that is correct is worse than no mark,
+# because it becomes the background a real failure has to be noticed against.
+#
+# This variant is the scaffold source and nothing else — a second prose repository is
+# not something this ecosystem will have — so there is no future `none` repo whose
+# submodule this entry would have served.
