@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.9](https://github.com/rak200/workflow/compare/0.18.8...0.18.9) (2026-08-05)
+
+
+### Documentation
+
+* measured — the submodule updater targets tags, and the design was right ([#38](https://github.com/rak200/workflow/issues/38)) ([e48f131](https://github.com/rak200/workflow/commit/e48f131c1306a3d84f332cc8e2479f33800c92a0))
+
 ## [0.18.8](https://github.com/rak200/workflow/compare/0.18.7...0.18.8) (2026-08-04)
 
 
