@@ -371,51 +371,45 @@ seven tags in a single day. An outdated library is outdated; an outdated baselin
 > `cooldown: { exclude: ["*"] }`; `default-days: 0` is not expressible, because the schema puts
 > `minimum: 1` on every `*-days` field but `semver-patch-days`.
 >
-> **The same log unsettles a claim this document used to make**, without replacing it. It said the
-> updater bumps to the latest **tag** reachable on the default branch — a claim that came from
-> simulation and survived because nothing had ever watched the mechanism run. What the log
-> establishes is narrower than either answer:
+> **The updater targets TAGS, and that is now measured rather than assumed.** This document said
+> so from the design, on simulation; a reading of the first log said the opposite, on the strength
+> of the `/commits` call; the experiment settles it, and the design was right.
 >
-> - It queries `/commits`, not `/tags`. That is real evidence and it points one way.
-> - `Latest version is <sha>` is **not** evidence, though it reads like it. That line is the
->   fallback to the *current* version, and the current version is a SHA because that is how a
->   submodule pin is recorded. It says nothing about what the candidates were.
-> - `Filtered out 26 versions` matches **nothing** in the repository at that moment: 17 commits
->   newer than the pin, 15 tags newer, 24 tags in total, 34 commits in total. Whatever it counted,
->   it was not any of those.
+> Set up deliberately on 2026-08-04: `rak200/utils` pinned at `e7d190ec`, which is exactly tag
+> `0.18.7`, carrying `cooldown: exclude: ["*"]`; `rak200/workflow`'s `master` moved **one commit
+> past that tag**, to the untagged `e769a63e`. A forced run then had a newer commit available and
+> no newer tag — the only arrangement in which the two answers differ.
 >
-> So the honest state is: the mechanism looks commit-shaped and is not confirmed to be. Do not
-> write down either answer until the measurement below returns one.
+> ```
+> Checking if .rak200 e7d190ec… needs updating
+> GET /repos/rak200/workflow/commits?per_page=100&sha=HEAD
+> Latest version is e7d190ecedd38ab6a87983d03c34d2f975bb8cec
+> No update needed for .rak200
+> ```
 >
-> **The contradiction that hangs on it.** Conformance **rejects a pin that is not a tag** (§4.7),
-> so if the updater does target commits, every bump PR it opens is one CI refuses by design — an
-> automation and a gate in this estate flatly disagreeing, with the bot losing every time.
+> `HEAD` returns `e769a63e` first. The updater skipped it and resolved *latest* to `e7d190ec` —
+> the tagged commit. **The `/commits` call is how it enumerates candidates; the tags are how it
+> picks one.** An untagged commit on the default branch is not a version to it.
 >
-> **The measurement, and why it is circular by construction.** A repository only receives the
-> cooldown exemption by adopting the seed that carries it — and adopting the seed bumps `.rak200`
-> to current, which is exactly the state in which there is nothing to bump. Every repository loses
-> the condition it needs to be measured in the act of becoming measurable. That is why nothing had
-> been observed after the fix any more than before it, and it is not a mistake anyone made; it
-> follows from the pin and the fix travelling in the same file.
+> Two consequences worth stating plainly. The **tag-pinned property holds**: a bump PR will pin a
+> tag, so there is no conflict with the conformance step that rejects a non-tag pin (§4.7). And
+> the same run confirms the **cooldown exemption works** — the job definition carried
+> `"cooldown":{…,"exclude":["*"]}` and the `Filtered out N versions due to cooldown` line, which
+> had ended every previous run, is simply gone.
 >
-> The way out is that **the discriminating case is not a newer tag, it is a newer commit**. Set it
-> up deliberately:
+> One thing this did **not** show, because the arrangement excluded it: an actual bump. That needs
+> a consumer a *tag* behind with the exemption in place, which is the state the next release
+> creates. Watch it once — the mechanism is now understood but has still never opened a pull
+> request in this estate.
 >
-> 1. A consumer holds a pin equal to `rak200/workflow`'s newest tag, and carries
->    `cooldown: exclude: ["*"]`.
-> 2. `rak200/workflow`'s `master` moves **one commit past that tag** — which is the ordinary state
->    between any merge and the merge of its Release PR, and the permanent state after a commit
->    whose type cuts no release.
-> 3. Force a `gitsubmodule` run on the consumer (*Insights → Dependency graph → Dependabot →
->    Check for updates*), and read the answer off the outcome:
->
-> | outcome | what it means |
-> | --- | --- |
-> | a bump PR pinning the untagged commit | it targets **commits**; the contradiction above is live and must be resolved |
-> | `No PRs affected` | it targets **tags**; the original claim stands and mine was wrong |
->
-> Nothing has to be manufactured for this — step 2 arrives on its own — but it does have to be
-> caught, because step 2 is transient whenever the Release PR follows quickly.
+> **A note for whoever tries to reproduce this: the measurement is circular by default.** A
+> repository receives the cooldown exemption only by adopting the seed that carries it, and
+> adopting the seed bumps `.rak200` to current — the state in which there is nothing to bump.
+> Every repository loses the condition it needs to be measured in the act of becoming measurable.
+> The way out is the arrangement above: hold the pin at the newest tag and move `master` past it,
+> which is the ordinary state between any merge and the merge of its Release PR, and the permanent
+> state after a commit whose type cuts no release. Nothing has to be manufactured; it has to be
+> caught.
 >
 > `rak200/workflow` is not evidence either way: it has **no** `.gitmodules`, being the scaffold
 > source, and its daily job errored daily — `Dependabot couldn't find the submodule /.gitmodules`
