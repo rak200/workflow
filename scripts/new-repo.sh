@@ -142,11 +142,7 @@ for name, color, desc in [("bug","d73a4a","Something behaves incorrectly"),
 PY
 
 say "7/9  rulesets, from the canonical JSON in $BASE_REPO"
-# Three, and the branch protection being TWO of them is load-bearing. A bypass is granted
-# per ruleset, never per rule: with the review requirement and `ci / gate` in one ruleset,
-# exempting `github-actions` from the review — which `automerge.yml` needs — exempted it
-# from the pipeline in the same stroke. Split, the exemption reaches only the review.
-for r in branch-review branch-checks tag; do
+for r in branch tag; do
   gh api "repos/$BASE_REPO/contents/rulesets/$r.json" -H "Accept: application/vnd.github.raw" > "$work/$r.json"
   gh api -X POST "repos/$REPO/rulesets" --input "$work/$r.json" >/dev/null
 done

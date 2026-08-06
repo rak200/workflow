@@ -19,6 +19,13 @@ Where a rule exists because a mechanism behaves in a non-obvious way, the reason
 Those reasons are not commentary — they were established empirically, and removing the rule
 reintroduces the failure.
 
+**What that licence does not cover is a log.** This file holds the consolidated workflow: what to
+do, and the reason a step is shaped the way it is. It does not hold the trials that arrived at
+that shape, the alternatives weighed and discarded, the dated measurements, or the corrections
+made along the way. Those belong to the design proposal, whose job is exactly that history. The
+test: if a sentence would still be here after the reader forgot how the rule was discovered, keep
+it — otherwise it is narrative, and narrative is what makes a reference stop being read.
+
 **Two copies of this document exist and they are not the same.** The `CONTRIBUTING.md` propagated
 from `rak200/.github` links to the **current** version in `rak200/workflow` — right for a
 drive-by reader. The copy at `.rak200/LIFECYCLE.md` inside a repository is the version **that
@@ -63,8 +70,7 @@ onboarded — see §8.
 | Dependency automation | `.github/dependabot.yml` | per-repo, committed |
 | Code owners | `.github/CODEOWNERS` | per-repo — **does not propagate** |
 | PR template, issue templates | `rak200/.github` | GitHub-native propagation |
-| Branch and tag rules | per-repo rulesets (**three**: review, checks, tags) | canonical JSON in `rak200/.github`, applied by API at onboarding, verified by read-back |
-| Baseline auto-merge | `.github/workflows/automerge.yml` | thin caller; the guards live in `rak200/.github` |
+| Branch and tag rules | per-repo rulesets | canonical JSON in `rak200/.github`, applied by API at onboarding, verified by read-back |
 | Local secret gate | `.githooks/pre-push` (`gitleaks`) | seeded from the scaffold; `core.hooksPath` set per clone at onboarding |
 | Line endings & dist surface | `.gitattributes` (`text=auto eol=lf`, `export-ignore`) | copied from the scaffold |
 | License | `LICENSE` (MIT) | copied from the scaffold — **does not propagate** |
@@ -281,11 +287,7 @@ gh pr merge --squash --auto --delete-branch
 `--auto` exists because a merge attempted immediately after opening is refused while the required
 check is still queued. It merges when the gate turns green. It works **because the approval above
 already happened**: auto-merge waits for the requirements to be satisfied, and an approval
-satisfies them. A bypass would not — see §3.9.
-
-> **One Path B PR never reaches this step: a `gitsubmodule` bump of `.rak200` alone.**
-> `automerge.yml` merges it after CI, and there is nothing left to approve by the time you look.
-> Any other file in the diff disqualifies it and it waits here like the rest.
+satisfies them.
 
 **Requesting changes.** On either path, review comments and `gh pr review --request-changes` work
 normally. A new push **dismisses the existing approval** — deliberately, so an approval never
@@ -351,12 +353,6 @@ A new release reaches consumers as a Dependabot bump PR — `composer`, `npm`, `
 review applies, the maintainer approves, merge is normal. A new conventions tag on
 `rak200/workflow` arrives the same way.
 
-**One of them merges itself, and only one.** A `gitsubmodule` bump of `.rak200` — nothing else —
-lands without a human, via `automerge.yml`. Every other ecosystem, and any submodule PR that
-touches a second file, waits for review like anything else. The exception is not convenience: it
-is the pin whose staleness **blocks every other pull request in the repository**, arriving daily,
-carrying a change no person reads.
-
 **`gitsubmodule` runs daily; everything else runs weekly.** The asymmetry is deliberate. Since
 conformance began failing on an obsolete pin (§4.7), the baseline is the only dependency whose
 staleness **blocks a merge** rather than merely lagging: between a baseline release and the next
@@ -364,123 +360,20 @@ Dependabot pass, every pull request in an affected repository opens red, and the
 is a hand-written bump. Weekly made that window seven days wide, against a baseline that has cut
 seven tags in a single day. An outdated library is outdated; an outdated baseline stops the work.
 
-> **Zero submodule bump PRs had ever been opened in this estate, and the job log says why.**
-> Forced on `rak200/utils` 2026-08-04 with the pin five releases behind — every reason to act —
-> the run finished green with `No PRs affected`:
->
-> ```
-> Checking if .rak200 81aad451… needs updating
-> Fetching release info for Git Submodules: .rak200
-> GET /repos/rak200/workflow/commits?per_page=100&sha=HEAD
-> Filtered out 26 versions due to cooldown
-> All versions filtered by cooldown for .rak200, falling back to current version 81aad451…
-> No update needed for .rak200
-> ```
->
-> **Cooldown.** Nothing in any `dependabot.yml` here configured one — the schema documents the
-> feature as opt-in — so one is being applied that was never asked for, and `rak200/workflow` is
-> two days old, which puts its **entire history** inside any window. A baseline that cuts several
-> releases a day cannot wait out a feature built to let versions settle. The seeds now carry
-> `cooldown: { exclude: ["*"] }`; `default-days: 0` is not expressible, because the schema puts
-> `minimum: 1` on every `*-days` field but `semver-patch-days`.
->
-> **The updater targets TAGS, and that is now measured rather than assumed.** This document said
-> so from the design, on simulation; a reading of the first log said the opposite, on the strength
-> of the `/commits` call; the experiment settles it, and the design was right.
->
-> Set up deliberately on 2026-08-04: `rak200/utils` pinned at `e7d190ec`, which is exactly tag
-> `0.18.7`, carrying `cooldown: exclude: ["*"]`; `rak200/workflow`'s `master` moved **one commit
-> past that tag**, to the untagged `e769a63e`. A forced run then had a newer commit available and
-> no newer tag — the only arrangement in which the two answers differ.
->
-> ```
-> Checking if .rak200 e7d190ec… needs updating
-> GET /repos/rak200/workflow/commits?per_page=100&sha=HEAD
-> Latest version is e7d190ecedd38ab6a87983d03c34d2f975bb8cec
-> No update needed for .rak200
-> ```
->
-> `HEAD` returns `e769a63e` first. The updater skipped it and resolved *latest* to `e7d190ec` —
-> the tagged commit. **The `/commits` call is how it enumerates candidates; the tags are how it
-> picks one.** An untagged commit on the default branch is not a version to it.
->
-> Two consequences worth stating plainly. The **tag-pinned property holds**: a bump PR will pin a
-> tag, so there is no conflict with the conformance step that rejects a non-tag pin (§4.7). And
-> the same run confirms the **cooldown exemption works** — the job definition carried
-> `"cooldown":{…,"exclude":["*"]}` and the `Filtered out N versions due to cooldown` line, which
-> had ended every previous run, is simply gone.
->
-> **The first bump PR in this estate's history** followed immediately, once `0.18.8` put
-> `rak200/utils` one *tag* behind with the exemption in place — `utils#8`, `.rak200` from
-> `e7d190e` to `d85eae7`, which is tag `0.18.8`. It passed conformance, PHP 8.4 and 8.5, and
-> `ci / gate`. Read it for what it is and no more: with `0.18.8` sitting on `master`'s tip, *last
-> tag* and *last commit* named the same SHA, so this run is consistent with both readings and
-> discriminates nothing. The run *above* is the one that discriminates. What it does add is one
-> more call the "commits" reading cannot explain: `GET /repos/rak200/workflow/releases?per_page=100`.
->
-> **A note for whoever tries to reproduce this: the measurement is circular by default.** A
-> repository receives the cooldown exemption only by adopting the seed that carries it, and
-> adopting the seed bumps `.rak200` to current — the state in which there is nothing to bump.
-> Every repository loses the condition it needs to be measured in the act of becoming measurable.
-> The way out is the arrangement above: hold the pin at the newest tag and move `master` past it,
-> which is the ordinary state between any merge and the merge of its Release PR, and the permanent
-> state after a commit whose type cuts no release. Nothing has to be manufactured; it has to be
-> caught.
->
-> `rak200/workflow` is not evidence either way: it has **no** `.gitmodules`, being the scaffold
-> source, and its daily job errored daily — `Dependabot couldn't find the submodule /.gitmodules`
-> — until the `none` variant stopped declaring an ecosystem that cannot apply. A red mark every
-> day for a condition that is correct is the background a real failure has to be noticed against.
+**The submodule updater resolves *latest* to a tagged commit.** It enumerates candidates from the
+default branch's history, but an untagged commit is not a version to it — so a bump PR always pins
+a tag, which is what §4.7 requires and what makes the daily schedule safe on a branch that moves
+between releases.
 
-**The baseline bump merges itself, and the shape of that machinery was dictated by two
-measurements rather than chosen.** `CODEOWNERS` is `* @rak200`, the review rule applies to every
-non-admin author, and Dependabot cannot approve itself — so the one PR that should need no person
-was the only one that could not get past one.
+**The baseline is exempt from cooldown, and without the exemption it never bumps at all.** A
+cooldown is applied whether or not a `dependabot.yml` asks for one, and a baseline cutting several
+releases a day never leaves the window. The seeds carry `cooldown: { exclude: ["*"] }`;
+`default-days: 0` is not expressible, since the schema sets `minimum: 1` on every `*-days` field
+but `semver-patch-days`.
 
-> **A ruleset bypass is not part of mergeability.** With Dependabot's bypass in place and
-> untouched, toggling a single field flipped the same pull request:
->
-> | `require_code_owner_review` | `mergeStateStatus` |
-> | --- | --- |
-> | `false` | `CLEAN` |
-> | `true` | `BLOCKED` |
->
-> An admin's bypass did not clear it either. GitHub renders the override as a separate checkbox —
-> *Merge without waiting for requirements to be met* — which is the interface stating the same
-> fact: the requirements are **not** met; a bypass lets an actor proceed anyway.
->
-> The consequence is the whole design: **anything that waits for mergeable waits forever.**
-> GitHub's own auto-merge is exactly that, so it is unusable here — never `gh pr merge --auto` on
-> this path. Confirmed in the other direction by merging `utils#8` through that checkbox: a bypass
-> actor **can** merge a `BLOCKED` pull request. The merge must be *performed*, not scheduled.
-
-So `automerge.yml` (reusable, in `rak200/.github`) runs on `workflow_run` after a green CI and
-asserts four things before it touches anything: the triggering run's **actor** is `dependabot[bot]`
-— never the branch name, which anyone can spell; the changed files are **exactly** `.rak200`;
-`ci / gate` is `success`, checked **by the name the ruleset requires**, because a workflow can
-conclude success while the job publishing the required check was skipped; and an open PR really
-exists at that head commit, resolved by SHA because `workflow_run.pull_requests` is empty too
-often to trust. Then `gh pr merge --squash`.
-
-`workflow_run` rather than `pull_request` is not a stylistic preference: **a workflow triggered by
-a Dependabot pull request receives a read-only `GITHUB_TOKEN`** and cannot merge anything.
-`workflow_run` runs in the default branch's context with a full token — which also means a change
-to the caller has no effect until it is *on* `master`, and cannot be exercised by the PR that
-makes it.
-
-**The branch protection is two rulesets because a bypass is granted per ruleset, never per rule.**
-With the review requirement and `ci / gate` together, exempting `github-actions` from the review
-exempted it from the pipeline in the same stroke — the one thing nothing may be exempted from.
-
-| ruleset | rules | bypass |
-| --- | --- | --- |
-| `default-branch-review` | `pull_request` | admin, `github-actions` |
-| `default-branch-checks` | `deletion`, `non_fast_forward`, `ci / gate` (strict) | admin |
-
-The baseline bump therefore merges without a review and does not merge without a green pipeline,
-enforced by the platform rather than by the workflow that benefits from it. `dependabot` is
-deliberately **not** a bypass actor: it never merges, so the entry would be decoration that reads
-like a control.
+**The `none` variant declares no `gitsubmodule` ecosystem.** That variant is `rak200/workflow`
+itself, the scaffold source, which has no `.gitmodules`; Dependabot does not read that as *nothing
+to do* but as an error, once per scheduled run.
 
 **`docs:` cuts a release in the `none` variant, and nowhere else.** That variant is
 `rak200/workflow` itself, where the product **is** prose: `LIFECYCLE.md` and `CONVENTIONS.md`
@@ -523,22 +416,9 @@ compared.)
 **Rulesets are not files and follow a different path.** They are the one part of the baseline no
 submodule bump carries: `.rak200` moves, conformance re-checks every seeded file, and a repository
 whose protection is three releases stale reports nothing at all. After a `rak200/.github` release
-that changes any of `rulesets/branch-review.json`, `rulesets/branch-checks.json` or
-`rulesets/tag.json`, run the sweep: re-apply per repo via `gh api`, then **read back** (§5, rule
-9). No scheduled audit exists — that would need a stored admin credential.
-
-A repository onboarded before the split still carries the single `default-branch` ruleset. It is
-not broken and nothing warns about it; it simply cannot host `automerge.yml`, because the bypass
-that workflow needs would reach `ci / gate` too. Migrate by creating both replacements **first**
-and deleting the old one after, so the default branch is never unprotected for an instant:
-
-```bash
-gh api repos/rak200/:repo/rulesets --jq '.[] | select(.name=="default-branch") | .id'   # save it
-gh api -X POST repos/rak200/:repo/rulesets --input rulesets/branch-review.json
-gh api -X POST repos/rak200/:repo/rulesets --input rulesets/branch-checks.json
-gh api -X DELETE repos/rak200/:repo/rulesets/<the saved id>
-gh api repos/rak200/:repo/rulesets --jq '[.[] | {name,target,enforcement}]'             # read back
-```
+that changes `rulesets/branch.json` or `rulesets/tag.json`, run the sweep: re-apply per repo via
+`gh api`, then **read back** (§5, rule 9). No scheduled audit exists — that would need a stored
+admin credential.
 
 ---
 
@@ -660,13 +540,6 @@ gh pr comment <n> --body "@dependabot recreate"   # rebuild the PR from scratch
 ```
 
 Do not push commits to a Dependabot branch: it stops managing the PR from then on.
-
-**A `.rak200` bump sitting open is this same failure and reads as nothing.** `automerge.yml` fires
-only on a *successful* CI run, so the visible symptom of red is a bump that quietly stays open —
-absence, which is the hardest thing to notice. When one has not merged itself, read its checks
-before assuming the automation broke; the automation not firing is usually the automation working.
-The other two ways it declines are deliberate and both leave the PR for a human: the diff touched a
-second file, or `ci / gate` is absent rather than green.
 
 ### 4.7 The submodule pin is obsolete
 
@@ -876,10 +749,7 @@ These exist because each was violated once and the failure was silent.
 10. A merge goes through **`gh pr merge`**, never the raw REST endpoint. The bypass entry in the
     ruleset exempts the maintainer's **every** unflagged API call from the PR rules — measured: a
     plain API merge crossed a red `ci / gate` — and only the `gh` client refuses to do that
-    without `--admin`. `automerge.yml` obeys this too, and is safe for a second reason worth
-    stating: its actor bypasses `default-branch-review` and is a stranger to
-    `default-branch-checks`, so it *cannot* cross a red gate even if its own assertion were wrong.
-    A bypass narrow enough to be harmless is worth more than a check that must be right.
+    without `--admin`.
 11. A reusable workflow is referenced by **exact tag**, never a branch or a moving alias. A branch
     name is never unequal to itself, so every staleness comparison passes and the reference
     silently follows whatever lands on that branch.
@@ -925,11 +795,9 @@ maintainer's unflagged API calls from all PR rules, which is why rule 10 exists;
 the merge command is procedural, not enforced. If agents are ever given **distinct identities**,
 their PRs move to Path B and code-owner review begins to cover them with no new mechanism.
 
-**There is now exactly one merge no human is in the loop for**, and it is worth naming rather than
-discovering: the `.rak200` bump (§3.9). What replaces the human there is not trust in Dependabot
-but the narrowness of what the machinery may do — one file, one required check, one bypass that
-reaches the review rule and nothing else. If that PR ever contains a second file, no one has to
-notice: it stops being eligible and lands back on Path B.
+**Every merge in this estate is a human decision.** Nothing merges itself — not the daily baseline
+bump, not a green Dependabot PR, not the Release PR. What the platform guarantees is that no merge
+crosses a red `ci / gate`; what a person guarantees is that the merge should happen at all.
 
 ---
 
@@ -1086,13 +954,9 @@ gh api repos/rak200/<repo>/actions/permissions/workflow
 gh api repos/rak200/<repo>/private-vulnerability-reporting
 ```
 
-**`allow_auto_merge` is not optional, and its absence was invisible for exactly the reason this
-document keeps recording.** It defaults to off, nothing here ever wrote it, and `--auto` — the
-merge command §3.6 and §7 both prescribe — needs it: `gh pr merge --auto` enables auto-merge
-through a mutation the platform refuses when the repository has the feature disabled. Measured
-2026-08-05: off in nine of the ten repositories, and never noticed, because merges were being made
-in the web UI and the documented command was never the one anyone ran. A procedure nobody executes
-cannot fail, which is not the same as working.
+**`allow_auto_merge` is not optional.** It defaults to off, and `--auto` — the merge command §3.6
+and §7 both prescribe — needs it: `gh pr merge --auto` enables auto-merge through a mutation the
+platform refuses outright when the repository has the feature disabled.
 
 The squash message sources are not cosmetic: on GitHub's defaults the squash commit takes the
 *branch's* message rather than the PR title, which breaks `release-please` silently (§4.5).
@@ -1123,24 +987,17 @@ An empty result means the sweep costs nothing. Anything else is a decision, not 
 
 ```bash
 # the canonical JSON lives in rak200/.github, a different repository — fetch, then apply
-for r in branch-review branch-checks tag; do
+for r in branch tag; do
   gh api "repos/rak200/.github/contents/rulesets/$r.json" -H "Accept: application/vnd.github.raw" > "/tmp/$r.json"
   gh api -X POST "repos/rak200/<repo>/rulesets" --input "/tmp/$r.json"
 done
 gh api repos/rak200/<repo>/rulesets --jq '[.[] | {name,target,enforcement}]'
 ```
 
-The JSON is the canonical copy in [`rak200/.github`](https://github.com/rak200/.github/tree/master/rulesets) — clone it or fetch the three files; they are versioned there, not here. Order matters: the review ruleset's
+The JSON is the canonical copy in [`rak200/.github`](https://github.com/rak200/.github/tree/master/rulesets) — clone it or fetch the two files; they are versioned there, not here. Order matters: the branch ruleset's
 `pull_request` rule would reject the very push in step 4 that establishes the default branch.
 
-**Branch protection is two rulesets, not one, and the reason is mechanical: a bypass is granted per
-ruleset, never per rule.** `default-branch-review` holds the `pull_request` rule and grants
-`github-actions` an exemption so `automerge.yml` can land the baseline bump (§3.9);
-`default-branch-checks` holds `deletion`, `non_fast_forward` and the strict `ci / gate` requirement
-and grants that actor nothing. Together they say what one ruleset could not: *this actor may merge
-without a review, and may not merge without a pipeline.*
-
-**Both branch rulesets** carry a `bypass_actors` entry for the repository admin, in `bypass_mode:
+**The branch ruleset** carries a `bypass_actors` entry for the repository admin, in `bypass_mode:
 pull_request`. It was granted for the Release PR's absent-check deadlock, and that deadlock turned
 out not to exist — the Release PR's check is held, not absent (§3.8), and approving the run clears
 it without any bypass. The entry stays for the blame-registration PR and as a safety net, on
@@ -1230,7 +1087,7 @@ Branch the canary **from the current tip of `master`**. Under `strict_required_s
 a stale branch is refused for being behind, which looks identical to being refused for the red
 gate — and proves nothing.
 
-**11. Final read-back.** `default_branch` = `master`; three rulesets `active`; the seven merge/permission
+**11. Final read-back.** `default_branch` = `master`; two rulesets `active`; the seven merge/permission
 fields as written in step 5; the canonical labels present and the stock ones gone; `git submodule
 status` clean at `<tag>`; `ci` green on `master`.
 
