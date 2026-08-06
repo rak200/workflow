@@ -1,0 +1,33 @@
+name: automerge
+
+# The baseline bump lands without a human. Nothing else here does, and the exception is
+# earned by what this particular pin is: `.rak200` is the one dependency whose staleness
+# BLOCKS every other pull request in the repository, because conformance fails the moment
+# a seed this repo consumes moved under an old pin. It arrives daily and it is mechanical.
+#
+# The reusable workflow carries the guards — actor, changed files, `ci / gate` — and the
+# reasoning for each. This file only says WHEN.
+#
+# `workflow_run`, not `pull_request`, and the difference is not stylistic: a workflow
+# triggered by a Dependabot pull request receives a READ-ONLY `GITHUB_TOKEN` and cannot
+# merge anything. `workflow_run` runs in the default branch's context with a full token.
+# It also means this file has no effect until it is ON the default branch — a change to it
+# cannot be tested by the pull request that makes it.
+
+on:
+  workflow_run:
+    # The `name:` of the CI workflow, not its filename.
+    workflows: [CI]
+    types: [completed]
+
+# The caller CAPS what the called workflow may request, and this one performs a merge.
+# Capped at the usual `contents: read`, the job would `startup_failure` and the bump would
+# sit there looking like Dependabot's fault.
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # Pin an exact tag, never a moving alias.
+  automerge:
+    uses: rak200/.github/.github/workflows/automerge.yml@1.11.0
