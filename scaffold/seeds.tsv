@@ -33,21 +33,18 @@ github	exact	github/.gitattributes	.gitattributes
 github	exact	github/.gitignore	.gitignore
 github	exact	github/dependabot.yml	.github/dependabot.yml
 github	masked:@[0-9]+\.[0-9]+\.[0-9]+	github/ci.yml	.github/workflows/ci.yml
-github	exact	github/self-automerge.yml	.github/workflows/self-automerge.yml
 github	exact	github/release-please-config.json	release-please-config.json
 github	exact	github/self-release.yml	.github/workflows/self-release.yml
 php	exact	php/.gitattributes	.gitattributes
 php	exact	php/.gitignore	.gitignore
 php	exact	php/dependabot.yml	.github/dependabot.yml
 php	masked:@[0-9]+\.[0-9]+\.[0-9]+	php/ci.yml	.github/workflows/ci.yml
-php	masked:@[0-9]+\.[0-9]+\.[0-9]+	php/automerge.yml	.github/workflows/automerge.yml
 php	exact	php/release-please-config.json	release-please-config.json
 php	masked:@[0-9]+\.[0-9]+\.[0-9]+	php/release.yml	.github/workflows/release.yml
 php-config	exact	php-config/.gitattributes	.gitattributes
 php-config	exact	php/.gitignore	.gitignore
 php-config	exact	php/dependabot.yml	.github/dependabot.yml
 php-config	masked:@[0-9]+\.[0-9]+\.[0-9]+	php-config/ci.yml	.github/workflows/ci.yml
-php-config	masked:@[0-9]+\.[0-9]+\.[0-9]+	php/automerge.yml	.github/workflows/automerge.yml
 php-config	exact	php/release-please-config.json	release-please-config.json
 php-config	masked:@[0-9]+\.[0-9]+\.[0-9]+	php/release.yml	.github/workflows/release.yml
 ts-config	exact	ts-config/.gitattributes	.gitattributes
@@ -55,7 +52,6 @@ ts-config	exact	ts-config/.gitignore	.gitignore
 ts-config	exact	ts-config/.prettierignore	.prettierignore
 ts-config	exact	ts-config/dependabot.yml	.github/dependabot.yml
 ts-config	masked:@[0-9]+\.[0-9]+\.[0-9]+	ts-config/ci.yml	.github/workflows/ci.yml
-ts-config	masked:@[0-9]+\.[0-9]+\.[0-9]+	ts/automerge.yml	.github/workflows/automerge.yml
 ts-config	exact	ts/release-please-config.json	release-please-config.json
 ts-config	masked:@[0-9]+\.[0-9]+\.[0-9]+	ts/release.yml	.github/workflows/release.yml
 ts	exact	ts/.gitattributes	.gitattributes
@@ -63,6 +59,5 @@ ts	exact	ts/.gitignore	.gitignore
 ts	exact	ts/.prettierignore	.prettierignore
 ts	exact	ts/dependabot.yml	.github/dependabot.yml
 ts	masked:@[0-9]+\.[0-9]+\.[0-9]+	ts/ci.yml	.github/workflows/ci.yml
-ts	masked:@[0-9]+\.[0-9]+\.[0-9]+	ts/automerge.yml	.github/workflows/automerge.yml
 ts	exact	ts/release-please-config.json	release-please-config.json
 ts	masked:@[0-9]+\.[0-9]+\.[0-9]+	ts/release.yml	.github/workflows/release.yml
