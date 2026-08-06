@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.12](https://github.com/rak200/workflow/compare/0.18.11...0.18.12) (2026-08-06)
+
+
+### Reverts
+
+* drop the bot auto-merge, and stop letting LIFECYCLE accumulate a log ([#44](https://github.com/rak200/workflow/issues/44)) ([d24bdc2](https://github.com/rak200/workflow/commit/d24bdc263ac0a9d38f9c18dc07fc93eaf4cbcf48))
+
 ## [0.18.11](https://github.com/rak200/workflow/compare/0.18.10...0.18.11) (2026-08-06)
 
 
