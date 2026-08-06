@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.10](https://github.com/rak200/workflow/compare/0.18.9...0.18.10) (2026-08-06)
+
+
+### Features
+
+* seed the baseline auto-merge, and split the branch ruleset the scaffold applies ([#40](https://github.com/rak200/workflow/issues/40)) ([9db36db](https://github.com/rak200/workflow/commit/9db36db1147fa987d480dd595b8b0ba534a6618a))
+
 ## [0.18.9](https://github.com/rak200/workflow/compare/0.18.8...0.18.9) (2026-08-05)
 
 
