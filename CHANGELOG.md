@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.11](https://github.com/rak200/workflow/compare/0.18.10...0.18.11) (2026-08-06)
+
+
+### Bug Fixes
+
+* onboarding never enabled auto-merge, so the documented merge command could not work ([#42](https://github.com/rak200/workflow/issues/42)) ([8b6b33c](https://github.com/rak200/workflow/commit/8b6b33c9f67ebf62e447548bedbab7efc9716aa7))
+
 ## [0.18.10](https://github.com/rak200/workflow/compare/0.18.9...0.18.10) (2026-08-06)
 
 
