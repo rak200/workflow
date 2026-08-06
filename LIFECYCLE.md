@@ -302,9 +302,11 @@ The branch is deleted automatically.
 
 `release-please` watches `master` and maintains an open **Release PR** accumulating every
 releasable commit since the last tag, with the derived version bump and generated `CHANGELOG.md`.
-It also rewrites the latest-release badge in `README.md`, through the `extra-files` entry and its
-`x-release-please-version` annotation — that badge is maintained by this PR, never by hand.
 It carries the `autorelease: pending` label, which is **functional state** — never remove it.
+
+It does **not** touch the latest-release badge in `README.md`, and nothing does: the badge reads
+`shields.io/github/v/tag/rak200/<repo>?sort=semver`, which resolves the tag when the page renders.
+No `extra-files` entry exists in any repository and none should — see §8.2.
 
 The Release PR's CI is **held for approval**, and this page used to say it never ran at all. The
 run is created, actor `github-actions[bot]`, and completes its first attempt with the conclusion
