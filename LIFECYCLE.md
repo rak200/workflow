@@ -1075,15 +1075,24 @@ from step 1, because a rename leaves name-targeted rules pointing at the old nam
 gh api -X PATCH repos/rak200/<repo> \
   -F allow_squash_merge=true -F allow_merge_commit=false -F allow_rebase_merge=false \
   -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=PR_BODY \
+  -F allow_auto_merge=true \
   -F delete_branch_on_merge=true
 gh api -X PUT repos/rak200/<repo>/actions/permissions/workflow \
   -f default_workflow_permissions=read -F can_approve_pull_request_reviews=true
 gh api -X PUT repos/rak200/<repo>/private-vulnerability-reporting
 
-gh api repos/rak200/<repo> --jq '{allow_squash_merge,allow_merge_commit,allow_rebase_merge,squash_merge_commit_title,squash_merge_commit_message,delete_branch_on_merge}'
+gh api repos/rak200/<repo> --jq '{allow_squash_merge,allow_merge_commit,allow_rebase_merge,squash_merge_commit_title,squash_merge_commit_message,allow_auto_merge,delete_branch_on_merge}'
 gh api repos/rak200/<repo>/actions/permissions/workflow
 gh api repos/rak200/<repo>/private-vulnerability-reporting
 ```
+
+**`allow_auto_merge` is not optional, and its absence was invisible for exactly the reason this
+document keeps recording.** It defaults to off, nothing here ever wrote it, and `--auto` — the
+merge command §3.6 and §7 both prescribe — needs it: `gh pr merge --auto` enables auto-merge
+through a mutation the platform refuses when the repository has the feature disabled. Measured
+2026-08-05: off in nine of the ten repositories, and never noticed, because merges were being made
+in the web UI and the documented command was never the one anyone ran. A procedure nobody executes
+cannot fail, which is not the same as working.
 
 The squash message sources are not cosmetic: on GitHub's defaults the squash commit takes the
 *branch's* message rather than the PR title, which breaks `release-please` silently (§4.5).
@@ -1221,7 +1230,7 @@ Branch the canary **from the current tip of `master`**. Under `strict_required_s
 a stale branch is refused for being behind, which looks identical to being refused for the red
 gate — and proves nothing.
 
-**11. Final read-back.** `default_branch` = `master`; three rulesets `active`; the six merge/permission
+**11. Final read-back.** `default_branch` = `master`; three rulesets `active`; the seven merge/permission
 fields as written in step 5; the canonical labels present and the stock ones gone; `git submodule
 status` clean at `<tag>`; `ci` green on `master`.
 
