@@ -89,9 +89,13 @@ branch=$(gh api "repos/$REPO" --jq '.default_branch')
 [ "$branch" = master ] || die "default branch read back as '$branch', not master — delete the repo and start again; a rename leaves name-targeted rules behind"
 
 say "5/9  platform settings"
+# `allow_auto_merge` is off by default and was never written here, so `gh pr merge --auto` —
+# the merge command this lifecycle documents — could not work in any repository. Nobody hit
+# it because merges were made in the web UI. Written now, and read back below.
 gh api -X PATCH "repos/$REPO" \
   -F allow_squash_merge=true -F allow_merge_commit=false -F allow_rebase_merge=false \
   -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=PR_BODY \
+  -F allow_auto_merge=true \
   -F delete_branch_on_merge=true >/dev/null
 gh api -X PUT "repos/$REPO/actions/permissions/workflow" \
   -f default_workflow_permissions=read -F can_approve_pull_request_reviews=true >/dev/null
@@ -148,7 +152,7 @@ for r in branch-review branch-checks tag; do
 done
 
 say "8/9  read back every write — rule 9"
-gh api "repos/$REPO" --jq '{default_branch,allow_squash_merge,allow_merge_commit,allow_rebase_merge,squash_merge_commit_title,squash_merge_commit_message,delete_branch_on_merge}'
+gh api "repos/$REPO" --jq '{default_branch,allow_squash_merge,allow_merge_commit,allow_rebase_merge,squash_merge_commit_title,squash_merge_commit_message,allow_auto_merge,delete_branch_on_merge}'
 gh api "repos/$REPO/actions/permissions/workflow"
 gh api "repos/$REPO/private-vulnerability-reporting"
 gh api "repos/$REPO/rulesets" --jq '[.[] | {name,target,enforcement}]'
