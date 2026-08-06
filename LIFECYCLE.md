@@ -865,6 +865,18 @@ branch, and step 4 is the one that gets verified.
 git init -b master
 ```
 
+`README.md` is per-repo content and therefore **not a seed**, which means no conformance check
+ever looks at it. One line in it is still mandatory, in every variant, published or not:
+
+```markdown
+[![Latest tag](https://img.shields.io/github/v/tag/rak200/<repo>?sort=semver)](https://github.com/rak200/<repo>/tags)
+```
+
+It is the *live* badge class from `CONVENTIONS.md` — driven by a service, never hand-edited, and
+nothing in the release path touches it (§3.8). It appears here as a checklist item precisely
+because it cannot appear as a gate: six of ten repositories had gone without it, every one of them
+onboarded after the convention was written, and no mechanism in this document could have noticed.
+
 **3. Pin the conventions, then copy the seeds out of them.**
 
 ```bash

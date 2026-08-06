@@ -180,6 +180,18 @@ maintained:
 
 Prefer a verifiable badge over a vanity metric.
 
+**One badge is required in every repository**, whatever the variant and whether or not the thing
+it ships is published anywhere:
+
+```markdown
+[![Latest tag](https://img.shields.io/github/v/tag/rak200/<repo>?sort=semver)](https://github.com/rak200/<repo>/tags)
+```
+
+The **git tag** is the source, uniformly — not the registry the package happens to be installed
+from. Every repository here has tags; only some have a registry, and a rule that changes shape per
+variant is a rule that gets applied to some of them. A registry badge may be added alongside it,
+never instead of it.
+
 ## Security
 
 - **Third-party CI actions are pinned by full commit SHA**, never a floating tag, and the

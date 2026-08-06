@@ -1,5 +1,7 @@
 # rak200/workflow
 
+[![Latest tag](https://img.shields.io/github/v/tag/rak200/workflow?sort=semver)](https://github.com/rak200/workflow/tags)
+
 **Layer 1 of the rak200 ecosystem baseline** — the conventions every repository shares, the
 lifecycle they follow, the scaffold they are built from, and the labels they apply.
 
