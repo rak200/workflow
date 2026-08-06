@@ -302,9 +302,11 @@ The branch is deleted automatically.
 
 `release-please` watches `master` and maintains an open **Release PR** accumulating every
 releasable commit since the last tag, with the derived version bump and generated `CHANGELOG.md`.
-It also rewrites the latest-release badge in `README.md`, through the `extra-files` entry and its
-`x-release-please-version` annotation — that badge is maintained by this PR, never by hand.
 It carries the `autorelease: pending` label, which is **functional state** — never remove it.
+
+It does **not** touch the latest-release badge in `README.md`, and nothing does: the badge reads
+`shields.io/github/v/tag/rak200/<repo>?sort=semver`, which resolves the tag when the page renders.
+No `extra-files` entry exists in any repository and none should — see §8.2.
 
 The Release PR's CI is **held for approval**, and this page used to say it never ran at all. The
 run is created, actor `github-actions[bot]`, and completes its first attempt with the conclusion
@@ -862,6 +864,18 @@ branch, and step 4 is the one that gets verified.
 ```bash
 git init -b master
 ```
+
+`README.md` is per-repo content and therefore **not a seed**, which means no conformance check
+ever looks at it. One line in it is still mandatory, in every variant, published or not:
+
+```markdown
+[![Latest tag](https://img.shields.io/github/v/tag/rak200/<repo>?sort=semver)](https://github.com/rak200/<repo>/tags)
+```
+
+It is the *live* badge class from `CONVENTIONS.md` — driven by a service, never hand-edited, and
+nothing in the release path touches it (§3.8). It appears here as a checklist item precisely
+because it cannot appear as a gate: six of ten repositories had gone without it, every one of them
+onboarded after the convention was written, and no mechanism in this document could have noticed.
 
 **3. Pin the conventions, then copy the seeds out of them.**
 
