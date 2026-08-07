@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.13](https://github.com/rak200/workflow/compare/0.18.12...0.18.13) (2026-08-07)
+
+
+### Documentation
+
+* the Release PR does not touch the version badge, and §3.8 said it did ([#46](https://github.com/rak200/workflow/issues/46)) ([0cd9abc](https://github.com/rak200/workflow/commit/0cd9abc899b669d06ada56139f895e79ad9e188f))
+
 ## [0.18.12](https://github.com/rak200/workflow/compare/0.18.11...0.18.12) (2026-08-06)
 
 
