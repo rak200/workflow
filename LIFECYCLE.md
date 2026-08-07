@@ -117,7 +117,9 @@ gh issue create --title "Foo breaks when bar is empty" --label bug
 ```
 
 An RFC is required only for a change that alters the ecosystem's design — see
-`.rak200/proposals/TEMPLATE.md`. Ordinary bugs and features do not need one.
+`.rak200/proposals/TEMPLATE.md` for the form and `.rak200/proposals/README.md` for the process.
+It goes in **this repository's** `docs/proposals/`, not a central one — `CONVENTIONS.md`,
+*Proposals*. Ordinary bugs and features do not need one.
 
 **If the work is already on `ROADMAP.md`**, the entry carries its issue number — that reference is
 what lets the delivering PR retire the entry (§3.4). If it is not on the roadmap, nothing to do.
