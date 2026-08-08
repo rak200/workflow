@@ -6,15 +6,9 @@ deleted — a well-argued rejection documents learning just as much as a shipped
 A proposal is first and foremost a place to **study**: state an intention, research how the
 problem is solved elsewhere, sketch a design that fits, and only then decide.
 
-## Where proposals live
-
-**Per repository**, in that repository's own `docs/proposals/`, with its own `README.md` index
-and its own repo-scoped `NNNN` numbering. There is no central aggregating index; discovery is
-per-repo, and cross-repo relationships are carried by **mother↔daughter links** — a proposal
-that spawns work in another repository links to the offspring, and the offspring links back.
-
-**`rak200/devr` is the cradle by convention**: ecosystem-wide proposals, and anything not owned
-by a specific repository, start there.
+Where a proposal lives — which repository, which directory, how it is numbered — is stated in
+`CONVENTIONS.md`, *Proposals*. Read that before step 1 below, which assumes the destination is
+already settled.
 
 ## Steps
 

@@ -131,12 +131,29 @@ presence: a script that cannot run is worse than a missing one, because it reads
   signature are noise; add one when it carries something the signature cannot (units, semantics,
   edge cases, the condition of a throw).
 
+## Proposals
+
+The process — what a proposal is for, its steps, its statuses, its template — is
+`.rak200/proposals/README.md`. Only **where a proposal lives** is here, because that is decided
+with a repository open and the process document closed.
+
+- **Per repository**, in that repository's own `docs/proposals/`, with its own `README.md` index
+  and its own repo-scoped `NNNN` numbering. There is no central aggregating index; discovery is
+  per-repo, and cross-repo relationships are carried by **mother↔daughter links** — a proposal
+  that spawns work in another repository links to the offspring, and the offspring links back.
+- **`rak200/devr` is the cradle by convention**: ecosystem-wide proposals, and anything not owned
+  by a specific repository, start there. A subject a repository owns belongs in that repository,
+  even when its nearest neighbour was born in the cradle.
+- **The directory is created on demand.** A repository with no proposal carries no
+  `docs/proposals/`, and nothing asserts otherwise.
+
 ## Support files
 
 | File | Holds |
 | --- | --- |
 | `README.md` | overview, installation, badges, links |
 | `docs/` | the reference — index plus one page per unit |
+| `docs/proposals/` | this repository's proposals, if it has any — index plus one file each |
 | `CLAUDE.md` | stable instructions and conventions; imports this file |
 | `ROADMAP.md` | pending work, ordered; each entry references its issue |
 | `CHANGELOG.md` | released history, generated |
