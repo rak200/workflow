@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.14](https://github.com/rak200/workflow/compare/0.18.13...0.18.14) (2026-08-08)
+
+
+### Features
+
+* where proposals live moves into CONVENTIONS.md ([#50](https://github.com/rak200/workflow/issues/50)) ([7dcdfc1](https://github.com/rak200/workflow/commit/7dcdfc12caa85aa33cc1143a0ae9da9b96ec9165))
+
 ## [0.18.13](https://github.com/rak200/workflow/compare/0.18.12...0.18.13) (2026-08-07)
 
 
