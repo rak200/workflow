@@ -6,10 +6,9 @@ deleted — a well-argued rejection documents learning just as much as a shipped
 A proposal is first and foremost a place to **study**: state an intention, research how the
 problem is solved elsewhere, sketch a design that fits, and only then decide.
 
-**Where a proposal lives is not here.** It is `CONVENTIONS.md`, *Proposals* — the file every
-repository imports into its `CLAUDE.md`, which is where the question gets asked. Kept in one
-place rather than two: this document was the only one carrying it, and nothing loaded it at the
-moment somebody had to choose a directory.
+Where a proposal lives — which repository, which directory, how it is numbered — is stated in
+`CONVENTIONS.md`, *Proposals*. Read that before step 1 below, which assumes the destination is
+already settled.
 
 ## Steps
 
