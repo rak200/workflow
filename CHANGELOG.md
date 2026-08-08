@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.15](https://github.com/rak200/workflow/compare/0.18.14...0.18.15) (2026-08-08)
+
+
+### Features
+
+* public documentation never depends on a private repository ([#54](https://github.com/rak200/workflow/issues/54)) ([ca4f4e9](https://github.com/rak200/workflow/commit/ca4f4e98432e15e57d89578d5bc2ee76974ed692))
+
 ## [0.18.14](https://github.com/rak200/workflow/compare/0.18.13...0.18.14) (2026-08-08)
 
 
