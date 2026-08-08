@@ -819,7 +819,7 @@ gh pr checks --watch
 # merge — own PR (mechanically gated by ci / gate; never --admin here)
 gh pr merge --squash --auto --delete-branch
 
-# merge — bot PR  (a .rak200-only submodule bump needs none of this: it merges itself)
+# merge — bot PR  (a separate identity, so the code owner's review is requested and required)
 gh pr review --approve && gh pr merge --squash --auto --delete-branch
 
 # merge — Release PR (approve the HELD run first, then merge normally; not --admin)
