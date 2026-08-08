@@ -141,9 +141,11 @@ with a repository open and the process document closed.
   and its own repo-scoped `NNNN` numbering. There is no central aggregating index; discovery is
   per-repo, and cross-repo relationships are carried by **mother↔daughter links** — a proposal
   that spawns work in another repository links to the offspring, and the offspring links back.
-- **`rak200/devr` is the cradle by convention**: ecosystem-wide proposals, and anything not owned
-  by a specific repository, start there. A subject a repository owns belongs in that repository,
-  even when its nearest neighbour was born in the cradle.
+- **A subject a repository owns belongs to that repository**, even when a related proposal lives
+  elsewhere. Age is not ownership: a proposal that predates the repository it created stays where
+  it was written, and the new repository starts its own numbering at `0001`, joined to its parent
+  by those links. Where a proposal with *no* owning repository goes is internal routing, and not
+  stated here — see *Repository hygiene*, on public documentation.
 - **The directory is created on demand.** A repository with no proposal carries no
   `docs/proposals/`, and nothing asserts otherwise.
 
@@ -157,7 +159,7 @@ with a repository open and the process document closed.
 | `CLAUDE.md` | stable instructions and conventions; imports this file |
 | `ROADMAP.md` | pending work, ordered; each entry references its issue |
 | `CHANGELOG.md` | released history, generated |
-| `ARCHITECTURE.md` | design decisions |
+| `ARCHITECTURE.md` | design decisions, in public — the consumer-facing half of what a proposal decided |
 | `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md` | propagate account-wide from `rak200/.github` |
 
 **A delivered roadmap entry is pruned by the PR that delivers it** — removed, not annotated as
@@ -166,6 +168,14 @@ enforces it against the PR's `Closes #N`.
 
 ## Repository hygiene
 
+- **Public documentation never depends on a private repository.** The estate is deliberately
+  mixed — private is a strategic choice, not an accident to be corrected — so a public `README.md`,
+  `docs/` page, `ROADMAP.md` or `CLAUDE.md` neither links nor names one. A reader outside the
+  account finds a 404 where the reasoning should be, and a package whose rationale is unreachable
+  is a package nobody can evaluate. **Whatever a consumer needs in order to understand a decision
+  goes in that repository's own public `ARCHITECTURE.md`**; the proposal behind it stays internal
+  history. This binds the *whole* public surface, not only the documents: a badge, a workflow
+  comment and an issue template leak exactly the same way.
 - **Line endings are LF everywhere** — `.gitattributes` sets `* text=auto eol=lf`, working tree
   included. Development happens on Windows and CI on Linux; without it the tree is
   platform-dependent and fixers rewrite lines for their endings.
