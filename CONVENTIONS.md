@@ -142,10 +142,10 @@ with a repository open and the process document closed.
   per-repo, and cross-repo relationships are carried by **mother↔daughter links** — a proposal
   that spawns work in another repository links to the offspring, and the offspring links back.
 - **A subject a repository owns belongs to that repository**, even when a related proposal lives
-  elsewhere. Age is not ownership: a proposal that predates the repository it created stays where
-  it was written, and the new repository starts its own numbering at `0001`, joined to its parent
-  by those links. Where a proposal with *no* owning repository goes is internal routing, and not
-  stated here — see *Repository hygiene*, on public documentation.
+  elsewhere. Age is not ownership: a proposal that predates the repository it created stays where it
+  was written, and the new repository starts its own numbering at `0001`, joined to its parent by
+  those links. Where a proposal with *no* owning repository goes is internal routing, and stays out
+  of this file.
 - **The directory is created on demand.** A repository with no proposal carries no
   `docs/proposals/`, and nothing asserts otherwise.
 
@@ -168,14 +168,15 @@ enforces it against the PR's `Closes #N`.
 
 ## Repository hygiene
 
-- **Public documentation never depends on a private repository.** The estate is deliberately
-  mixed — private is a strategic choice, not an accident to be corrected — so a public `README.md`,
-  `docs/` page, `ROADMAP.md` or `CLAUDE.md` neither links nor names one. A reader outside the
-  account finds a 404 where the reasoning should be, and a package whose rationale is unreachable
-  is a package nobody can evaluate. **Whatever a consumer needs in order to understand a decision
-  goes in that repository's own public `ARCHITECTURE.md`**; the proposal behind it stays internal
-  history. This binds the *whole* public surface, not only the documents: a badge, a workflow
-  comment and an issue template leak exactly the same way.
+- **Public documentation never depends on a private repository.** The estate is deliberately mixed,
+  so a public `README.md`, `docs/` page, `ROADMAP.md` or `CLAUDE.md` neither links nor names one — a
+  reader outside the account finds a 404 where the reasoning should be. **What a consumer needs in
+  order to understand a decision goes in that repository's own public `ARCHITECTURE.md`**; the
+  proposal behind it stays internal history, cited by number alone — `RFC 0016`, no URL and no
+  repository name.
+- **It binds the whole public surface**, not only the documents: badges, workflow comments, issue
+  templates, and the bodies of issues and pull requests. **`CHANGELOG.md` is the one exemption**,
+  being generated from released commits — the control point there is the pull request that feeds it.
 - **Line endings are LF everywhere** — `.gitattributes` sets `* text=auto eol=lf`, working tree
   included. Development happens on Windows and CI on Linux; without it the tree is
   platform-dependent and fixers rewrite lines for their endings.
