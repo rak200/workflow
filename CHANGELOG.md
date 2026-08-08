@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.16](https://github.com/rak200/workflow/compare/0.18.15...0.18.16) (2026-08-08)
+
+
+### Features
+
+* the leak surface includes issue bodies, and generated history is exempt ([#57](https://github.com/rak200/workflow/issues/57)) ([1777844](https://github.com/rak200/workflow/commit/177784461a1842bc35130e84caa8c8905977293a))
+
 ## [0.18.15](https://github.com/rak200/workflow/compare/0.18.14...0.18.15) (2026-08-08)
 
 
