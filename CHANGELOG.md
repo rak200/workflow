@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.19](https://github.com/rak200/workflow/compare/0.18.18...0.18.19) (2026-08-09)
+
+
+### Features
+
+* every rule names what would catch it, and how far that reaches ([#82](https://github.com/rak200/workflow/issues/82)) ([c0aed40](https://github.com/rak200/workflow/commit/c0aed406a5a22429e000b2bfa1cbf08a331126f1))
+
 ## [0.18.18](https://github.com/rak200/workflow/compare/0.18.17...0.18.18) (2026-08-09)
 
 
