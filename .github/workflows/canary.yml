@@ -1,0 +1,17 @@
+name: canary
+
+# TEMPORARY — negative canary for sha_pinning_required (rak200/workflow#61).
+# Deleted with the branch once the platform's refusal has been observed.
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  floating-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
