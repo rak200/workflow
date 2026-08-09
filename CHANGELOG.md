@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.17](https://github.com/rak200/workflow/compare/0.18.16...0.18.17) (2026-08-09)
+
+
+### Bug Fixes
+
+* a bot PR does not merge itself, and §7 said it did ([#67](https://github.com/rak200/workflow/issues/67)) ([c63c673](https://github.com/rak200/workflow/commit/c63c673bd4011a68893946ab9ebf64d2ea07c1fb))
+
 ## [0.18.16](https://github.com/rak200/workflow/compare/0.18.15...0.18.16) (2026-08-08)
 
 
