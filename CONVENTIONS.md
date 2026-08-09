@@ -8,6 +8,20 @@ alongside this file.
 This file travels as a tag-pinned submodule at `.rak200/`. A repository pins a version; it does
 not track a moving target.
 
+## How to read a rule here
+
+**Every rule in this file names the mechanism that would catch its violation, and how far that
+mechanism reaches** — a CI step, a seeded file, a tool configuration, by name. Where none exists,
+the rule says so in the same breath.
+
+Silence is the unacceptable answer, because a reader cannot tell it from enforcement. The
+half-answer is worse: most of what has gone wrong here was not an unchecked rule but a *partly*
+checked one, where the sentence claimed the whole and the mechanism covered a corner of it. Reach is
+part of the answer, not a footnote to it.
+
+Nothing enforces this rule. No check can decide whether a sentence states a requirement, so it is
+enforced by whoever writes the next one.
+
 ## Versioning and releases
 
 - **[SemVer](https://semver.org)**, tagged on `master`. Tags are **bare** — `4.5.0`, no `v`
@@ -16,9 +30,14 @@ not track a moving target.
   Release PR, and merging it cuts the tag and the GitHub Release. Do not hand-edit a version
   field; a manifest pin is machine state.
 - **Deprecate in a minor, remove in the next major — never both in one release.** A consumer
-  must have one release in which the replacement and the deprecation coexist.
+  must have one release in which the replacement and the deprecation coexist. **Nothing checks
+  this, and nothing can from inside one pull request**: it is a property of two releases read side
+  by side.
 - **Raising the language floor is a major.** A minor would fail *silently*: the resolver simply
-  stops offering the new version and pins the consumer to an old one, with no error to read.
+  stops offering the new version and pins the consumer to an old one, with no error to read. The
+  **mirror-badge check** catches the visible half — the floor cannot move without the README badge
+  following, or the pull request reds. It does not reach the bump itself: `release-please` derives
+  that from the commit type, so a floor raise typed `build:` cuts no release at all.
 - **`CHANGELOG.md`** follows [Keep a Changelog](https://keepachangelog.com) and is generated.
   Hand-written entries survive above the generated ones; a hand-written *unreleased* section
   must be reconciled before the first automated release or it ships twice.
@@ -175,6 +194,12 @@ with a repository open and the process document closed.
 done. `CHANGELOG.md` is the historical record; `ROADMAP.md` is only what is still pending. CI
 enforces it against the PR's `Closes #N`.
 
+**Three of those rows are checked, and none of the checks asserts presence.** The mirror-badge,
+`docs/` symbol-coverage and roadmap-pruning steps each open with a guard that passes when the file
+is absent — *no README.md*, *no src/ or no docs/*, *no ROADMAP.md*. They verify content where the
+file exists, never that it exists. Onboarding writes `README.md` and `CLAUDE.md`; every other row
+appears when someone writes it, and its absence is caught by a reader or not at all.
+
 **`CLAUDE.md` states no rule that is not written somewhere a human reads.** Its job is to deliver,
 to an agent, context that is spread across the other files — so a rule that lives only there binds
 nobody, because the human operator never opens it. A repository's own design decisions go in
@@ -197,16 +222,24 @@ nobody, because the human operator never opens it. A repository's own design dec
 - **The distribution tarball carries consumption, not development.** `export-ignore` on tests,
   docs, CI configuration, tool configs and the `.rak200` gitlink. `.gitattributes` is therefore a
   **per-variant** seed, not a shared one: the list names one language's tool configs, and a
-  package whose product *is* configuration must export the very files a library hides.
+  package whose product *is* configuration must export the very files a library hides. The
+  conformance check compares that seed byte for byte, so the list cannot drift; that the list still
+  *matches the tree* is one manual step — `LIFECYCLE.md` §8.2 — on the existing-repository path
+  only. A repository created by the onboarding script never runs it.
 - **Bulk reformatting commits are recorded in `.git-blame-ignore-revs`** so `git blame` skips
   them. GitHub honours the file automatically; enable it locally with
   `git config blame.ignoreRevsFile .git-blame-ignore-revs`.
 - **Lockfiles follow the artifact, not the language.** An *application* commits its lockfile; a
   *library* does not, and resolves fresh against its constraints. (PHP libraries omit
   `composer.lock`; JS/TS libraries commit `package-lock.json` — the taxonomy is Layer 1, the
-  convention that follows from it is Layer 2.)
+  convention that follows from it is Layer 2.) **The library half is enforced in both languages**:
+  the seeded `.gitignore` keeps `composer.lock` out of a PHP tree, and `npm ci` fails outright
+  without a `package-lock.json`. The application half is enforced by nothing — no scaffold variant
+  produces an application, so that half of the taxonomy has never been exercised.
 - **Configuration ships as a committed `.dist` template** where the tool supports a local
-  override, and the override is ignored.
+  override, and the override is ignored. The seeded `.gitignore` is what ignores it, so the
+  override cannot be committed by accident. **Nothing asserts the `.dist` itself exists**, and the
+  rule currently has PHP instances only — no seeded TypeScript tool takes a local override.
 
 ## README badges
 
