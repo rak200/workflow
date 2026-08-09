@@ -735,6 +735,12 @@ an existing repo and never part of scaffolding (§8.1 step 4).
 
 These exist because each was violated once and the failure was silent.
 
+**This is the operator's list, and all but two of it are Layer 1** — the same rules appear in
+`CONVENTIONS.md`, which every repository imports, in wording that binds a repository author rather
+than whoever runs this lifecycle. The two exceptions are **10** and **12**: a merge is a procedure,
+and a seed destination binds only whoever authors the scaffold. Nothing here is a rule
+`CONVENTIONS.md` disagrees with; where the two differ it is audience, not drift.
+
 1. A workflow producing a required check carries **no `paths:` filter**.
 2. The aggregator job carries **`if: always()`** — without it a skipped gate counts as *satisfied*
    and a red PR merges.
@@ -746,8 +752,10 @@ These exist because each was violated once and the failure was silent.
    analysis check.
 6. Third-party actions are **pinned by full commit SHA** — enforced by the platform, not by
    review.
-7. Untrusted values — PR titles, branch names, issue bodies — reach a script through `env:` and
-   are quoted. Never interpolated into `run:`.
+7. **`pull_request_target` is banned**, and untrusted values — PR titles, branch names, issue
+   bodies — reach a script through `env:` and are quoted. Never interpolated into `run:`. The two
+   are one rule: the trigger hands a fork's code a writable token, and the interpolation hands a
+   fork's text a shell.
 8. `secrets: inherit` is forbidden in reusable-workflow callers.
 9. Every API-driven setting is **read back** after writing. A settings write can return `200` and
    change nothing.
@@ -766,6 +774,10 @@ These exist because each was violated once and the failure was silent.
     it **overwrote** it, and every tag from `1.8.1` shipped an `on: push` caller under the name
     everyone calls. Four releases, unnoticed, because the only repository that could break was
     pinning `@1.8.0` — past its own breakage.
+13. Audit a pipeline on each step's **`outcome`**, never its `conclusion` — `continue-on-error`
+    relabels a failure as success, so a summary that looks green can contain a failed step (§4.1).
+14. **A gate that has never failed has never been tested.** Make each one fail on purpose once and
+    confirm it blocks; §4.3 holds the canary per gate.
 
 ---
 
