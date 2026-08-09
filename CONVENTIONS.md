@@ -63,6 +63,10 @@ One reusable workflow holds the pipeline; each repository carries a thin caller.
 Layer 1; the steps are Layer 2, and each step invokes a **verb**, never a tool — which is what
 lets the PHP and TypeScript pipelines read identically.
 
+**The caller pins an exact tag**, never a branch or a moving alias. A branch name is never unequal
+to itself, so every staleness comparison passes and the reference silently follows whatever lands
+on that branch.
+
 ```
 validate → install → lint → analyse → test → coverage floor → scan → mutation floor → gate
 ```
@@ -73,6 +77,11 @@ are never required by name — they are version-dependent and break at the next 
 
 **Both floors are enforced inside the job**, from files in the repository, so the required check
 never waits on a third party. Coverage reporting (Codecov) is reporting only.
+
+**The `scan` step is three ordered steps, and the order is the rule**: scan, capturing the exit
+code and never failing; publish the findings, never deciding; then enforce the captured code in a
+step of its own. Collapsing them is how a scanner keeps reporting and stops blocking — an exit code
+captured and never acted on disarms the gate while every step stays green.
 
 ## The shared task vocabulary
 
@@ -156,7 +165,7 @@ with a repository open and the process document closed.
 | `README.md` | overview, installation, badges, links |
 | `docs/` | the reference — index plus one page per unit |
 | `docs/proposals/` | this repository's proposals, if it has any — index plus one file each |
-| `CLAUDE.md` | stable instructions and conventions; imports this file |
+| `CLAUDE.md` | agent routing — imports this file and its Layer 2 counterpart; states no rule of its own |
 | `ROADMAP.md` | pending work, ordered; each entry references its issue |
 | `CHANGELOG.md` | released history, generated |
 | `ARCHITECTURE.md` | design decisions, in public — the consumer-facing half of what a proposal decided |
@@ -165,6 +174,11 @@ with a repository open and the process document closed.
 **A delivered roadmap entry is pruned by the PR that delivers it** — removed, not annotated as
 done. `CHANGELOG.md` is the historical record; `ROADMAP.md` is only what is still pending. CI
 enforces it against the PR's `Closes #N`.
+
+**`CLAUDE.md` states no rule that is not written somewhere a human reads.** Its job is to deliver,
+to an agent, context that is spread across the other files — so a rule that lives only there binds
+nobody, because the human operator never opens it. A repository's own design decisions go in
+`ARCHITECTURE.md`; ecosystem rules go here or in the Layer 2 standard.
 
 ## Repository hygiene
 
@@ -229,6 +243,10 @@ never instead of it.
 - **Credentials follow a ladder**: OIDC or an ephemeral credential first; a repo-scoped secret
   only where no OIDC path exists; an environment with a required reviewer for anything genuinely
   powerful. Never `secrets: inherit`, and nothing repo-local that a forked PR could exfiltrate.
+- **`pull_request_target` is banned.** It runs the *base* repository's workflow, with a writable
+  token and access to secrets, against a fork's code. No use of it is worth the class of exploit it
+  opens; where a fork's PR genuinely needs privilege, the work belongs in a second workflow keyed on
+  `workflow_run`.
 - **Untrusted values** — PR titles, branch names, issue bodies — reach a script through `env:`,
   never through template interpolation.
 - **`gitleaks` runs twice**: locally in `.githooks/pre-push` (prevention) and in CI (the
@@ -242,6 +260,10 @@ never instead of it.
 ## Non-negotiables
 
 These exist because each was violated once and the failure was **silent**.
+
+**These five bind anything anyone writes in any repository** — a workflow, a settings write, a gate.
+They are not the whole list: `LIFECYCLE.md` §5 is the operator's, adding the rules that bind only
+whoever runs the lifecycle. Everything here appears there; the difference is audience, not drift.
 
 1. **A settings write is verified by reading it back**, never by its response code.
 2. **An aggregator carries `if: always()`** and compares for **equality with `success`**. A
