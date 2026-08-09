@@ -493,6 +493,7 @@ Verify by **making the gate fail on purpose**:
 | Gate | Canary |
 | --- | --- |
 | aggregator | a matrix job forced to fail |
+| SHA pinning | a step using `actions/setup-node@v4` — refused at `Set up job` |
 | PR title check | a PR titled `wip` |
 | scanner | a fixture with `eval($_POST[…])` |
 | `gitleaks` | a planted credential |
@@ -963,16 +964,38 @@ gh api -X PATCH repos/rak200/<repo> \
   -F delete_branch_on_merge=true
 gh api -X PUT repos/rak200/<repo>/actions/permissions/workflow \
   -f default_workflow_permissions=read -F can_approve_pull_request_reviews=true
+gh api -X PUT repos/rak200/<repo>/actions/permissions \
+  -F enabled=true -f allowed_actions=all -F sha_pinning_required=true
 gh api -X PUT repos/rak200/<repo>/private-vulnerability-reporting
 
 gh api repos/rak200/<repo> --jq '{allow_squash_merge,allow_merge_commit,allow_rebase_merge,squash_merge_commit_title,squash_merge_commit_message,allow_auto_merge,delete_branch_on_merge}'
 gh api repos/rak200/<repo>/actions/permissions/workflow
+gh api repos/rak200/<repo>/actions/permissions
 gh api repos/rak200/<repo>/private-vulnerability-reporting
 ```
 
 **`allow_auto_merge` is not optional.** It defaults to off, and `--auto` — the merge command §3.6
 and §7 both prescribe — needs it: `gh pr merge --auto` enables auto-merge through a mutation the
 platform refuses outright when the repository has the feature disabled.
+
+**`sha_pinning_required` lives one path segment above the token defaults**, on the repository's
+Actions *policy* rather than its token settings, and the two endpoints are easy to mistake for one.
+It is what makes rule 6 — third-party actions pinned by full commit SHA — a platform rule instead of
+a review habit, and the Actions allowlist was dropped in exchange for it. Two properties matter when
+writing it:
+
+- **The PUT replaces the whole policy object.** Send `enabled` and `allowed_actions` with it or they
+  are rewritten to defaults. The read-back above is what proves they were not.
+- **It does not reach reusable-workflow references.** `uses: rak200/.github/…@<tag>` is untouched,
+  so rule 11 — exact tag, never a moving alias — stands beside it rather than against it.
+
+A floating tag then fails at `Set up job`, with the platform's own message and as a **red check
+rather than an absent one**:
+
+```
+The action actions/setup-node@v4 is not allowed in rak200/<repo> because all actions must be
+pinned to a full-length commit SHA.
+```
 
 The squash message sources are not cosmetic: on GitHub's defaults the squash commit takes the
 *branch's* message rather than the PR title, which breaks `release-please` silently (§4.5).
@@ -1104,8 +1127,9 @@ a stale branch is refused for being behind, which looks identical to being refus
 gate — and proves nothing.
 
 **11. Final read-back.** `default_branch` = `master`; two rulesets `active`; the seven merge/permission
-fields as written in step 5; the canonical labels present and the stock ones gone; `git submodule
-status` clean at `<tag>`; `ci` green on `master`.
+fields as written in step 5; `sha_pinning_required` **true** with `allowed_actions` still `all`; the
+canonical labels present and the stock ones gone; `git submodule status` clean at `<tag>`; `ci` green
+on `master`.
 
 ### 8.2 An existing repository
 

@@ -99,6 +99,13 @@ gh api -X PATCH "repos/$REPO" \
   -F delete_branch_on_merge=true >/dev/null
 gh api -X PUT "repos/$REPO/actions/permissions/workflow" \
   -f default_workflow_permissions=read -F can_approve_pull_request_reviews=true >/dev/null
+# One path segment shorter, and a different object: the repository's Actions policy rather
+# than its token defaults. `sha_pinning_required` is what makes SHA pinning a platform rule
+# instead of a review habit, and the Actions allowlist was dropped in exchange for it. The
+# PUT replaces the whole policy, so `enabled` and `allowed_actions` go with it or they are
+# rewritten to defaults; the read-back below is what proves they were not.
+gh api -X PUT "repos/$REPO/actions/permissions" \
+  -F enabled=true -f allowed_actions=all -F sha_pinning_required=true >/dev/null
 gh api -X PUT "repos/$REPO/private-vulnerability-reporting" >/dev/null
 
 say "6/9  canonical labels, additively — then GitHub's stock set, deleted once"
@@ -150,6 +157,7 @@ done
 say "8/9  read back every write — rule 9"
 gh api "repos/$REPO" --jq '{default_branch,allow_squash_merge,allow_merge_commit,allow_rebase_merge,squash_merge_commit_title,squash_merge_commit_message,allow_auto_merge,delete_branch_on_merge}'
 gh api "repos/$REPO/actions/permissions/workflow"
+gh api "repos/$REPO/actions/permissions"
 gh api "repos/$REPO/private-vulnerability-reporting"
 gh api "repos/$REPO/rulesets" --jq '[.[] | {name,target,enforcement}]'
 gh api "repos/$REPO/rulesets" --jq '.[].id' | while read -r id; do
