@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.18](https://github.com/rak200/workflow/compare/0.18.17...0.18.18) (2026-08-09)
+
+
+### Bug Fixes
+
+* onboarding writes sha_pinning_required, which nothing ever had ([#77](https://github.com/rak200/workflow/issues/77)) ([49e0429](https://github.com/rak200/workflow/commit/49e042977c2a71c98614c23f9a9a6b1ea73b5cfe))
+
 ## [0.18.17](https://github.com/rak200/workflow/compare/0.18.16...0.18.17) (2026-08-09)
 
 
