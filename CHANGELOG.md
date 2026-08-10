@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.20](https://github.com/rak200/workflow/compare/0.18.19...0.18.20) (2026-08-10)
+
+
+### Bug Fixes
+
+* the Release effect table was wrong for most of the estate ([#84](https://github.com/rak200/workflow/issues/84)) ([2874a22](https://github.com/rak200/workflow/commit/2874a2248b80f56ce13efe3ef4eff0c18b72deb7))
+
 ## [0.18.19](https://github.com/rak200/workflow/compare/0.18.18...0.18.19) (2026-08-09)
 
 
