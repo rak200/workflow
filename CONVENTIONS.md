@@ -29,15 +29,25 @@ enforced by whoever writes the next one.
 - **The version is derived, never typed.** `release-please` reads the commit history, opens a
   Release PR, and merging it cuts the tag and the GitHub Release. Do not hand-edit a version
   field; a manifest pin is machine state.
+- **Below `1.0.0` every effect shifts one level down**, and that is the majority of the estate at
+  any given moment — a repository starts at `initial-version: "0.1.0"`. A break cuts a **minor**,
+  a `feat` cuts a **patch**. Two flags in the seeded `release-please-config.json` do it,
+  `bump-minor-pre-major` and `bump-patch-for-minor-pre-major`, both `true` in every variant and
+  neither a release-please default. `0.x` has two levels for three classes, so one pair must
+  collapse, and this is the pair that costs nothing: `^0.3.0` resolves to `>=0.3.0 <0.4.0` in both
+  Composer and npm, so the caret already treats a minor as breaking. A break has to leave that
+  range; an additive `feat` does not. **`1.0.0` is never reached by accumulation** — it is asked
+  for, with `Release-As: 1.0.0`.
 - **Deprecate in a minor, remove in the next major — never both in one release.** A consumer
   must have one release in which the replacement and the deprecation coexist. **Nothing checks
   this, and nothing can from inside one pull request**: it is a property of two releases read side
-  by side.
-- **Raising the language floor is a major.** A minor would fail *silently*: the resolver simply
-  stops offering the new version and pins the consumer to an old one, with no error to read. The
-  **mirror-badge check** catches the visible half — the floor cannot move without the README badge
-  following, or the pull request reds. It does not reach the bump itself: `release-please` derives
-  that from the commit type, so a floor raise typed `build:` cuts no release at all.
+  by side. Below `1.0.0` it does not bind at all — `0.x` promises nothing.
+- **Raising the language floor is a major**, or a minor below `1.0.0` — whichever level the
+  consumer's caret refuses. A lesser bump would fail *silently*: the resolver simply stops offering
+  the new version and pins the consumer to an old one, with no error to read. The **mirror-badge
+  check** catches the visible half — the floor cannot move without the README badge following, or
+  the pull request reds. It does not reach the bump itself: `release-please` derives that from the
+  commit type, so a floor raise typed `build:` cuts no release at all.
 - **`CHANGELOG.md`** follows [Keep a Changelog](https://keepachangelog.com) and is generated.
   Hand-written entries survive above the generated ones; a hand-written *unreleased* section
   must be reconciled before the first automated release or it ships twice.
@@ -49,23 +59,30 @@ the **pull request title**. In-branch commits are unconstrained — they are squ
 
 `type(scope)?: subject`, with `type!` or a `BREAKING CHANGE:` footer marking a break.
 
-| Type | Use for | Release effect |
-| --- | --- | --- |
-| `feat` | a new capability | minor |
-| `fix` | a bug fix | patch |
-| `perf` | a performance change, no API change | patch |
-| `revert` | reverts a prior commit | patch |
-| `refactor` | internal change, no behaviour change | none |
-| `style` | formatting only, no meaning change | none |
-| `docs` | docs / docblocks only | none |
-| `test` | tests only | none |
-| `build` | build, dependencies, package manifest | none |
-| `ci` | CI config only | none |
-| `chore` | anything else not user-facing | none |
+| Type | Use for | `≥ 1.0.0` | `0.x` |
+| --- | --- | --- | --- |
+| `feat` | a new capability | minor | **patch** |
+| `fix` | a bug fix | patch | patch |
+| `perf` | a performance change, no API change | patch | patch |
+| `revert` | reverts a prior commit | patch | patch |
+| `refactor` | internal change, no behaviour change | none | none |
+| `style` | formatting only, no meaning change | none | none |
+| `docs` | docs / docblocks only | none | none |
+| `test` | tests only | none | none |
+| `build` | build, dependencies, package manifest | none | none |
+| `ci` | CI config only | none | none |
+| `chore` | anything else not user-facing | none | none |
 
 The set is closed at these eleven — the stock `type-enum` of
-`@commitlint/config-conventional`, adopted without override. A breaking change forces a major
-regardless of type.
+`@commitlint/config-conventional`, adopted without override. A breaking change forces a **major**
+regardless of type — a **minor** below `1.0.0`, where §Versioning explains why.
+
+**`none` means no release at all, not a release with nothing in it.** It holds while the type's
+changelog section stays **hidden**: `release-please` opens no Release PR for a window whose commits
+are all hidden, so those commits wait and ship with the next visible one. The seeds set no
+`changelog-sections`, so every repository inherits release-please's defaults — un-hide a type in a
+repository's own config and that type cuts a patch there, which is a local decision the column
+cannot carry.
 
 **A revert never subtracts.** Inside an open release window it neither removes the reverted
 entry from the changelog nor lowers the pending bump; it supersedes forward, as a patch.
