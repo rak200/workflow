@@ -3,7 +3,8 @@
 The invariants every rak200 repository shares, whatever it is written in. Language-specific
 rules — analyser level, formatter preset, naming, idioms — are **Layer 2** and live in that
 language's config package (`rak200/coding-standard-php`, `@rak200/coding-standard-ts`), imported
-alongside this file.
+alongside this file. **The test is one question: would the rule still make sense in a repository
+written in the other language?** If it would not, it is Layer 2.
 
 This file travels as a tag-pinned submodule at `.rak200/`. A repository pins a version; it does
 not track a moving target.
@@ -221,6 +222,17 @@ appears when someone writes it, and its absence is caught by a reader or not at 
 to an agent, context that is spread across the other files — so a rule that lives only there binds
 nobody, because the human operator never opens it. A repository's own design decisions go in
 `ARCHITECTURE.md`; ecosystem rules go here or in the Layer 2 standard.
+
+**That binds rules, and only rules.** Two other things belong in a `CLAUDE.md` and stay there:
+**routing** — where a decision is written, so the agent can go and read it — and **operating
+instructions**, which are the steps that make the context load and the commands that exercise one
+part of the repository. A recovery step for a failed import has no human procedure to belong to;
+moving it out would leave a file that says the right things and cannot reach them.
+
+**The reason for a configured decision goes at the configuration**, as a comment beside the line it
+explains. A reader who is about to change a threshold, disable a fixer or flip a compiler flag is
+looking at that file, not at a document — and a reason that travels with the value cannot fall
+out of step with it.
 
 ## Repository hygiene
 

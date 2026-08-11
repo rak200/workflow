@@ -12,11 +12,16 @@ repository's own CI. Nothing here tracks a moving target, and nothing pushes int
 | File | What it is |
 | --- | --- |
 | [`CONVENTIONS.md`](CONVENTIONS.md) | the language-agnostic invariants; imported into every `CLAUDE.md` |
-| [`LIFECYCLE.md`](LIFECYCLE.md) | the end-to-end development cycle, its contingencies, onboarding and retirement |
+| [`LIFECYCLE.md`](LIFECYCLE.md) | the end-to-end development cycle, its contingencies, onboarding and retirement — written to be **executed**, not merely read |
 | [`labels.yml`](labels.yml) | the canonical label set, applied additively |
 | [`scaffold/`](scaffold) | the seeded files a repository is built from, plus the manifest that checks them |
 | [`proposals/`](proposals) | the RFC template and the process every repository's proposals follow |
 | [`scripts/new-repo.sh`](scripts/new-repo.sh) | onboarding, executable — the form of `LIFECYCLE.md` §8.1 |
+
+**`LIFECYCLE.md` carries commands, and a procedure is not changed until it has been run.** The last
+time §8 was rewritten from correct premises it still broke three times on its first real execution,
+once silently — so a change there is finished when the steps have been executed, not when they
+read well.
 
 The GitHub-native half — reusable CI workflows, ruleset JSON, community health files — lives in
 **[rak200/.github](https://github.com/rak200/.github)**, because GitHub reads those from a
@@ -50,6 +55,11 @@ drifts from its seed reds the consumer's own CI, so drift stops being silently g
 `masked:RE` (identical once the version pin is blanked). Files that are *per-repo state* rather
 than seeds are listed there too, as exclusions, so their absence is not read as an oversight.
 
+**A new seed needs its row, and the row is what makes it a seed.** A file added under `scaffold/`
+with no entry is copied once at onboarding and never compared again — silent drift, which is the
+failure mode this whole design exists to remove. The file would be there, would look maintained, and
+would be the one thing nothing checks.
+
 The comparison is always against the **pinned** version, so a repository that stands still stays
 green; a seed change reaches it as part of the submodule bump, in one atomic pull request.
 
@@ -61,3 +71,7 @@ distributes applies to it first.
 
 Bare SemVer tags. Consumers pin an exact tag; a bump is a reviewed pull request in the consumer,
 never a push from here.
+
+**Every change here is a change to a contract**, and the type says which. Altering a seed or a
+documented rule is at least a `feat`; removing or renaming one is breaking. Below `1.0.0` those
+cut a patch and a minor respectively — `CONVENTIONS.md` §Versioning explains the shift.
