@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.21](https://github.com/rak200/workflow/compare/0.18.20...0.18.21) (2026-08-11)
+
+
+### Features
+
+* CLAUDE.md holds routing and operating instructions, not rules ([#87](https://github.com/rak200/workflow/issues/87)) ([cb7d093](https://github.com/rak200/workflow/commit/cb7d0934f238b959b3b1cec9b79b24b35c05f132))
+
 ## [0.18.20](https://github.com/rak200/workflow/compare/0.18.19...0.18.20) (2026-08-10)
 
 
