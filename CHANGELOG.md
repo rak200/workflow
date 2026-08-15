@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.22](https://github.com/rak200/workflow/compare/0.18.21...0.18.22) (2026-08-15)
+
+
+### Features
+
+* the ts scaffold knows about a component playground ([#91](https://github.com/rak200/workflow/issues/91)) ([d13243a](https://github.com/rak200/workflow/commit/d13243a858cf1561428b19d21eb7af30c283544c))
+
 ## [0.18.21](https://github.com/rak200/workflow/compare/0.18.20...0.18.21) (2026-08-11)
 
 
