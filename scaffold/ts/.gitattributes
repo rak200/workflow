@@ -11,6 +11,8 @@
 /.gitmodules             export-ignore
 /tests/                  export-ignore
 /docs/                   export-ignore
+/stories/                export-ignore
+/.storybook/             export-ignore
 /.editorconfig           export-ignore
 /.gitattributes          export-ignore
 /.gitignore              export-ignore
