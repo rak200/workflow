@@ -47,8 +47,9 @@ Then import the conventions from the repository's `CLAUDE.md`:
 ## The scaffold, and why it is checked
 
 `scaffold/` holds the files a repository is *seeded* with — `.editorconfig`, `.gitattributes`,
-`CODEOWNERS`, the CI caller, the Dependabot config, `LICENSE`, the pre-push hook. A copy that
-drifts from its seed reds the consumer's own CI, so drift stops being silently green.
+`CODEOWNERS`, the CI caller, the Dependabot config, `LICENSE`, the pre-push hook, the `gitleaks`
+config. A copy that drifts from its seed reds the consumer's own CI, so drift stops being silently
+green.
 
 `scaffold/seeds.tsv` is the manifest: one row per seed, naming its variant, its destination, and
 **how** it is compared — `exact`, `prefix:N` (a seeded header over per-repo content), or

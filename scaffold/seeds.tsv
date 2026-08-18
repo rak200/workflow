@@ -18,10 +18,16 @@
 # .gitattributes is per-variant, not `all`: its export-ignore list names the tool
 # configs of one language, and a package that SHIPS configuration must export the
 # very files a library hides. One `all` copy could only be right for one of them.
+#
+# .gitleaks.toml is `all` for the mirror reason: an allowlist names credentials, and a
+# credential has no language. It is also seeded EMPTY on purpose — the file exists so
+# that the first legitimate high-entropy string has a place to be permitted, rather
+# than being permitted in a hurry against a red required check.
 all	exact	all/.editorconfig	.editorconfig
 all	exact	all/CODEOWNERS	.github/CODEOWNERS
 all	exact	all/LICENSE	LICENSE
 all	exact	all/.githooks/pre-push	.githooks/pre-push
+all	exact	all/.gitleaks.toml	.gitleaks.toml
 all	prefix:4	all/.git-blame-ignore-revs	.git-blame-ignore-revs
 none	exact	none/.gitattributes	.gitattributes
 none	exact	none/.gitignore	.gitignore
