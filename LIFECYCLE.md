@@ -71,7 +71,8 @@ onboarded — see §8.
 | Code owners | `.github/CODEOWNERS` | per-repo — **does not propagate** |
 | PR template, issue templates | `rak200/.github` | GitHub-native propagation |
 | Branch and tag rules | per-repo rulesets | canonical JSON in `rak200/.github`, applied by API at onboarding, verified by read-back |
-| Local secret gate | `.githooks/pre-push` (`gitleaks`) | seeded from the scaffold; `core.hooksPath` set per clone at onboarding |
+| Local secret gate | `.githooks/pre-push` (`gitleaks`) | seeded from the scaffold; `core.hooksPath` and the pinned `gitleaks` version set per clone at onboarding |
+| Secret-scanning allowlist | `.gitleaks.toml` | copied from the scaffold; seeded empty, extends the default ruleset, read by both halves |
 | Line endings & dist surface | `.gitattributes` (`text=auto eol=lf`, `export-ignore`) | copied from the scaffold |
 | License | `LICENSE` (MIT) | copied from the scaffold — **does not propagate** |
 | Blame noise | `.git-blame-ignore-revs` | header seeded (prefix-checked); entries appended by bot PR; `blame.ignoreRevsFile` set per clone |
@@ -1113,8 +1114,16 @@ Packagist resolves from the git tag.
 ```bash
 git config core.hooksPath .githooks
 git config blame.ignoreRevsFile .git-blame-ignore-revs
-gitleaks version || winget install --id Gitleaks.Gitleaks --exact   # or the platform's equivalent
+gitleaks version   # must print exactly the version .githooks/pre-push pins
 ```
+
+**The version is part of the install, not a detail of it.** The hook refuses the push unless
+`gitleaks version` matches the version it pins, which is the same version `base.yml` pins for CI
+via `GITLEAKS_VERSION`. Two versions of one scanner are two rule sets: a rule present in one and
+absent in the other means a secret caught locally sails through CI, or the reverse, and neither
+half reports anything odd. Install that version specifically — a package manager's `latest` is
+the thing this pin exists to prevent. `apt` in particular is far behind and would reintroduce the
+divergence on installation.
 
 The hook **refuses to push** when gitleaks is absent rather than skipping the scan, so a missing
 install is loud. Two things about the install are worth knowing: winget puts the package directory
@@ -1122,6 +1131,13 @@ on the **user** PATH rather than a shim in `WinGet\Links`, so already-open termi
 until they are restarted; and `core.hooksPath` pointing at a directory that does not exist is
 silent, which buys the appearance of a hook and none of the scanning — so set it only once
 `.githooks/pre-push` is actually there.
+
+Bumping the pin is a **two-file change, made together**: `scaffold/all/.githooks/pre-push` here and
+`GITLEAKS_VERSION` in `rak200/.github`'s `base.yml`. Nothing checks that the two agree — the seed
+gate proves every repo matches this seed, and `base.yml` is a different repository — so the pair is
+held by this paragraph and by the comment in each file. The seeded `.gitleaks.toml` carries a
+`minVersion` recording the same number, but it only warns and exits 0, so it documents the pin and
+never enforces it.
 
 **10. Fire a canary before calling it conformant.** Open a PR that drifts one seed on purpose
 (append a line to `.gitattributes`). Required: **`ci / gate` FAILURE** — the full name, and it must
