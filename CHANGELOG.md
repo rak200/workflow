@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.23](https://github.com/rak200/workflow/compare/0.18.22...0.18.23) (2026-08-18)
+
+
+### Features
+
+* the local gitleaks half asserts its version, and the estate gains an allowlist ([#93](https://github.com/rak200/workflow/issues/93)) ([4c797f3](https://github.com/rak200/workflow/commit/4c797f36ebf8dfa0755d37d84189d437c4aa27ff))
+
 ## [0.18.22](https://github.com/rak200/workflow/compare/0.18.21...0.18.22) (2026-08-15)
 
 
