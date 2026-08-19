@@ -1,23 +1,38 @@
 version: 2
+# Every ecosystem below excludes the cooldown, and the exclusion is not a preference.
+# Nothing in this file configures a cooldown — the schema documents it as opt-in — yet one
+# is applied anyway, at three days. It does two kinds of damage here, both measured.
+#
+# It BLOCKS MERGES. A stale pin reddens a required check, so the window between a baseline
+# release and the next Dependabot pass is a window where every pull request in every
+# consumer opens red. Measured 2026-08-16 on rak200/ui: `Available release version/ref is
+# 1.13.1` followed by `Days since release : 1 (cooldown days 3)`. The bump was withheld,
+# and four repositories were carried to 1.13.1 by hand instead.
+#
+# On an EXACT-REF dependency it DOWNGRADES. The candidate list is tags, and the newest
+# survivor of the filter can be older than the version in use — so the updater writes a
+# downgrade and calls it an update. Measured the same day, same repository:
+# `Filtered git tag 0.4.6 ... (2/3 cooldown days)`, `Filtered git tag 0.4.7 ... (1/3
+# cooldown days)`, and the pull request it opened read `@rak200/coding-standard-ts (from
+# 0.4.7 to 0.4.5)`. 0.4.5 predates the `rak200-scan` binary, so `npm run scan` exited 127.
+# A semver constraint cannot do this — it can only be delayed — which is why the damage
+# lands on npm git refs and workflow pins and not on Composer ranges.
+#
+# What a cooldown buys — time for a bad release to be found — this estate already buys
+# with a gate: lint, analyse, test, the coverage floor, the mutation floor and the scanner
+# all run on the bump pull request. A calendar is a weaker copy of a check that exists.
+# The cost it charges, meanwhile, is merges blocked on staleness the gate itself reports.
+#
+# `exclude: ["*"]` rather than `default-days: 0` — the schema sets `minimum: 1` on every
+# `*-days` field except `semver-patch-days`, so zero is not expressible and exclusion is
+# the only lever that turns it off.
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      exclude: ["*"]
     groups:
       actions:
         patterns: ["*"]
-
-# NO `gitsubmodule` ENTRY, and its absence is why this file is per-variant.
-#
-# Every other variant pins `.rak200` and needs the updater. This one is
-# `rak200/workflow` itself — the source of the scaffold, which cannot import itself and
-# therefore has no `.gitmodules` at all. Dependabot does not read that as "nothing to
-# do": it errors with `Dependabot couldn't find the submodule /.gitmodules`, and on the
-# daily schedule the other variants use it errored once a day for as long as the entry
-# was here. A red mark every day for a condition that is correct is worse than no mark,
-# because it becomes the background a real failure has to be noticed against.
-#
-# This variant is the scaffold source and nothing else — a second prose repository is
-# not something this ecosystem will have — so there is no future `none` repo whose
-# submodule this entry would have served.
