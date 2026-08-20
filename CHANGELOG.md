@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.24](https://github.com/rak200/workflow/compare/0.18.23...0.18.24) (2026-08-20)
+
+
+### Bug Fixes
+
+* the cooldown nobody configured is excluded from every ecosystem ([#96](https://github.com/rak200/workflow/issues/96)) ([d750d4a](https://github.com/rak200/workflow/commit/d750d4a90b761a0e5b3f47fc13f910e4ea70d6da))
+
 ## [0.18.23](https://github.com/rak200/workflow/compare/0.18.22...0.18.23) (2026-08-18)
 
 
