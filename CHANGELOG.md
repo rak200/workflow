@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.25](https://github.com/rak200/workflow/compare/0.18.24...0.18.25) (2026-08-22)
+
+
+### Documentation
+
+* **lifecycle:** onboarding bumps the pipeline pin, because the seed does not ([#98](https://github.com/rak200/workflow/issues/98)) ([c93c19f](https://github.com/rak200/workflow/commit/c93c19fa746bc4dacaa789f5e614f5c9ba3068d1))
+
 ## [0.18.24](https://github.com/rak200/workflow/compare/0.18.23...0.18.24) (2026-08-20)
 
 
