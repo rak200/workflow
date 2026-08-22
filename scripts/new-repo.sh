@@ -176,6 +176,15 @@ cat <<EOF
       git config blame.ignoreRevsFile .git-blame-ignore-revs
       # install gitleaks, or the pre-push hook refuses every push
 
+  Bump the pipeline pins before the first PR. They came from the seed, which is NOT kept
+  current — nothing grades it (the pin line is masked) and Dependabot never sees it (it
+  reads .github/workflows/, and the seeds are not there). Skip this and the first PR
+  fails 'The pinned pipeline is not obsolete'. See LIFECYCLE.md 4.8 and 8.1.
+
+      latest=\$(gh api repos/rak200/.github/tags --jq '.[0].name')
+      sed -i -E "s#(uses: rak200/\.github/\.github/workflows/[a-z0-9-]+\.yml)@[0-9.]+#\\1@\$latest#" \\
+        .github/workflows/*.yml
+
   Then fire a canary before calling the repository conformant: open a PR that drifts one
   seed on purpose, confirm 'gate' is FAILURE and the merge is refused, and close it.
   A gate that has never failed has never been tested.
