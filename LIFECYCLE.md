@@ -951,6 +951,31 @@ configs the library variants hide.
 `.gitmodules` needs **no `branch =` line**: Dependabot falls back to the source repository's
 default branch, and it bumps to the latest **tag** reachable there, skipping untagged commits.
 
+**The caller pins arrive at the seed's version, and the seed is not kept current — bump them
+now.** Nothing grades the seed's pin: the `ci.yml` and `release.yml` rows are `masked:` on
+`@<tag>`, deliberately, so that bumping a pin in the scaffold does not redden every repository at
+once (§4.7, §4.8). And nothing updates it either — Dependabot's `github-actions` ecosystem reads
+`<directory>/.github/workflows/`, and the seeds live at `scaffold/<variant>/ci.yml`, outside it.
+The seed's value is therefore whatever it was the last time a human changed it, which on
+2026-08-20 was `1.10.0` against a current `1.13.1`.
+
+```bash
+latest=$(gh api repos/rak200/.github/tags --jq '.[0].name')
+sed -i -E "s#(uses: rak200/\.github/\.github/workflows/[a-z0-9-]+\.yml)@[0-9.]+#\1@$latest#" \
+  .github/workflows/*.yml
+grep -hoE 'workflows/[a-z0-9-]+\.yml@[0-9.]+' .github/workflows/*.yml   # read it back
+```
+
+Skip it and the repository's **first pull request fails §4.8** — for a line its author did not
+write. Dependabot would clear it on the weekly `github-actions` pass, so the cost of forgetting is
+bounded; the cost of remembering is one command.
+
+**Left as a step rather than fixed in the scaffold, knowingly.** Two structural fixes were
+designed and measured — a marker in the seed that the onboarding script substitutes, and restructuring so
+Dependabot can see the seeds — and both were rejected as disproportionate to one red pull request
+in a repository that self-heals within a week. RFC 0017 `E.28` carries the argument and the
+measurements, so the question does not have to be reopened from scratch.
+
 **4. Commit, and push `master` first. This is the step that sets the default branch.**
 
 ```bash
