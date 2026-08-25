@@ -159,10 +159,13 @@ gh api "repos/$REPO" --jq '{default_branch,allow_squash_merge,allow_merge_commit
 gh api "repos/$REPO/actions/permissions/workflow"
 gh api "repos/$REPO/actions/permissions"
 gh api "repos/$REPO/private-vulnerability-reporting"
-gh api "repos/$REPO/rulesets" --jq '[.[] | {name,target,enforcement}]'
-gh api "repos/$REPO/rulesets" --jq '.[].id' | while read -r id; do
-  gh api "repos/$REPO/rulesets/$id" --jq '{name, bypass_mode: (.bypass_actors[0].bypass_mode // "NONE")}'
-done
+# Rulesets are read back by COMPARISON, not by listing. The listing that used to stand here
+# printed name/target/enforcement plus the bypass mode: it proved two rulesets existed and
+# almost nothing about what they contained. Measured 2026-08-24 — four parameters were being
+# injected by GitHub onto the rule that decides who may merge, and no read-back in this estate
+# could see them. `|| true` because a finding here is a report to act on, not a reason to abort
+# an onboarding that has already written everything else.
+"$(dirname "$0")/check-rulesets.sh" "$REPO" || true
 gh api "repos/$REPO/labels" --jq '[.[].name] | sort | join(", ")'
 git submodule status
 
