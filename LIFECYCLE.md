@@ -1068,8 +1068,34 @@ for r in branch tag; do
   gh api "repos/rak200/.github/contents/rulesets/$r.json" -H "Accept: application/vnd.github.raw" > "/tmp/$r.json"
   gh api -X POST "repos/rak200/<repo>/rulesets" --input "/tmp/$r.json"
 done
-gh api repos/rak200/<repo>/rulesets --jq '[.[] | {name,target,enforcement}]'
+# read it back by COMPARISON — the script lives beside the JSON, in rak200/.github
+gh api repos/rak200/.github/contents/scripts/check-rulesets.sh -H "Accept: application/vnd.github.raw" \
+  > /tmp/check-rulesets.sh && chmod +x /tmp/check-rulesets.sh
+gh api repos/rak200/.github/contents/scripts/check-rulesets.py -H "Accept: application/vnd.github.raw" \
+  > /tmp/check-rulesets.py
+/tmp/check-rulesets.sh rak200/<repo>
 ```
+
+**The read-back is a comparison, not a listing.** What stood here printed
+`{name,target,enforcement}` — it proved two rulesets existed and nothing about what they contained,
+which is rule 9 satisfied in form and not in substance. `check-rulesets.sh` diffs the live rulesets
+against the canonical JSON in both directions: a declared parameter whose value differs, and **a
+parameter GitHub applied that the file never declared.**
+
+That second direction is the one that earns its keep. Measured 2026-08-24 on a throwaway ruleset:
+a `POST` of five `pull_request` parameters is stored as **eight**, and a `PUT` of the same five
+re-injects the extras rather than removing them — **a ruleset cannot be returned to its declaration
+by re-applying the file.** Four parameters were arriving undeclared on the rule that decides who
+may merge, identically across all six onboarded repositories, and were found by accident rather
+than by any read-back. They are named in the canonical JSON now, so the next platform default shows
+up as the only undeclared key instead of hiding among them.
+
+**It lives in `rak200/.github`, beside the `rulesets/*.json` it grades**, so the declaration and the
+check ship as one thing — and this repository stays prose. The same script is the estate sweep: it
+takes any number of repositories, and it is deliberately **not** a required check. A platform
+default arrives everywhere at once, and a gate that reddens every repository simultaneously for
+something absent from the pull request is the slow, noisy check people learn to route around
+(§4.7's argument, one layer up).
 
 The JSON is the canonical copy in [`rak200/.github`](https://github.com/rak200/.github/tree/master/rulesets) — clone it or fetch the two files; they are versioned there, not here. Order matters: the branch ruleset's
 `pull_request` rule would reject the very push in step 4 that establishes the default branch.
