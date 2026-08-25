@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.26](https://github.com/rak200/workflow/compare/0.18.25...0.18.26) (2026-08-25)
+
+
+### Documentation
+
+* **lifecycle:** the ruleset read-back is a comparison, and it lives in .github ([#101](https://github.com/rak200/workflow/issues/101)) ([caefca4](https://github.com/rak200/workflow/commit/caefca47095fdf3fa6eab1ef1564276694062d81))
+
 ## [0.18.25](https://github.com/rak200/workflow/compare/0.18.24...0.18.25) (2026-08-22)
 
 
