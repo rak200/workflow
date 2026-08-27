@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.28](https://github.com/rak200/workflow/compare/0.18.27...0.18.28) (2026-08-27)
+
+
+### Bug Fixes
+
+* 8.2 skipped the step that copies the seeds ([#107](https://github.com/rak200/workflow/issues/107)) ([48991e1](https://github.com/rak200/workflow/commit/48991e13bd0e23967f06cbc3f8611d3d460de8e0))
+
 ## [0.18.27](https://github.com/rak200/workflow/compare/0.18.26...0.18.27) (2026-08-27)
 
 
