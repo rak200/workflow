@@ -921,7 +921,15 @@ while IFS=$'\t' read -r v form seed dest; do
   mkdir -p "$(dirname "$dest")"
   cp -a ".rak200/scaffold/$seed" "$dest"
 done < .rak200/scaffold/seeds.tsv
-chmod +x .githooks/pre-push
+
+# `cp -a` carries the seed's mode, but git records it only where the filesystem has
+# the bit for it to read — NTFS has none, so a repository scaffolded on Windows lands
+# a 100644 hook and git skips it in silence, no error, push succeeds. Set it in the
+# INDEX, which does not depend on the filesystem or on `core.fileMode`. `chmod` here
+# is the wrong instrument for the same reason: on a clone with `core.fileMode=false`
+# it changes the disk and registers nothing.
+git add .githooks/pre-push
+git update-index --chmod=+x .githooks/pre-push
 
 printf '# %s\n\n<one line>\n' "<repo>" > README.md   # not a seed: per-repo content
 ```
@@ -1226,8 +1234,17 @@ on `master`.
 
 ### 8.2 An existing repository
 
-Same procedure minus steps 1–4 (the repo and its default branch already exist). Verify the dist
-surface (`git archive HEAD | tar -t` against the `export-ignore` list).
+Same procedure minus steps **1, 2 and 4** (the repository, its tree and its default branch already
+exist). Verify the dist surface (`git archive HEAD | tar -t` against the `export-ignore` list).
+
+> **Step 3 is not skipped**, and this line used to say `1–4`, which read as skipping it. Step 3 is
+> where the submodule pin, the seed copy loop and the pipeline-pin bump live — an existing
+> repository needs all three, and the cautions further down this section are instructions *for
+> performing it*: *"`release-please-config.json` is a seed and arrives with step 3 already
+> correct"*, *"the copy loop in step 3 destroys a `prefix:N` seed"*. The section contradicted its
+> own opening line. It was a range that stopped being true when `E.28` moved the pipeline-pin bump
+> into step 3, and nothing re-read the body — **a cross-reference is a claim about another section,
+> and nothing grades it.**
 
 #### Bootstrapping `release-please` on a repo that already has tags
 
