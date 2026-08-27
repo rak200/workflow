@@ -387,7 +387,17 @@ reach consumers only inside a tag, so a documentation change that never gets one
 correct everywhere the product is code, and silently wrong here. It is enabled by listing `docs`
 un-hidden in `changelog-sections`; a hidden section neither appears in the changelog nor triggers
 a release, and the two properties are the same switch. Note that `changelog-sections` **replaces**
-the defaults rather than extending them, so the seed spells out all twelve types.
+the defaults rather than extending them, so every seed spells out all twelve types.
+
+**All four seeds declare the list, and `docs` is the only line that differs between them.** Leaving
+it out does not select a sensible default — it selects *whatever this release type happens to
+decide*, and the release types disagree. Measured 2026-08-27, on the first `chore:` commits this
+estate ever made: identical message, same hour, and `utils` and `coding-standard-php` each cut a
+patch release for a file-mode change while `ui` and `coding-standard-ts` cut none. The `php`
+strategy carries its own section list with `chore` **un-hidden**; `node` declares none and falls
+through to a default where it is hidden. The rule in the paragraph above was decided, was written
+here, and three of the four seeds did not carry it — a policy with no declaration behind it is the
+prose-side twin of *looks green, enforces nothing*.
 
 **One pin Dependabot does not move: the CI caller's reusable-workflow reference.** Measured
 (round 3): the updater ignores `jobs.<id>.uses`, tag or Release, even though the dependency graph
@@ -1130,8 +1140,8 @@ is derived state that happens to be one line long, not a number anyone types. `C
 never seeded: the first Release PR writes it.
 
 The seeded `release-please-config.json` does the rest — but only because it
-names two settings that would otherwise default against this design, and both were found the hard
-way on the first release ever cut here:
+names three settings that would otherwise default against this design, each found the hard way: the
+first two on the first release ever cut here, the third twenty-five days later:
 
 - `initial-version: "0.1.0"`. `bump-minor-pre-major` governs bumps *from* a version and says
   nothing about the first one, which release-please defaults to **`1.0.0`**. Without this line
@@ -1139,9 +1149,13 @@ way on the first release ever cut here:
 - `include-component-in-tag: false`. `include-v-in-tag: false` controls the `v` and nothing else;
   the component defaults to **on** and prefixes the package name, so the first tag comes out
   `mypackage-0.0.0`.
+- `changelog-sections`. Undeclared, the release type picks the list, and the release types do not
+  agree: `php` ships one where `chore` is **un-hidden**, so a `chore:` commit cuts a release there
+  and nowhere else. Two versions were published for a file-mode change before anyone looked.
 
-Neither is visible in a diff of a well-formed version. **Read the first Release PR's title before
-merging it** — it is the only place either mistake shows.
+None of the three is visible in a diff of a well-formed version. **Read the first Release PR before
+merging it** — its title is the only place the first two show, and for the third the tell is the
+Release PR *existing at all*, for a commit that was never meant to publish.
 
 An existing repo is a different procedure — §8.2.
 
