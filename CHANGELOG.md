@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.27](https://github.com/rak200/workflow/compare/0.18.26...0.18.27) (2026-08-27)
+
+
+### Bug Fixes
+
+* three of the four seeds left the release policy to the tool ([#105](https://github.com/rak200/workflow/issues/105)) ([d44d2c6](https://github.com/rak200/workflow/commit/d44d2c6b45f08987569af5fffde4482e6d2366e2))
+
 ## [0.18.26](https://github.com/rak200/workflow/compare/0.18.25...0.18.26) (2026-08-25)
 
 
