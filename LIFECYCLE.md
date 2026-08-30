@@ -1346,6 +1346,41 @@ git ls-files -z | xargs -0 grep -lIU $'\r'   # empty output: nothing to normalis
 > It is not depended on: **the first branch pushed into an empty repository becomes the default**,
 > which is why step 4 pushes `master` before anything else.
 
+### 8.3 A repository that needs different pipeline inputs
+
+**It needs a variant, not an input.** The caller `scaffold/<variant>/ci.yml` is a seed graded
+`masked:` on its version pin alone — the whole file is compared, so editing its `with:` block in a
+repository fails `Seeded files match the pinned scaffold`, which is a `gate` row and blocks the
+merge. That is deliberate: the inputs describe **a kind of repository**, and a kind of repository
+is what a variant is. `ts-config` is the worked example — it passes `browser: false` where `ts`
+leaves it on, because a package of configuration has no DOM.
+
+An input on `php.yml`/`js.yml` therefore exists only when some variant passes it. Three did not and
+were removed on 2026-08-30 (`runs-on`, `extensions`, `mutation`); see RFC 0017 `E.38`.
+
+**Before adding a variant, check whether the difference is per-repo state instead.** Most are, and
+this is the cheaper answer by a wide margin. The tool configs are **not seeds** —
+`infection.json5.dist`, `phpunit.xml`, `phpstan.neon.dist` and `.php-cs-fixer.dist.php` are all
+per-repo, as are `.coverage-floor` and `.release-please-manifest.json`. So:
+
+- **a repository that has not reached the mutation floor sets its own** — `minCoveredMsi` in its
+  `infection.json5.dist`, entering at what it has and ratcheting up, exactly as `.coverage-floor`
+  works. It does **not** get a variant, and it does **not** get its mutation step switched off:
+  §7's vocabulary requires the `mutation` verb of every repository unconditionally, so a repository
+  that cannot run it is a repository that cannot be conformant. Declare the verb, set the floor
+  you can hold, raise it.
+- **a repository needing an extra PHP extension** is the case with no per-repo route, because
+  `setup-php` runs before any repository file is read. Today the literal is `mbstring, bcmath`, the
+  union of what this estate's manifests declare. A repository needing more is a variant, and it is
+  the only one of the three removed inputs whose case is not already answered.
+
+**Adding a variant, if it is genuinely one.** A variant is a directory under `scaffold/` and a set
+of rows in `scaffold/seeds.tsv`. It does **not** have to duplicate the seeds it shares: a row names
+the seed *path*, so a new variant reuses another's files by pointing at them —
+`php-config` does exactly this for `.gitignore`, `dependabot.yml` and `release-please-config.json`,
+carrying its own `ci.yml` and `.gitattributes` only. Copy that shape: one new `ci.yml`, one new
+`.gitattributes` if the dist surface differs, and rows pointing at `php/` for everything else.
+
 ---
 
 ## 9. Retiring a repository
