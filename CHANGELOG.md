@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.29](https://github.com/rak200/workflow/compare/0.18.28...0.18.29) (2026-08-30)
+
+
+### Documentation
+
+* pipeline inputs are chosen per variant, and most differences are not inputs ([#110](https://github.com/rak200/workflow/issues/110)) ([b2599e8](https://github.com/rak200/workflow/commit/b2599e8f4e07c5a7705c1363f4d889a55980f92b))
+
 ## [0.18.28](https://github.com/rak200/workflow/compare/0.18.27...0.18.28) (2026-08-27)
 
 
