@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.30](https://github.com/rak200/workflow/compare/0.18.29...0.18.30) (2026-09-01)
+
+
+### Bug Fixes
+
+* the pipeline pin moves itself, and `github-actions` goes daily ([#112](https://github.com/rak200/workflow/issues/112)) ([f6ead6b](https://github.com/rak200/workflow/commit/f6ead6b74741f395c4762114ad8f0157bd5ef883))
+
 ## [0.18.29](https://github.com/rak200/workflow/compare/0.18.28...0.18.29) (2026-08-30)
 
 
