@@ -399,27 +399,29 @@ through to a default where it is hidden. The rule in the paragraph above was dec
 here, and three of the four seeds did not carry it — a policy with no declaration behind it is the
 prose-side twin of *looks green, enforces nothing*.
 
-**One pin Dependabot does not move: the CI caller's reusable-workflow reference.** Measured
-(round 3): the updater ignores `jobs.<id>.uses`, tag or Release, even though the dependency graph
-parses it. After a `rak200/.github` release, the pin is bumped **manually** in each consumer — an
-ordinary PR the maintainer or an agent opens:
+**The CI caller's reusable-workflow pin moves like everything else: Dependabot opens the PR.**
+After a `rak200/.github` release, the `github-actions` ecosystem bumps every `jobs.<id>.uses`
+reference in `.github/workflows/` — not only `ci.yml`; `release.yml` pins one or two of its own —
+and delivers them as **one grouped `build(deps)` pull request**. That PR runs the repository's own
+CI against the new pipeline before it lands, which is the property that makes the exact pin worth
+pinning exactly. Review it and merge it; there is nothing to do by hand.
 
-```bash
-git switch -c build/bump-ci-pipeline
-sed -i -E 's#(uses: rak200/\.github/\.github/workflows/[a-z0-9-]+\.yml)@[0-9.]+#\1@1.10.0#' \
-  .github/workflows/*.yml
-git commit -am "build: bump the pipeline to 1.10.0" && git push -u origin HEAD
-gh pr create --title "build: bump the pipeline to 1.10.0"
-```
+> **This page said the opposite until 2026-08-30, and was wrong for three weeks.** Round 3 of the
+> RFC 0017 simulation measured the updater ignoring `jobs.<id>.uses` and this section carried a
+> `sed` recipe under the heading *"One pin Dependabot does not move"*. The estate's own history
+> refutes it six times over — `1.10.0` → `1.11.1` was carried into all five consumers on
+> 2026-08-09, eleven pins in one pass. The likeliest cause is that the sandbox pinned `v1.0.0`
+> while no tag here carries a `v`, and the prefix was never varied. See RFC 0017 `E.42`; the
+> narrower lesson is that **a negative result about a platform is perishable in a way a positive
+> one is not**, and nothing in this estate re-asks a closed question.
 
-The PR runs that repo's own CI against the new pipeline before it lands — the property that makes
-the exact pin worth its manual cost.
-
-**Since `rak200/.github` 1.10.0 this bump is enforced, not remembered.** Conformance fails on a
-stale pipeline pin the way it fails on a stale submodule pin, and for the same reason: with no
-Dependabot pass to lean on, *manual* had meant *forgotten* — four distinct pins across five
-repositories, the scaffold's own source six releases behind. `every workflow in .github/workflows/`
-is the scope, not just `ci.yml`: `release.yml` pins one or two of its own. See §4.8.
+**The bump is enforced as well as automated.** Conformance fails on a stale pipeline pin the way it
+fails on a stale submodule pin — `The pinned pipeline is not obsolete`, §4.8 — and that check
+predates the correction above, added when *manual* meant *forgotten*: four distinct pins across
+five repositories, the scaffold's own source six releases behind. It keeps its value with the
+premise gone, because what it grades now is the **window** until the next Dependabot pass. Which is
+why `github-actions` is scheduled **daily** rather than weekly (`dependabot.yml` carries the
+measurement).
 
 **A conventions bump may red its own PR — by design.** CI conformance-checks every seeded copy
 (`.editorconfig`, `dependabot.yml`, the CI caller's shape with its pin line masked, …) against
@@ -597,7 +599,12 @@ and what moved underneath it:
         — this repository is running an obsolete pipeline
 ```
 
-Fix — bump every `rak200/.github` reference in `.github/workflows/`, not only the one it named:
+Fix — **usually, wait: merge the `build(deps)` pull request Dependabot opens.** It bumps every
+`rak200/.github` reference in `.github/workflows/` as a group, and `github-actions` runs daily, so
+the red is normally hours old rather than a task (§3.9).
+
+Do it by hand only when the wait is the problem — an urgent pipeline fix, or a release whose
+consumers are blocked now. The scope is every reference, not only the one the error named:
 
 ```bash
 git switch -c build/bump-ci-pipeline
@@ -605,6 +612,9 @@ sed -i -E 's#(uses: rak200/\.github/\.github/workflows/[a-z0-9-]+\.yml)@[0-9.]+#
   .github/workflows/*.yml
 git commit -am "build: bump the pipeline to 1.10.0" && git push -u origin HEAD
 ```
+
+Beating the bot to it costs a pull request that would have opened on its own; on 2026-08-30 four
+were walked by hand eighteen minutes before the first Dependabot pass did the same work.
 
 **This is §4.7 one level up, and it stayed open longer because the mask that keeps §4.7 quiet is
 what hid it.** A seed's pin line is graded `masked:` — deliberately, so bumping it in the scaffold

@@ -27,10 +27,24 @@ version: 2
 # `*-days` field except `semver-patch-days`, so zero is not expressible and exclusion is
 # the only lever that turns it off.
 updates:
+  # Daily, and it was `weekly` until 2026-08-30. This pin is graded by a CI check that reddens
+  # on staleness — `The pinned pipeline is not obsolete` — so the window between a baseline
+  # release and the next Dependabot pass is a window where every pull request in a consumer
+  # opens red. Weekly rested on baseline releases being the rarer event; rarer is a claim about
+  # frequency, where the gate makes one about blocking.
+  #
+  # Measured before changing it: the slots are weekly-all-Sunday and staggered per repository,
+  # so `1.11.1`, published on a Thursday, was not carried until the Sunday — three days, with
+  # seven the worst case for a release that misses a slot by minutes. Daily costs nothing on a
+  # quiet week: grouped, with nothing upstream to move, no pull request opens.
+  #
+  # RFC 0017 `E.42`. The asymmetry this file used to carry rested on the claim that Dependabot
+  # does not move a reusable-workflow pin at all — false, and false for three weeks before
+  # anyone read the pull requests that said so.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     cooldown:
       exclude: ["*"]
     groups:
