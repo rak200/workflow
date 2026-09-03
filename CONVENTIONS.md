@@ -68,11 +68,15 @@ the **pull request title**. In-branch commits are unconstrained — they are squ
 | `revert` | reverts a prior commit | patch | patch |
 | `refactor` | internal change, no behaviour change | none | none |
 | `style` | formatting only, no meaning change | none | none |
-| `docs` | docs / docblocks only | none | none |
+| `docs` | docs / docblocks only | none * | none * |
 | `test` | tests only | none | none |
 | `build` | build, dependencies, package manifest | none | none |
 | `ci` | CI config only | none | none |
 | `chore` | anything else not user-facing | none | none |
+
+\* **The `docs` row is the one that varies by variant.** The `none` variant leaves the section
+visible, because there the prose *is* the product: `rak200/workflow` cuts a patch on a `docs:`
+commit and nothing else does. `LIFECYCLE.md` §3.9 carries the reasoning and the measurement.
 
 The set is closed at these eleven — the stock `type-enum` of
 `@commitlint/config-conventional`, adopted without override. A breaking change forces a **major**
@@ -80,10 +84,13 @@ regardless of type — a **minor** below `1.0.0`, where §Versioning explains wh
 
 **`none` means no release at all, not a release with nothing in it.** It holds while the type's
 changelog section stays **hidden**: `release-please` opens no Release PR for a window whose commits
-are all hidden, so those commits wait and ship with the next visible one. The seeds set no
-`changelog-sections`, so every repository inherits release-please's defaults — un-hide a type in a
-repository's own config and that type cuts a patch there, which is a local decision the column
-cannot carry.
+are all hidden, so those commits wait and ship with the next visible one. Every seed declares
+`changelog-sections` in full: the field **replaces** the defaults rather than extending them, and
+the release types disagree about what those defaults are — leaving it out selects whichever one
+this repository's release type happens to carry, which is how two versions were once published for
+a file-mode change. `release-please-config.json` is an `exact` seed, so un-hiding a type is a
+**variant** decision and never a local one — a repository that edits its own copy fails
+conformance.
 
 **A revert never subtracts.** Inside an open release window it neither removes the reverted
 entry from the changelog nor lowers the pending bump; it supersedes forward, as a patch.
