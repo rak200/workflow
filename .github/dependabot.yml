@@ -41,12 +41,21 @@ updates:
   # RFC 0017 `E.42`. The asymmetry this file used to carry rested on the claim that Dependabot
   # does not move a reusable-workflow pin at all — false, and false for three weeks before
   # anyone read the pull requests that said so.
+  #
+  # `commit-message` is DECLARED and not inferred: absent it, Dependabot reads this repository's
+  # history and picks a prefix. `build` is the right one here — a pipeline pin and a baseline pin
+  # change how this repository is BUILT, never what an installed package resolves, so they stay
+  # hidden. The variants with a package manager split the prefix on `dependency-type`; there is
+  # nothing here to split. `LIFECYCLE.md` §3.9 carries the measurement that made this explicit.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
     cooldown:
       exclude: ["*"]
+    commit-message:
+      prefix: "build"
+      include: "scope"
     groups:
       actions:
         patterns: ["*"]

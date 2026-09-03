@@ -399,6 +399,34 @@ through to a default where it is hidden. The rule in the paragraph above was dec
 here, and three of the four seeds did not carry it — a policy with no declaration behind it is the
 prose-side twin of *looks green, enforces nothing*.
 
+**A bump that changes what a consumer resolves is titled to release; one that does not is not.**
+Absent `commit-message`, Dependabot infers its prefix from the repository's history, and it
+inferred `build` — hidden in every seed, so a dependency the consumer receives published nothing.
+Measured on `coding-standard-ts`: eighteen commits since `0.4.7` on 2026-08-14, seventeen `build:`
+and one `chore:`, **no Release PR opened at all**, while `@stryker-mutator/core` sat at `^10.0.0`
+on `master` against `^9.6.1` in the published package for thirteen days. An empty release window
+and a healthy one look identical, which is why nineteen days of it went unremarked.
+
+The seeds now declare what was inferred: `prefix: fix`, `prefix-development: build`,
+`include: scope`. A production bump arrives as `fix(deps):` and cuts a patch; a development bump
+arrives as `build(deps-dev):` and stays hidden. The groups split on `dependency-type` because the
+prefix is chosen **once per pull request** — a group holding both kinds cannot be labelled
+correctly, and the single `patterns: ["*"]` group this replaces was named `dev` while carrying
+production dependencies. In the two `-config` repositories that is nearly all of them:
+`coding-standard-ts` declares thirteen runtime `dependencies` and `coding-standard-php` five with
+no `require-dev` at all, because there the tooling **is** the product.
+
+`dependency-type` is not the real discriminator and is not claimed to be. What decides whether a
+release is owed is whether the declared constraint moved outside its previous range: four of the
+five Dependabot pull requests in that window moved only `package-lock.json`, which no consumer of
+a library reads. Dependabot cannot see that; it can see production versus development, and the two
+coincide often enough that this is right far more often than `build` ever was. **A hand-written
+pull request that moves `require` or `dependencies` under a hidden type is still silent** — that
+would need a check on the manifest diff, which is a larger decision and is not taken here.
+
+`deps` is a **scope** in this estate and never a type; `CONVENTIONS.md` §Commits closes the type
+set at eleven, and `deps` is not among them.
+
 **The CI caller's reusable-workflow pin moves like everything else: Dependabot opens the PR.**
 After a `rak200/.github` release, the `github-actions` ecosystem bumps every `jobs.<id>.uses`
 reference in `.github/workflows/` — not only `ci.yml`; `release.yml` pins one or two of its own —
