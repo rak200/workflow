@@ -11,7 +11,6 @@
     { "type": "fix", "section": "Bug Fixes" },
     { "type": "docs", "section": "Documentation" },
     { "type": "perf", "section": "Performance Improvements" },
-    { "type": "deps", "section": "Dependencies" },
     { "type": "revert", "section": "Reverts" },
     { "type": "style", "section": "Styles", "hidden": true },
     { "type": "chore", "section": "Miscellaneous Chores", "hidden": true },
