@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.18.31](https://github.com/rak200/workflow/compare/0.18.30...0.18.31) (2026-09-03)
+
+
+### Bug Fixes
+
+* §Commits describes a config the seeds stopped inheriting at [#105](https://github.com/rak200/workflow/issues/105) ([#117](https://github.com/rak200/workflow/issues/117)) ([3651ac5](https://github.com/rak200/workflow/commit/3651ac521d827e7c0a898ad3854dc043839a8da5))
+* a production dependency bump is titled to release, not to hide ([#118](https://github.com/rak200/workflow/issues/118)) ([d83e3cb](https://github.com/rak200/workflow/commit/d83e3cbf419a479a3eab52962c7c0c37d439c05f))
+
 ## [0.18.30](https://github.com/rak200/workflow/compare/0.18.29...0.18.30) (2026-09-01)
 
 
