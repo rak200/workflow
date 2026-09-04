@@ -9,6 +9,11 @@ written in the other language?** If it would not, it is Layer 2.
 This file travels as a tag-pinned submodule at `.rak200/`. A repository pins a version; it does
 not track a moving target.
 
+Its counterpart in the same submodule is **`LIFECYCLE.md`**, the operator's document: this file says
+what is *true* of a rak200 repository, that one says what to *do* — the cycle from issue to
+propagation, the contingencies when a step goes wrong, and the onboarding of a new repository. A
+rule belongs here; the procedure that satisfies it belongs there.
+
 ## How to read a rule here
 
 **Every rule in this file names the mechanism that would catch its violation, and how far that
@@ -20,8 +25,23 @@ half-answer is worse: most of what has gone wrong here was not an unchecked rule
 checked one, where the sentence claimed the whole and the mechanism covered a corner of it. Reach is
 part of the answer, not a footnote to it.
 
-Nothing enforces this rule. No check can decide whether a sentence states a requirement, so it is
-enforced by whoever writes the next one.
+**A rule states its result; the argument that produced it lives in the change that decided it.**
+The measurement, the failure that prompted it, the assumption it corrects — all of that is already
+recorded in full, in the pull request or the issue. Repeating it beside the rule doubles the
+maintenance and buries the requirement under its own defence.
+
+The rule carries a **citation** instead, qualified with the repository — `rak200/workflow#118`,
+never a bare `#118`, because these files travel into consumers at `.rak200/`, where an unqualified
+reference resolves against the reading repository and points at something else entirely.
+
+The citation is the load-bearing half, not a courtesy. **A rule with no provenance cannot be told
+apart from an assumption**, and this estate has already spent three weeks on one that could not.
+So where no change decided a rule — the ones that arrived with the document itself — the reasoning
+stays, because nothing else holds it.
+
+Nothing enforces either rule. No check can decide whether a sentence states a requirement or
+whether a paragraph is argument rather than result, so both are enforced by whoever writes the next
+one.
 
 ## Versioning and releases
 
