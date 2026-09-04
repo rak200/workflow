@@ -12,16 +12,18 @@ repository's own CI. Nothing here tracks a moving target, and nothing pushes int
 | File | What it is |
 | --- | --- |
 | [`CONVENTIONS.md`](CONVENTIONS.md) | the language-agnostic invariants; imported into every `CLAUDE.md` |
-| [`LIFECYCLE.md`](LIFECYCLE.md) | the end-to-end development cycle, its contingencies, onboarding and retirement — written to be **executed**, not merely read |
+| [`LIFECYCLE.md`](LIFECYCLE.md) | the development cycle, issue to propagation — written to be **executed**, not merely read |
+| [`CONTINGENCIES.md`](CONTINGENCIES.md) | what to do when a step in that cycle goes wrong |
+| [`REPOSITORY.md`](REPOSITORY.md) | onboarding a repository, reconfiguring one, retiring one |
 | [`labels.yml`](labels.yml) | the canonical label set, applied additively |
 | [`scaffold/`](scaffold) | the seeded files a repository is built from, plus the manifest that checks them |
 | [`proposals/`](proposals) | the RFC template and the process every repository's proposals follow |
-| [`scripts/new-repo.sh`](scripts/new-repo.sh) | onboarding, executable — the form of `LIFECYCLE.md` §8.1 |
+| [`scripts/new-repo.sh`](scripts/new-repo.sh) | onboarding, executable — the form of `REPOSITORY.md` §1.1 |
 
-**`LIFECYCLE.md` carries commands, and a procedure is not changed until it has been run.** The last
-time §8 was rewritten from correct premises it still broke three times on its first real execution,
-once silently — so a change there is finished when the steps have been executed, not when they
-read well.
+**These three carry commands, and a procedure is not changed until it has been run.** The last time
+`REPOSITORY.md` §1 was rewritten from correct premises it still broke three times on its first
+real execution, once silently — so a change there is finished when the steps have been executed,
+not when they read well.
 
 The GitHub-native half — reusable CI workflows, ruleset JSON, community health files — lives in
 **[rak200/.github](https://github.com/rak200/.github)**, because GitHub reads those from a

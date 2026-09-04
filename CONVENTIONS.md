@@ -277,7 +277,7 @@ out of step with it.
   **per-variant** seed, not a shared one: the list names one language's tool configs, and a
   package whose product *is* configuration must export the very files a library hides. The
   conformance check compares that seed byte for byte, so the list cannot drift; that the list still
-  *matches the tree* is one manual step — `LIFECYCLE.md` §8.2 — on the existing-repository path
+  *matches the tree* is one manual step — `REPOSITORY.md` §1.2 — on the existing-repository path
   only. A repository created by the onboarding script never runs it.
 - **Bulk reformatting commits are recorded in `.git-blame-ignore-revs`** so `git blame` skips
   them. GitHub honours the file automatically; enable it locally with
@@ -348,7 +348,7 @@ never instead of it.
 These exist because each was violated once and the failure was **silent**.
 
 **These five bind anything anyone writes in any repository** — a workflow, a settings write, a gate.
-They are not the whole list: `LIFECYCLE.md` §5 is the operator's, adding the rules that bind only
+They are not the whole list: `LIFECYCLE.md` §4 is the operator's, adding the rules that bind only
 whoever runs the lifecycle. Everything here appears there; the difference is audience, not drift.
 
 1. **A settings write is verified by reading it back**, never by its response code.

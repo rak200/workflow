@@ -4,7 +4,7 @@
 #
 #   scripts/new-repo.sh <name> <variant: php|php-config|ts|ts-config|none|github> <conventions-tag> ["description"]
 #
-# This is the executable form of LIFECYCLE.md section 8.1. The order below is not
+# This is the executable form of REPOSITORY.md section 1.1. The order below is not
 # stylistic: archiving aside, two steps in it are load-bearing and were measured.
 #
 #   * The repository is created EMPTY. --add-readme / --license / --gitignore each force
@@ -179,7 +179,7 @@ cat <<EOF
   Bump the pipeline pins before the first PR. They came from the seed, which is NOT kept
   current — nothing grades it (the pin line is masked) and Dependabot never sees it (it
   reads .github/workflows/, and the seeds are not there). Skip this and the first PR
-  fails 'The pinned pipeline is not obsolete'. See LIFECYCLE.md 4.8 and 8.1.
+  fails 'The pinned pipeline is not obsolete'. See CONTINGENCIES.md 8, REPOSITORY.md 1.1.
 
       latest=\$(gh api repos/rak200/.github/tags --jq '.[0].name')
       sed -i -E "s#(uses: rak200/\.github/\.github/workflows/[a-z0-9-]+\.yml)@[0-9.]+#\\1@\$latest#" \\
