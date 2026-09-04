@@ -138,14 +138,20 @@ Do not push commits to a Dependabot branch: it stops managing the PR from then o
 ## 7. The submodule pin is obsolete
 
 Symptom: `ci / conformance` fails on **The pinned scaffold is not obsolete**, naming the seeds
-that moved. Fix:
+that moved. The Dependabot bump carried the gitlink and left the seeds behind. Fix, from a clone of
+the baseline:
 
 ```bash
-git -C .rak200 fetch --tags
-git -C .rak200 checkout <latest tag>
-# then re-copy the seeds it named, from .rak200/scaffold/, and commit both together
-git add .rak200 <the seeds> && git commit -m "build: bump .rak200 to <tag>"
+# --push opens the pull requests as well
+scripts/carry-seeds.sh [--tag <tag>] [--push] ../utils ../caster ...
 ```
+
+**Carry it with the script, never by hand — two of the three check forms are not a copy.**
+`seeds.tsv` grades `.git-blame-ignore-revs` as `prefix:4`, so copying it verbatim deletes the
+repository's own blame entries, and it grades `ci.yml` and `release.yml` as `masked:` on the
+pipeline pin, so copying those rolls the pin back to whatever the seed happens to name. The script
+reads `seeds.tsv`, honours each row's form, and runs the conformance comparison before it commits.
+rak200/workflow#127
 
 **A stale pin is not safe.** The submodule carries `scaffold/`, the seeds CI grades against, and a
 repository grades itself against **its own pinned copy**, so an old pin does not merely miss an
