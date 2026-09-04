@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.18.32](https://github.com/rak200/workflow/compare/0.18.31...0.18.32) (2026-09-04)
+
+
+### Features
+
+* carrying a release into consumers is executable ([#127](https://github.com/rak200/workflow/issues/127)) ([2cde224](https://github.com/rak200/workflow/commit/2cde224bfcd55e96e628faccbdaefc0ed19f49e9))
+
+
+### Documentation
+
+* a mistyped type is recoverable, and a silent startup_failure is transient ([#120](https://github.com/rak200/workflow/issues/120)) ([b86cd85](https://github.com/rak200/workflow/commit/b86cd858c14c1ecd466146cb3c33b0bcac0b86d2))
+* a rule states its result and cites its decision ([#122](https://github.com/rak200/workflow/issues/122)) ([1b78bbc](https://github.com/rak200/workflow/commit/1b78bbcc600fc512a2968ca3eb6b983ce9ed5c98))
+* one home for the rule about rules, and it keeps the better test ([#124](https://github.com/rak200/workflow/issues/124)) ([e5143bc](https://github.com/rak200/workflow/commit/e5143bc6a2d6ab863aadd4ccc477edf1c7b4c1e9))
+* split the lifecycle into the cycle, the contingencies and the repository ([#126](https://github.com/rak200/workflow/issues/126)) ([8fd6d9f](https://github.com/rak200/workflow/commit/8fd6d9ff21451a54ff2621f42211db73ea4007b3))
+* the rule obeys itself, and the reference is bare ([#123](https://github.com/rak200/workflow/issues/123)) ([cef5594](https://github.com/rak200/workflow/commit/cef5594d414422bce1278eaae558c36f222725e5))
+* the rules drop their log and carry a reference instead ([#125](https://github.com/rak200/workflow/issues/125)) ([93b0a11](https://github.com/rak200/workflow/commit/93b0a11e13d281be5f456ef433ed95a61163ccd8))
+
 ## [0.18.31](https://github.com/rak200/workflow/compare/0.18.30...0.18.31) (2026-09-03)
 
 
