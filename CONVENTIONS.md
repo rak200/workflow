@@ -26,18 +26,10 @@ checked one, where the sentence claimed the whole and the mechanism covered a co
 part of the answer, not a footnote to it.
 
 **A rule states its result; the argument that produced it lives in the change that decided it.**
-The measurement, the failure that prompted it, the assumption it corrects — all of that is already
-recorded in full, in the pull request or the issue. Repeating it beside the rule doubles the
-maintenance and buries the requirement under its own defence.
-
-The rule carries a **citation** instead, qualified with the repository — `rak200/workflow#118`,
-never a bare `#118`, because these files travel into consumers at `.rak200/`, where an unqualified
-reference resolves against the reading repository and points at something else entirely.
-
-The citation is the load-bearing half, not a courtesy. **A rule with no provenance cannot be told
-apart from an assumption**, and this estate has already spent three weeks on one that could not.
-So where no change decided a rule — the ones that arrived with the document itself — the reasoning
-stays, because nothing else holds it.
+The paragraph ends with a bare reference to that change and nothing else — one or more, qualified
+with the repository, because this file is also read at `.rak200/` inside a consumer where a bare
+`#118` names the wrong thing. Where no change decided a rule, the reasoning stays, because nothing
+else holds it. rak200/workflow#122, rak200/workflow#123
 
 Nothing enforces either rule. No check can decide whether a sentence states a requirement or
 whether a paragraph is argument rather than result, so both are enforced by whoever writes the next
