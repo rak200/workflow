@@ -366,7 +366,7 @@ between releases.
 cooldown is applied whether or not a `dependabot.yml` asks for one, and a baseline cutting several
 releases a day never leaves the window. The seeds carry `cooldown: { exclude: ["*"] }`;
 `default-days: 0` is not expressible, since the schema sets `minimum: 1` on every `*-days` field
-but `semver-patch-days`.
+but `semver-patch-days`. rak200/workflow#44
 
 **The `none` variant declares no `gitsubmodule` ecosystem.** That variant is `rak200/workflow`
 itself, the scaffold source, which has no `.gitmodules`; Dependabot does not read that as *nothing
@@ -393,11 +393,8 @@ prose-side twin of *looks green, enforces nothing*.
 
 **A bump that changes what a consumer resolves is titled to release; one that does not is not.**
 Absent `commit-message`, Dependabot infers its prefix from the repository's history, and it
-inferred `build` — hidden in every seed, so a dependency the consumer receives published nothing.
-Measured on `coding-standard-ts`: eighteen commits since `0.4.7` on 2026-08-14, seventeen `build:`
-and one `chore:`, **no Release PR opened at all**, while `@stryker-mutator/core` sat at `^10.0.0`
-on `master` against `^9.6.1` in the published package for thirteen days. An empty release window
-and a healthy one look identical, which is why nineteen days of it went unremarked.
+inferred `build` — hidden in every seed, so a dependency the consumer receives published nothing,
+and an empty release window is indistinguishable from a healthy one. rak200/workflow#118
 
 The seeds now declare what was inferred: `prefix: fix`, `prefix-development: build`,
 `include: scope`. A production bump arrives as `fix(deps):` and cuts a patch; a development bump
@@ -424,7 +421,7 @@ After a `rak200/.github` release, the `github-actions` ecosystem bumps every `jo
 reference in `.github/workflows/` — not only `ci.yml`; `release.yml` pins one or two of its own —
 and delivers them as **one grouped `build(deps)` pull request**. That PR runs the repository's own
 CI against the new pipeline before it lands, which is the property that makes the exact pin worth
-pinning exactly. Review it and merge it; there is nothing to do by hand.
+pinning exactly. Review it and merge it; there is nothing to do by hand. rak200/workflow#112
 
 > **This page said the opposite until 2026-08-30, and was wrong for three weeks.** Round 3 of the
 > RFC 0017 simulation measured the updater ignoring `jobs.<id>.uses` and this section carried a
@@ -436,12 +433,9 @@ pinning exactly. Review it and merge it; there is nothing to do by hand.
 > one is not**, and nothing in this estate re-asks a closed question.
 
 **The bump is enforced as well as automated.** Conformance fails on a stale pipeline pin the way it
-fails on a stale submodule pin — `The pinned pipeline is not obsolete`, §4.8 — and that check
-predates the correction above, added when *manual* meant *forgotten*: four distinct pins across
-five repositories, the scaffold's own source six releases behind. It keeps its value with the
-premise gone, because what it grades now is the **window** until the next Dependabot pass. Which is
-why `github-actions` is scheduled **daily** rather than weekly (`dependabot.yml` carries the
-measurement).
+fails on a stale submodule pin — `The pinned pipeline is not obsolete`, §4.8. What it grades is
+the **window** until the next Dependabot pass, which is why `github-actions` is scheduled **daily**
+rather than weekly (`dependabot.yml` carries the measurement). rak200/workflow#112
 
 **A conventions bump may red its own PR — by design.** CI conformance-checks every seeded copy
 (`.editorconfig`, `dependabot.yml`, the CI caller's shape with its pin line masked, …) against
@@ -601,12 +595,10 @@ git -C .rak200 checkout <latest tag>
 git add .rak200 <the seeds> && git commit -m "build: bump .rak200 to <tag>"
 ```
 
-**A stale pin used to be safe and is not any more.** This page said so for as long as `.rak200/`
-held prose and labels: *an old pin can fail to add something, never remove it.* That stopped being
-true the moment the submodule started carrying `scaffold/`, the seeds CI grades against. A
+**A stale pin is not safe.** The submodule carries `scaffold/`, the seeds CI grades against, and a
 repository grades itself against **its own pinned copy**, so an old pin does not merely miss an
 addition — it makes the repository judge itself by an obsolete rulebook **and pass**. The check
-built to detect drift was the thing concealing it.
+built to detect drift was the thing concealing it. rak200/workflow#16
 
 Measured on `rak200/utils`: pinned eight releases behind, `release-please-config.json` changed
 underneath it, gate green, and its next release would have been tagged `utils-4.6.0` — which
@@ -646,12 +638,10 @@ git commit -am "build: bump the pipeline to 1.10.0" && git push -u origin HEAD
 Beating the bot to it costs a pull request that would have opened on its own; on 2026-08-30 four
 were walked by hand eighteen minutes before the first Dependabot pass did the same work.
 
-**This is §4.7 one level up, and it stayed open longer because the mask that keeps §4.7 quiet is
-what hid it.** A seed's pin line is graded `masked:` — deliberately, so bumping it in the scaffold
-does not redden every repository at once — and that mask was the only thing in the estate that
-ever looked at a pin. Measured on 2026-08-03, before the check existed: four distinct pins across
-five repositories, and `rak200/workflow`, which distributes the seed, was **six releases behind
-the version its own seed named**.
+**This is §4.7 one level up, and the mask that keeps §4.7 quiet is what hid it.** A seed's pin line
+is graded `masked:` — deliberately, so bumping it in the scaffold does not redden every repository
+at once — and that mask was the only thing in the estate that ever looked at a pin.
+rak200/workflow#30
 
 The rule is §4.7's rule: it fails when something the repository **actually runs** moved, following
 the closure — `js.yml` and `php.yml` both delegate to `base.yml`, so a change there reaches a
@@ -660,7 +650,7 @@ quiet.
 
 **A pin that is not a release tag fails outright**, separately from staleness. A branch name would
 otherwise pass every comparison, being never unequal to itself, so *pin an exact tag, never a
-moving alias* had nothing enforcing it (§5, rule 11).
+moving alias* had nothing enforcing it (§5, rule 11). rak200/workflow#30
 
 Two related failures from the same step, both in `rak200/.github` alone:
 
@@ -791,6 +781,7 @@ These exist because each was violated once and the failure was silent.
 than whoever runs this lifecycle. The two exceptions are **10** and **12**: a merge is a procedure,
 and a seed destination binds only whoever authors the scaffold. Nothing here is a rule
 `CONVENTIONS.md` disagrees with; where the two differ it is audience, not drift.
+rak200/workflow#80
 
 1. A workflow producing a required check carries **no `paths:` filter**.
 2. The aggregator job carries **`if: always()`** — without it a skipped gate counts as *satisfied*
@@ -866,6 +857,7 @@ their PRs move to Path B and code-owner review begins to cover them with no new 
 **Every merge in this estate is a human decision.** Nothing merges itself — not the daily baseline
 bump, not a green Dependabot PR, not the Release PR. What the platform guarantees is that no merge
 crosses a red `ci / gate`; what a person guarantees is that the merge should happen at all.
+rak200/workflow#44
 
 ---
 
@@ -989,13 +981,9 @@ that apply everywhere.
 half: they have no package to install. Every other variant calls its language pipeline —
 **including `php-config` and `ts-config`**. A configuration package is a package: it ships
 executable code, and a package whose CI never installs it has no CI. Both `-config` variants
-called `base.yml` for a while, on the reasoning that a config package has no source. That was
-true when it was written and stopped being true without anything re-examining it, leaving two
-repositories green for weeks that had never run a test, an analyser or a mutant — while shipping
-the binary that enforces everyone else's coverage floor. **A pipeline that is never asked the
-question gives no wrong answers.** The language pipelines take a `variant:` input for exactly
-this: a `-config` package must be graded against its own seed set, which *exports* the tool
-configs the library variants hide.
+The language pipelines take a `variant:` input for exactly this: a `-config` package must be
+graded against its own seed set, which *exports* the tool configs the library variants hide.
+rak200/workflow#28
 
 > **A seed destination is a claim that the repository owns that path.** It is not a filename.
 > The `github` variant's release caller was seeded to `.github/workflows/release.yml` — free in
@@ -1014,8 +1002,7 @@ now.** Nothing grades the seed's pin: the `ci.yml` and `release.yml` rows are `m
 `@<tag>`, deliberately, so that bumping a pin in the scaffold does not redden every repository at
 once (§4.7, §4.8). And nothing updates it either — Dependabot's `github-actions` ecosystem reads
 `<directory>/.github/workflows/`, and the seeds live at `scaffold/<variant>/ci.yml`, outside it.
-The seed's value is therefore whatever it was the last time a human changed it, which on
-2026-08-20 was `1.10.0` against a current `1.13.1`.
+The seed's value is therefore whatever it was the last time a human changed it. rak200/workflow#98
 
 ```bash
 latest=$(gh api repos/rak200/.github/tags --jq '.[0].name')
@@ -1028,11 +1015,9 @@ Skip it and the repository's **first pull request fails §4.8** — for a line i
 write. Dependabot would clear it on the weekly `github-actions` pass, so the cost of forgetting is
 bounded; the cost of remembering is one command.
 
-**Left as a step rather than fixed in the scaffold, knowingly.** Two structural fixes were
-designed and measured — a marker in the seed that the onboarding script substitutes, and restructuring so
-Dependabot can see the seeds — and both were rejected as disproportionate to one red pull request
-in a repository that self-heals within a week. RFC 0017 `E.28` carries the argument and the
-measurements, so the question does not have to be reopened from scratch.
+**Left as a step rather than fixed in the scaffold, knowingly.** The structural fixes were designed
+and rejected as disproportionate to one red pull request in a repository that self-heals within a
+week. RFC 0017 `E.28`
 
 **4. Commit, and push `master` first. This is the step that sets the default branch.**
 
@@ -1134,11 +1119,11 @@ gh api repos/rak200/.github/contents/scripts/check-rulesets.py -H "Accept: appli
 /tmp/check-rulesets.sh rak200/<repo>
 ```
 
-**The read-back is a comparison, not a listing.** What stood here printed
-`{name,target,enforcement}` — it proved two rulesets existed and nothing about what they contained,
-which is rule 9 satisfied in form and not in substance. `check-rulesets.sh` diffs the live rulesets
-against the canonical JSON in both directions: a declared parameter whose value differs, and **a
-parameter GitHub applied that the file never declared.**
+**The read-back is a comparison, not a listing.** Printing `{name,target,enforcement}` proves two
+rulesets exist and nothing about what they contain, which is rule 9 satisfied in form and not in
+substance. `check-rulesets.sh` diffs the live rulesets against the canonical JSON in both
+directions: a declared parameter whose value differs, and **a parameter GitHub applied that the
+file never declared.** rak200/workflow#101
 
 That second direction is the one that earns its keep. Measured 2026-08-24 on a throwaway ruleset:
 a `POST` of five `pull_request` parameters is stored as **eight**, and a `PUT` of the same five
@@ -1159,20 +1144,18 @@ The JSON is the canonical copy in [`rak200/.github`](https://github.com/rak200/.
 `pull_request` rule would reject the very push in step 4 that establishes the default branch.
 
 **The branch ruleset** carries a `bypass_actors` entry for the repository admin, in `bypass_mode:
-pull_request`. It was granted for the Release PR's absent-check deadlock, and that deadlock turned
-out not to exist — the Release PR's check is held, not absent (§3.8), and approving the run clears
-it without any bypass. The entry stays for the blame-registration PR and as a safety net, on
-weaker grounds than it was granted. The mode is the narrow part
+pull_request`. It is there for the blame-registration PR and as a safety net. The mode is the
+narrow part
 and must be read back as such: `always` would permit a **direct push** to `master`, which this
 design does not want. Within the PR path the entry is wide — it exempts every API call the actor
 makes — which is why merges go through `gh pr merge` (rule 10) and why an `--admin` merge can cross
-a red required check.
+a red required check. rak200/workflow#8
 
 **The tag ruleset carries no bypass at all**, and not by choice: GitHub rejects the narrow mode on
 a tag ruleset outright — *"bypass mode must not be 'PULL_REQUEST' for tag rulesets"* — which left
 `always` or nothing. Nothing is correct here. Its rules block **moving and deleting** a tag, never
 creating one, so `release-please` cuts releases untouched, and moving a released tag is exactly
-what a bad release procedure does.
+what a bad release procedure does. rak200/workflow#8
 
 **8. Release bootstrap.** **Every variant releases** — including the prose ones. A repository
 whose tags are typed by hand is a repository whose version is typed, which the whole versioning
@@ -1212,7 +1195,7 @@ release ends at the git tag and the package is installable by nobody. On npmjs.c
 the package → Settings → Trusted publishing*: register this repository and the workflow filename
 **`release.yml`** — the caller, never `npm-publish.yml`, because npm validates the workflow that
 started the run. The package must exist before it can be configured, so publish the first version
-by hand:
+by hand: rak200/workflow#15
 
 ```bash
 npm publish            # from a clean checkout of the tag, with publishConfig.access set
@@ -1236,7 +1219,7 @@ via `GITLEAKS_VERSION`. Two versions of one scanner are two rule sets: a rule pr
 absent in the other means a secret caught locally sails through CI, or the reverse, and neither
 half reports anything odd. Install that version specifically — a package manager's `latest` is
 the thing this pin exists to prevent. `apt` in particular is far behind and would reintroduce the
-divergence on installation.
+divergence on installation. rak200/workflow#93
 
 The hook **refuses to push** when gitleaks is absent rather than skipping the scan, so a missing
 install is loud. Two things about the install are worth knowing: winget puts the package directory
@@ -1362,6 +1345,7 @@ revisions. Restore the tail after the loop, or skip the row and splice:
 **Rulesets come after the onboarding PR merges, not before it.** The branch ruleset requires
 `ci / gate`, and that check does not exist until the pipeline the PR introduces has run on the
 default branch once. Applying the ruleset first deadlocks the very PR that would satisfy it.
+rak200/workflow#8
 
 **The `eol=lf` normalisation is conditional.** Land it as a `style:` commit *if it changes
 anything* — a repository that already carried `* text=auto eol=lf` normalises nothing, and a
@@ -1393,7 +1377,7 @@ git ls-files -z | xargs -0 grep -lIU $'\r'   # empty output: nothing to normalis
 repository fails `Seeded files match the pinned scaffold`, which is a `gate` row and blocks the
 merge. That is deliberate: the inputs describe **a kind of repository**, and a kind of repository
 is what a variant is. `ts-config` is the worked example — it passes `browser: false` where `ts`
-leaves it on, because a package of configuration has no DOM.
+leaves it on, because a package of configuration has no DOM. rak200/workflow#110
 
 An input on `php.yml`/`js.yml` therefore exists only when some variant passes it. Three did not and
 were removed on 2026-08-30 (`runs-on`, `extensions`, `mutation`); see RFC 0017 `E.38`.
@@ -1401,7 +1385,7 @@ were removed on 2026-08-30 (`runs-on`, `extensions`, `mutation`); see RFC 0017 `
 **Before adding a variant, check whether the difference is per-repo state instead.** Most are, and
 this is the cheaper answer by a wide margin. The tool configs are **not seeds** —
 `infection.json5.dist`, `phpunit.xml`, `phpstan.neon.dist` and `.php-cs-fixer.dist.php` are all
-per-repo, as are `.coverage-floor` and `.release-please-manifest.json`. So:
+per-repo, as are `.coverage-floor` and `.release-please-manifest.json`. So: rak200/workflow#110
 
 - **a repository that has not reached the mutation floor sets its own** — `minCoveredMsi` in its
   `infection.json5.dist`, entering at what it has and ratcheting up, exactly as `.coverage-floor`
@@ -1420,6 +1404,7 @@ the seed *path*, so a new variant reuses another's files by pointing at them —
 `php-config` does exactly this for `.gitignore`, `dependabot.yml` and `release-please-config.json`,
 carrying its own `ci.yml` and `.gitattributes` only. Copy that shape: one new `ci.yml`, one new
 `.gitattributes` if the dist surface differs, and rows pointing at `php/` for everything else.
+rak200/workflow#110
 
 ---
 
