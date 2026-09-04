@@ -193,10 +193,16 @@ presence: a script that cannot run is worse than a missing one, because it reads
 
 ## Documentation
 
-- **Documentation is mandatory**, and the root `README.md` stays lean: overview, installation,
-  badges, links. API detail lives in `docs/`.
+- **Documentation is mandatory.** A repository with a `src/` has a `docs/`, and CI asserts that
+  with no exception. The root `README.md` stays lean — overview, installation, badges, links; API
+  detail lives in `docs/`.
 - **`docs/` is sized by unit, not by class** — an index plus one page per unit that a reader
-  would look up on its own. CI asserts that every public symbol appears somewhere in `docs/`.
+  would look up on its own.
+- **A unit is what a consumer reaches, which is not always a symbol.** Where a package's interface
+  *is* its exported symbols, CI asserts that every one of them appears in `docs/`. Where it is not
+  — a `-config` package declares commands and configuration entry points, and its `src/` exists so
+  those can be tested — the repository passes an empty `symbol-pattern` and documents the units its
+  manifest declares. rak200/.github#67
 - Every public unit and every public member carries a doc comment. Tags that merely restate the
   signature are noise; add one when it carries something the signature cannot (units, semantics,
   edge cases, the condition of a throw).
