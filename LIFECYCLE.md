@@ -491,11 +491,9 @@ This is the **absent check** deadlock, and it is the most dangerous state in thi
 it looks like patience rather than failure. Two known causes:
 
 1. **The workflow did not start at all** — `startup_failure` with zero checks. Usually an invalid
-   workflow file or a repository Actions policy refusing it. **A `startup_failure` whose run
-   carries no error is transient**: re-run the SHA before diagnosing. A real misconfiguration says
-   what it is, and one that says nothing has already been measured here as a passing pull request
-   that got unlucky — four hypotheses were eliminated before that conclusion, which is four more
-   than the symptom deserves.
+   workflow file or a repository Actions policy refusing it. **One whose run carries no error is
+   transient**: re-run the SHA before diagnosing, because a real misconfiguration says what it is.
+   `rak200/workflow#89`.
 2. **The workflow was filtered out** — a `paths:` filter excluded every file the PR touched. A
    workflow producing a required check must carry **no** `paths:` filter; if you find one, that is
    the bug.
@@ -580,42 +578,13 @@ gh api repos/:owner/:repo \
 The GitHub default (`COMMIT_OR_PR_TITLE`) uses the *branch commit's* message whenever the branch
 holds a single commit — the most common shape there is.
 
-**A message that parses but carries the wrong type is a different case, and it is recoverable.**
-`build(deps): bump the dev group with 6 updates` is a valid Conventional Commit; `build` is hidden
-in every variant, so a change the consumer receives lands with no release behind it. Nothing is
-lost — the change is on `master` — but nothing publishes it either, and an empty release window is
-indistinguishable from a healthy one.
-
-**`Release-As:` does not fix this**, and both the obvious reading and release-please's own
-documentation suggest it does — *"when a commit to the main branch has `Release-As: x.x.x` in the
-commit body, Release Please will open a new pull request for the specified version"*. In
-`release-please/src/strategies/base.ts` the footer is read by `buildNewVersion` (line 554): it
-chooses **which version**, never **whether to open the PR**. That decision is made thirty lines
-earlier, on the notes body:
-
-```ts
-const releaseNotesBody = await this.buildReleaseNotes(...);          // 324
-if (!bumpOnlyOptions && this.changelogEmpty(releaseNotesBody)) {     // 331
-  this.logger.info(`No user facing commits found since ... - skipping`);
-  return undefined;
-}
-```
-
-`changelogEmpty` is `changelogEntry.split('\n').length <= 1`. With every commit since the last tag
-hidden, the body is empty and the run returns **before** the version it just computed is ever used.
-The footer is read and then discarded.
-
-So the recovery is **a commit whose type is visible** — `feat`, `fix`, `perf`, `revert`, and `docs`
-in the `none` variant. Once one exists the whole window ships in the same tag, hidden commits
-included; they reach the tag without reaching the changelog, which is the right record of what a
-consumer received.
-
-Measured on `rak200/coding-standard-ts`: `@stryker-mutator/core` moved `^9.6.1` → `^10.0.0` at
-`6cca0ec` under `build(deps)`, and nineteen commits accumulated since `0.4.7`, every one of them
-hidden. It was published by an **empty commit** typed `fix(deps):` — the mechanism release-please's
-own documentation demonstrates for `Release-As:` — with the body stating why the diff is empty and
-what it delivers. `0.4.8` closed a twenty-day release window and shipped the Stryker major
-fourteen days after it landed.
+**A message that parses but carries a hidden type is a different case, and it is recoverable.**
+The change is on `master` and nothing publishes it; an empty release window is indistinguishable
+from a healthy one. `Release-As:` is **not** the recovery — it chooses which version, never whether
+the Release PR opens. The recovery is a commit whose type is **visible**: `feat`, `fix`, `perf`,
+`revert`, and `docs` in the `none` variant. Once one exists the whole window ships in the same tag,
+hidden commits included — they reach the tag without reaching the changelog, which is the right
+record of what a consumer received. `rak200/workflow#120`.
 
 ### 4.6 A Dependabot PR fails CI
 
