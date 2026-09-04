@@ -19,6 +19,7 @@ repository's own CI. Nothing here tracks a moving target, and nothing pushes int
 | [`scaffold/`](scaffold) | the seeded files a repository is built from, plus the manifest that checks them |
 | [`proposals/`](proposals) | the RFC template and the process every repository's proposals follow |
 | [`scripts/new-repo.sh`](scripts/new-repo.sh) | onboarding, executable — the form of `REPOSITORY.md` §1.1 |
+| [`scripts/carry-seeds.sh`](scripts/carry-seeds.sh) | carrying a release into consumers — the form of `CONTINGENCIES.md` §7 |
 
 **These three carry commands, and a procedure is not changed until it has been run.** The last time
 `REPOSITORY.md` §1 was rewritten from correct premises it still broke three times on its first
