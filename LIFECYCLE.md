@@ -493,7 +493,7 @@ it looks like patience rather than failure. Two known causes:
 1. **The workflow did not start at all** — `startup_failure` with zero checks. Usually an invalid
    workflow file or a repository Actions policy refusing it. **One whose run carries no error is
    transient**: re-run the SHA before diagnosing, because a real misconfiguration says what it is.
-   `rak200/workflow#89`.
+   rak200/workflow#89
 2. **The workflow was filtered out** — a `paths:` filter excluded every file the PR touched. A
    workflow producing a required check must carry **no** `paths:` filter; if you find one, that is
    the bug.
@@ -584,7 +584,7 @@ from a healthy one. `Release-As:` is **not** the recovery — it chooses which v
 the Release PR opens. The recovery is a commit whose type is **visible**: `feat`, `fix`, `perf`,
 `revert`, and `docs` in the `none` variant. Once one exists the whole window ships in the same tag,
 hidden commits included — they reach the tag without reaching the changelog, which is the right
-record of what a consumer received. `rak200/workflow#120`.
+record of what a consumer received. rak200/workflow#120
 
 ### 4.6 A Dependabot PR fails CI
 
