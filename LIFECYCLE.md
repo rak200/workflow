@@ -15,16 +15,8 @@ This is the **primary reference** for how work moves through any `rak200` reposi
 to a released tag. It is written to be followed by a human reading it once, by an **agent**
 executing it as instructions, and by a **new contributor** who has never seen this ecosystem.
 
-Where a rule exists because a mechanism behaves in a non-obvious way, the reason is stated inline.
-Those reasons are not commentary — they were established empirically, and removing the rule
-reintroduces the failure.
-
-**What that licence does not cover is a log.** This file holds the consolidated workflow: what to
-do, and the reason a step is shaped the way it is. It does not hold the trials that arrived at
-that shape, the alternatives weighed and discarded, the dated measurements, or the corrections
-made along the way. Those belong to the design proposal, whose job is exactly that history. The
-test: if a sentence would still be here after the reader forgot how the rule was discovered, keep
-it — otherwise it is narrative, and narrative is what makes a reference stop being read.
+How a rule here is written — result and reason inline, log in the change that decided it — is
+`CONVENTIONS.md` §How to read a rule here.
 
 **Two copies of this document exist and they are not the same.** The `CONTRIBUTING.md` propagated
 from `rak200/.github` links to the **current** version in `rak200/workflow` — right for a
