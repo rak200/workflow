@@ -25,11 +25,16 @@ half-answer is worse: most of what has gone wrong here was not an unchecked rule
 checked one, where the sentence claimed the whole and the mechanism covered a corner of it. Reach is
 part of the answer, not a footnote to it.
 
-**A rule states its result; the argument that produced it lives in the change that decided it.**
-The paragraph ends with a bare reference to that change and nothing else — one or more, qualified
-with the repository, because this file is also read at `.rak200/` inside a consumer where a bare
-`#118` names the wrong thing. Where no change decided a rule, the reasoning stays, because nothing
-else holds it. rak200/workflow#122, rak200/workflow#123
+**A rule states its result and the reason it is shaped that way; the log of how it was found lives
+in the change that decided it.** A reason established empirically stays inline — remove it and the
+failure comes back. The trials, the alternatives discarded, the dated measurements and the
+corrections along the way do not stay: the test is whether a sentence would still belong here once
+the reader has forgotten how the rule was discovered.
+
+The paragraph ends with a bare reference and nothing else — rak200/workflow#118 for anything
+decided since this baseline existed, RFC 0017 `E.NN` for what arrived with it. The reference is
+qualified because this file is also read at `.rak200/` inside a consumer, where a bare `#118` names
+that repository's issue instead. rak200/workflow#122, rak200/workflow#123
 
 Nothing enforces either rule. No check can decide whether a sentence states a requirement or
 whether a paragraph is argument rather than result, so both are enforced by whoever writes the next
