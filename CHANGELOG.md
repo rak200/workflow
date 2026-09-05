@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.34](https://github.com/rak200/workflow/compare/0.18.33...0.18.34) (2026-09-05)
+
+
+### Documentation
+
+* two of those rows are checked, not three ([#132](https://github.com/rak200/workflow/issues/132)) ([2520954](https://github.com/rak200/workflow/commit/252095426da2c64a858676cab2087c0c2bb22249))
+
 ## [0.18.33](https://github.com/rak200/workflow/compare/0.18.32...0.18.33) (2026-09-05)
 
 
