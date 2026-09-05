@@ -242,11 +242,12 @@ with a repository open and the process document closed.
 done. `CHANGELOG.md` is the historical record; `ROADMAP.md` is only what is still pending. CI
 enforces it against the PR's `Closes #N`.
 
-**Three of those rows are checked, and none of the checks asserts presence.** The mirror-badge,
-`docs/` symbol-coverage and roadmap-pruning steps each open with a guard that passes when the file
-is absent — *no README.md*, *no src/ or no docs/*, *no ROADMAP.md*. They verify content where the
-file exists, never that it exists. Onboarding writes `README.md` and `CLAUDE.md`; every other row
-appears when someone writes it, and its absence is caught by a reader or not at all.
+**Two of those rows are checked, and neither check asserts presence.** The mirror-badge and
+roadmap-pruning steps each open with a guard that passes when the file is absent — *no README.md*,
+*no ROADMAP.md*. They verify content where the file exists, never that it exists. `docs/` was the
+third and no longer is: a repository with a `src/` must have a `docs/`, and the check fails when it
+does not. Onboarding writes `README.md` and `CLAUDE.md`; every other row appears when someone
+writes it, and its absence is caught by a reader or not at all. rak200/.github#67
 
 **`CLAUDE.md` states no rule that is not written somewhere a human reads.** Its job is to deliver,
 to an agent, context that is spread across the other files — so a rule that lives only there binds
