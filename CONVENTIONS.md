@@ -309,8 +309,23 @@ maintained:
 - **Live (never hand-edit):** CI, coverage, latest release — driven by a service, so they cannot
   drift.
 - **Mirror a source of truth (update the badge when the source changes):** runtime constraint,
-  analyser level, mutation floor, license. **CI-enforced** — the PR that moves a source reds
-  until the badge follows.
+  analyser level, mutation floor, license, and — where a package ships the compiler — its version.
+  **CI-enforced** — the PR that moves a source reds until the badge follows. **The badge's label is
+  part of the contract**: the check greps a fixed key, so a badge carrying the right number under a
+  different name reads as absent, not as wrong.
+
+  | Mirror | PHP | TS |
+  | --- | --- | --- |
+  | runtime constraint | `php-<v>+` ← `require.php` | `node->=<major>` ← `engines.node` |
+  | analyser level | `PHPStan-level <n>` ← `phpstan.neon.dist` | `ESLint-<tier>` ← `eslint.config.js` |
+  | mutation floor | `Infection-min covered MSI <n>%` ← `minCoveredMsi` | `Stryker-MSI <n>%` ← `thresholds.break` |
+  | license | `license-<id>` ← `composer.json` | `license-<id>` ← `package.json` |
+  | shipped compiler | — | `typescript-<major.minor>` ← `dependencies.typescript` |
+
+  Where the source lives in the pinned Layer 2 package rather than the repository, the check reads
+  the repository first and falls back to the package after install. An absent badge fails wherever
+  the source exists; a repository with no such source makes no claim and is not asked for one.
+  rak200/.github#71
 - **Stable claims (revisit only if the practice changes):** code style, SemVer, Keep a Changelog.
 
 Prefer a verifiable badge over a vanity metric.
