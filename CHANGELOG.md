@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.33](https://github.com/rak200/workflow/compare/0.18.32...0.18.33) (2026-09-05)
+
+
+### Features
+
+* a -config package's API is not its symbols, and the seeds now say so ([#128](https://github.com/rak200/workflow/issues/128)) ([54e1208](https://github.com/rak200/workflow/commit/54e12086de33b8789bc7575816fc0622d4e14a3c))
+
 ## [0.18.32](https://github.com/rak200/workflow/compare/0.18.31...0.18.32) (2026-09-04)
 
 
