@@ -4,45 +4,17 @@
 #
 # Renames go through `aliases`, which preserves the association of existing issues.
 #
-# PR type labels are DERIVED from the enforced PR title, never applied by hand: a
-# hand-applied one would be a second source of truth beside what the release tooling reads.
-
-# --- type: one per commit type, PR-only, machine-applied ---
-- name: "type: feat"
-  color: "0e8a16"
-  description: "A new capability"
-- name: "type: fix"
-  color: "d73a4a"
-  description: "A bug fix"
-- name: "type: perf"
-  color: "1d76db"
-  description: "A performance change, no API change"
-- name: "type: revert"
-  color: "b60205"
-  description: "Reverts a prior commit"
-- name: "type: refactor"
-  color: "5319e7"
-  description: "Internal change, no behaviour change"
-- name: "type: style"
-  color: "c5def5"
-  description: "Formatting only, no meaning change"
-- name: "type: docs"
-  color: "0075ca"
-  description: "Documentation only"
-- name: "type: test"
-  color: "bfd4f2"
-  description: "Tests only"
-- name: "type: build"
-  color: "d4c5f9"
-  description: "Build, dependencies, package manifest"
-- name: "type: ci"
-  color: "fef2c0"
-  description: "CI configuration only"
-- name: "type: chore"
-  color: "ededed"
-  description: "Anything else not user-facing"
+# There are no PR type labels. A pull request's type is its title, which CI enforces and
+# release-please reads, and which the squash merge turns into the trunk's own type index.
+# A label would be a third home for that fact, kept in step by a mechanism that has to be
+# built, permissioned and carried. rak200/workflow#60
 
 # --- issue and triage: applied by the templates or by triage ---
+# `bug` / `feature` come from the templates; the rest are triage. `docs` and `test` are
+# here because the first two do not cover them, which is why seven issues had reached for
+# `type: docs` and `type: test` instead. They are flat, like the rest: the prefix existed
+# to keep `bug` (an issue) apart from `fix` (a PR), and there are no PR labels to confuse
+# them with any more.
 - name: "bug"
   color: "d73a4a"
   description: "Something behaves incorrectly"
@@ -50,6 +22,14 @@
   color: "0e8a16"
   description: "A capability that does not exist yet"
   aliases: ["enhancement"]
+- name: "docs"
+  color: "0075ca"
+  description: "Documentation is wrong, missing or misleading"
+  aliases: ["type: docs"]
+- name: "test"
+  color: "bfd4f2"
+  description: "The suite is wrong, missing or asserts nothing"
+  aliases: ["type: test"]
 - name: "needs-triage"
   color: "fbca04"
   description: "Not yet assessed"
