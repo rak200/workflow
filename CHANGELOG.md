@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.35](https://github.com/rak200/workflow/compare/0.18.34...0.18.35) (2026-09-05)
+
+
+### Documentation
+
+* the badge label is part of the contract, and the seed's claim is now true ([#135](https://github.com/rak200/workflow/issues/135)) ([6a62ee2](https://github.com/rak200/workflow/commit/6a62ee26c9a58545f23dea82dd265d5230aea361))
+
 ## [0.18.34](https://github.com/rak200/workflow/compare/0.18.33...0.18.34) (2026-09-05)
 
 
