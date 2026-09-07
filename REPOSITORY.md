@@ -262,12 +262,13 @@ The JSON is the canonical copy in [`rak200/.github`](https://github.com/rak200/.
 `pull_request` rule would reject the very push in step 4 that establishes the default branch.
 
 **The branch ruleset** carries a `bypass_actors` entry for the repository admin, in `bypass_mode:
-pull_request`. It is there for the blame-registration PR and as a safety net. The mode is the
-narrow part
-and must be read back as such: `always` would permit a **direct push** to `master`, which this
-design does not want. Within the PR path the entry is wide — it exempts every API call the actor
-makes — which is why merges go through `gh pr merge` (rule 10) and why an `--admin` merge can cross
-a red required check. rak200/workflow#8
+pull_request`. **It is there as a safety net, and for nothing else.** The blame-registration PR
+justified it too, until that PR turned out to need no bypass: it is opened by hand after the
+reformat merges, so CI runs on it and the gate decides it. The mode is the narrow part and must be
+read back as such: `always` would permit a **direct push** to `master`, which this design does not
+want. Within the PR path the entry is wide — it exempts every API call the actor makes — which is
+why merges go through `gh pr merge` (rule 10) and why an `--admin` merge can cross a red required
+check. rak200/workflow#8, rak200/workflow#70
 
 **The tag ruleset carries no bypass at all**, and not by choice: GitHub rejects the narrow mode on
 a tag ruleset outright — *"bypass mode must not be 'PULL_REQUEST' for tag rulesets"* — which left

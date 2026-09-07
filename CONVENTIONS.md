@@ -287,8 +287,14 @@ out of step with it.
   *matches the tree* is one manual step — `REPOSITORY.md` §1.2 — on the existing-repository path
   only. A repository created by the onboarding script never runs it.
 - **Bulk reformatting commits are recorded in `.git-blame-ignore-revs`** so `git blame` skips
-  them. GitHub honours the file automatically; enable it locally with
-  `git config blame.ignoreRevsFile .git-blame-ignore-revs`.
+  them — by a second pull request once the reformat merges, since the squash SHA does not exist
+  before it. GitHub honours the file automatically; enable it locally with
+  `git config blame.ignoreRevsFile .git-blame-ignore-revs`. **Only the header is checked**:
+  `seeds.tsv` grades the file `prefix:4`, so conformance reaches the four seeded lines and nothing
+  below them. Nothing verifies that an entry resolves to a commit, and **a wrong SHA is silent** —
+  through `--ignore-revs-file` `git blame` skips an unresolvable revision without a word, where
+  `--ignore-rev` on the command line is fatal, so a dead entry reads exactly like a live one.
+  rak200/workflow#70
 - **Lockfiles follow the artifact, not the language.** An *application* commits its lockfile; a
   *library* does not, and resolves fresh against its constraints. (PHP libraries omit
   `composer.lock`; JS/TS libraries commit `package-lock.json` — the taxonomy is Layer 1, the
