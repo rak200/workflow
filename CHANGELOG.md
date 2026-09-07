@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.38](https://github.com/rak200/workflow/compare/0.18.37...0.18.38) (2026-09-07)
+
+
+### Bug Fixes
+
+* the carry no longer enters the tree you are working in ([#145](https://github.com/rak200/workflow/issues/145)) ([99e8721](https://github.com/rak200/workflow/commit/99e872125f32000d8dbbf1aa1a446f1a71265c7f))
+
 ## [0.18.37](https://github.com/rak200/workflow/compare/0.18.36...0.18.37) (2026-09-07)
 
 
