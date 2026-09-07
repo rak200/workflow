@@ -153,6 +153,12 @@ pipeline pin, so copying those rolls the pin back to whatever the seed happens t
 reads `seeds.tsv`, honours each row's form, and runs the conformance comparison before it commits.
 rak200/workflow#127
 
+**It never enters the repository's working tree**, so it is safe to run while you are working in
+one — each carry happens in a worktree of its own, and what you have checked out is neither moved
+nor read. It used to `checkout -B` in the tree itself, behind a `git status --porcelain` guard that
+refuses a modified tracked file and **cannot see one the repository ignores**, which `checkout`
+then overwrites without a word. rak200/workflow#144
+
 **A stale pin is not safe.** The submodule carries `scaffold/`, the seeds CI grades against, and a
 repository grades itself against **its own pinned copy**, so an old pin does not merely miss an
 addition — it makes the repository judge itself by an obsolete rulebook **and pass**. The check
