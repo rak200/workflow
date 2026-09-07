@@ -24,6 +24,10 @@
 #               back to whatever the seed happens to name
 #
 # Every carry is verified before it is committed: the same comparison base.yml runs.
+#
+# It is safe to run while you are working in a consumer: the carry happens in a worktree
+# of its own and the repository's checkout is never entered. See the comment on the
+# worktree below for what that replaced and why.
 
 set -euo pipefail
 
@@ -64,22 +68,58 @@ variant_of() {   # the variant a repository declares, or its pipeline's default
 }
 
 rc=0
+# `set -e` aborts mid-repository on any git failure, and an abandoned worktree is worse
+# than the copy it replaced: it holds a lock on the branch and shows up in every later
+# `git worktree list`. The trap fires on that path too. Found by running it — a submodule
+# clone failed and left both the tree and the branch behind. rak200/workflow#144
+WT='' WT_REPO=''
+drop_worktree() {
+  [ -n "$WT" ] || return 0
+  git -C "$WT_REPO" worktree remove --force "$WT" 2>/dev/null || true
+  rmdir "$(dirname "$WT")" 2>/dev/null || true
+  WT='' WT_REPO=''
+}
+trap drop_worktree EXIT
+
 for repo in "${REPOS[@]}"; do
   name=$(basename "$repo")
   [ -d "$repo/.git" ] || { echo "  $name: not a git repository — skipped"; rc=1; continue; }
   [ -f "$repo/.gitmodules" ] || { echo "  $name: no .rak200 submodule — skipped"; continue; }
-  [ -z "$(git -C "$repo" status --porcelain)" ] || { echo "  $name: working tree is dirty — skipped"; rc=1; continue; }
 
   variant=$(variant_of "$repo")
   [ -n "$variant" ] || { echo "  $name: no ci.yml, cannot tell its variant — skipped"; rc=1; continue; }
 
   git -C "$repo" fetch --quiet origin
-  git -C "$repo" checkout --quiet -B "$BRANCH" origin/master
-  git -C "$repo" submodule update --init --quiet .rak200
-  git -C "$repo" -C .rak200 fetch --quiet --tags origin 2>/dev/null || git -C "$repo/.rak200" fetch --quiet --tags origin
-  git -C "$repo/.rak200" checkout --quiet "$SHA"
 
-  changed=$(SEEDS_ROOT="$repo/.rak200/scaffold" REPO="$repo" VARIANT="$variant" python3 - <<'PY'
+  # THE CARRY NEVER ENTERS THE REPOSITORY'S WORKING TREE. It happens in a worktree of
+  # its own, so whatever the maintainer has checked out — a branch mid-review, a dirty
+  # tree, a detached HEAD carrying commits — is neither moved nor read. The earlier
+  # shape ran `checkout -B` in the tree itself, guarded only by `status --porcelain`:
+  # that guard refuses a modified tracked file, and CANNOT SEE a file the repository
+  # ignores, which `checkout` then overwrites silently and unrecoverably. Measured, on
+  # a `.gitignore`d file with uncommitted content: status empty, checkout exit 0,
+  # content replaced. The `.dist` overrides this convention tells every repository to
+  # ignore are exactly the files that were in reach. rak200/workflow#144
+  #
+  # The submodule is isolated too — measured on git 2.47.3: a worktree keeps its own
+  # submodule checkout, so moving `.rak200` to the tag here leaves the main tree's
+  # pin where it was.
+  wt=$(mktemp -d)/carry
+  if ! git -C "$repo" worktree add --quiet -B "$BRANCH" "$wt" origin/master 2>/dev/null; then
+    echo "  $name: cannot create the carry worktree — is $BRANCH checked out somewhere?"
+    rmdir "$(dirname "$wt")" 2>/dev/null || true; rc=1; continue
+  fi
+  WT=$wt WT_REPO=$repo   # from here on the trap owns it
+
+  if ! { git -C "$wt" submodule update --init --quiet .rak200 \
+      && git -C "$wt/.rak200" fetch --quiet --tags origin \
+      && git -C "$wt/.rak200" checkout --quiet "$SHA"; }; then
+    echo "  $name: could not put .rak200 at $TAG — skipped"
+    drop_worktree; git -C "$repo" branch -D --quiet "$BRANCH" 2>/dev/null || true
+    rc=1; continue
+  fi
+
+  changed=$(SEEDS_ROOT="$wt/.rak200/scaffold" REPO="$wt" VARIANT="$variant" python3 - <<'PY'
 import os, re, pathlib, shutil, sys
 
 root = pathlib.Path(os.environ['SEEDS_ROOT'])
@@ -135,7 +175,7 @@ PY
 ) || { echo "  $name: carry failed"; rc=1; continue; }
 
   # verify before committing: the comparison base.yml runs
-  if ! SEEDS_ROOT="$repo/.rak200/scaffold" REPO="$repo" VARIANT="$variant" python3 - <<'PY'
+  if ! SEEDS_ROOT="$wt/.rak200/scaffold" REPO="$wt" VARIANT="$variant" python3 - <<'PY'
 import os, re, pathlib, sys
 root = pathlib.Path(os.environ['SEEDS_ROOT']); repo = pathlib.Path(os.environ['REPO'])
 variant = os.environ['VARIANT']; bad = 0; checked = 0
@@ -160,29 +200,36 @@ for line in (root / 'seeds.tsv').read_text().splitlines():
         print(f'   {dest}: still drifts', file=sys.stderr); bad += 1
 sys.exit(1 if bad or checked == 0 else 0)
 PY
-  then echo "  $name: conformance still fails after the carry — left uncommitted"; rc=1; continue; fi
+  then
+    echo "  $name: conformance still fails after the carry — nothing committed"
+    drop_worktree; git -C "$repo" branch -D --quiet "$BRANCH" 2>/dev/null || true
+    rc=1; continue
+  fi
 
   mapfile -t files < <(printf '%s\n' $changed | grep -c . >/dev/null 2>&1 && printf '%s\n' $changed || true)
-  git -C "$repo" add -- .rak200 "${files[@]}"
-  if git -C "$repo" diff --cached --quiet; then
+  git -C "$wt" add -- .rak200 "${files[@]}"
+  if git -C "$wt" diff --cached --quiet; then
     echo "  $name ($variant): already at $TAG"
-    git -C "$repo" checkout --quiet -
+    drop_worktree
     git -C "$repo" branch -D --quiet "$BRANCH"
     continue
   fi
   n=$(printf '%s\n' $changed | grep -c . || true)
-  if ! git -C "$repo" commit --quiet -m "build: carry the baseline to $TAG" \
+  if ! git -C "$wt" commit --quiet -m "build: carry the baseline to $TAG" \
     -m "Dependabot moves the \`.rak200\` gitlink alone. $TAG changed $n seed(s) this variant consumes, so conformance grades the repository against a scaffold it no longer pins until they travel with it." \
     -m "Carried by \`scripts/carry-seeds.sh\`, which reads \`seeds.tsv\` and honours each row's check form."
   then
-    echo "  $name: the commit failed — carried but uncommitted"; rc=1; continue
+    echo "  $name: the commit failed — nothing committed"
+    drop_worktree; git -C "$repo" branch -D --quiet "$BRANCH" 2>/dev/null || true
+    rc=1; continue
   fi
-  echo "  $name ($variant): $TAG, $n seed(s) — $(git -C "$repo" rev-parse --short HEAD)"
+  echo "  $name ($variant): $TAG, $n seed(s) — $(git -C "$wt" rev-parse --short HEAD)"
   if [ "$PUSH" = 1 ]; then
-    git -C "$repo" push --quiet -u origin "$BRANCH"
+    git -C "$wt" push --quiet -u origin "$BRANCH"
     gh pr create --repo "$(git -C "$repo" remote get-url origin | sed -E 's#.*github.com[:/]##; s#\.git$##')" \
       --base master --head "$BRANCH" --title "build: carry the baseline to $TAG" \
       --body "Dependabot moves the \`.rak200\` gitlink alone; \`$TAG\` changed $n seed(s) this variant consumes. Carried by \`scripts/carry-seeds.sh\`, verified against \`seeds.tsv\` before commit."
   fi
+  drop_worktree
 done
 exit $rc
