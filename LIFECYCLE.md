@@ -71,7 +71,7 @@ onboarded — see `REPOSITORY.md` §1.
 | Secret-scanning allowlist | `.gitleaks.toml` | copied from the scaffold; seeded empty, extends the default ruleset, read by both halves |
 | Line endings & dist surface | `.gitattributes` (`text=auto eol=lf`, `export-ignore`) | copied from the scaffold |
 | License | `LICENSE` (MIT) | copied from the scaffold — **does not propagate** |
-| Blame noise | `.git-blame-ignore-revs` | header seeded (prefix-checked); entries appended by bot PR; `blame.ignoreRevsFile` set per clone |
+| Blame noise | `.git-blame-ignore-revs` | header seeded (prefix-checked); entries appended by a follow-up PR and checked by nothing; `blame.ignoreRevsFile` set per clone |
 
 Seeded copies (the *copied* / *per-repo* rows) are **conformance-checked by CI** against the
 pinned `.rak200/scaffold/` — a drifted copy reds the gate. The check compares against the
@@ -183,10 +183,13 @@ with `type` from the fixed set (`feat`, `fix`, `perf`, `refactor`, `style`, `doc
 `build`, `ci`, `chore`, `revert`) — the stock `@commitlint/config-conventional` set, no override.
 `style` is rare by design: day-to-day formatting is enforced by the lint gate, so its referent is
 the bulk reformat that follows a **fixer-config revision** — typed `style` and recorded in
-`.git-blame-ignore-revs` **by a bot, after the merge**: the squash SHA does not exist before it,
-so a workflow watching `master` opens a follow-up PR appending the SHA. That PR runs no CI (it is
-opened with the repo's own `GITHUB_TOKEN`) and merges with `--admin` — since the Release PR turned
-out to have a *held* check rather than an absent one (§3.8), it is now the **only** PR that does. A breaking change is either `type!` or a `BREAKING CHANGE:` footer
+`.git-blame-ignore-revs` **by a second pull request, after the merge**: the squash SHA does not
+exist before it. That PR adds one line and is ordinary in every way — CI runs on it, `ci / gate`
+gates it, and it needs no `--admin`. **Not every `style:` commit earns an entry**: the referent is
+the bulk reformat, and a one-file fix typed `style` recording a revision is noise (`REPOSITORY.md`
+§1.2). Nothing tells the two apart — whoever opens the PR decides. rak200/workflow#70
+
+A breaking change is either `type!` or a `BREAKING CHANGE:` footer
 **in the PR body**. `revert` releases a **patch** — measured, not assumed; a revert-only window
 still cuts a superseding release (see `CONTINGENCIES.md` §11).
 
@@ -264,13 +267,13 @@ approval count is **0**, so nothing on the review side blocks. The merge is ordi
 gh pr merge --squash --auto --delete-branch   # merges when ci / gate turns green
 ```
 
-> **No `--admin` on this path — if you find yourself typing it, something is wrong.** A red gate
-> refusing the merge is the system working; fix the branch instead. The one place `--admin` is
-> legitimate is the blame-registration PR (§3.4) — **not** the Release PR, whose check is held
-> rather than absent and is cleared by approving the run (§3.8). And merge through `gh` only,
-> never the raw REST endpoint — the maintainer is a bypass actor, and the server honours that bypass
-> on **any** unflagged API call, so a raw-endpoint merge would cross a red gate silently (§4,
-> rule 10).
+> **No `--admin`, on this path or any other — if you find yourself typing it, something is wrong.**
+> A red gate refusing the merge is the system working; fix the branch instead. **No exception is
+> carved out of this**: the Release PR's check is held rather than absent and is cleared by
+> approving the run (§3.8), and the blame-registration PR is an ordinary gated pull request (§3.4).
+> And merge through `gh` only, never the raw REST endpoint — the maintainer is a bypass actor, and
+> the server honours that bypass on **any** unflagged API call, so a raw-endpoint merge would cross
+> a red gate silently (§4, rule 10).
 
 **Path B — authored by a bot** (Dependabot, release-please):
 
@@ -567,9 +570,6 @@ gh pr review --approve && gh pr merge --squash --auto --delete-branch
 
 # merge — Release PR (approve the HELD run first, then merge normally; not --admin)
 gh pr merge --squash --delete-branch
-
-# merge — blame-registration PR (absent check; the only legitimate --admin)
-gh pr merge --squash --admin --delete-branch
 
 # diagnose
 gh run view --log-failed
