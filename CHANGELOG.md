@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.37](https://github.com/rak200/workflow/compare/0.18.36...0.18.37) (2026-09-07)
+
+
+### Bug Fixes
+
+* the command CONTINGENCIES.md §7 gives cannot run — carry-seeds.sh is not executable ([#141](https://github.com/rak200/workflow/issues/141)) ([10db478](https://github.com/rak200/workflow/commit/10db47865d6757fcb440c5c43e647bea85b64894))
+
 ## [0.18.36](https://github.com/rak200/workflow/compare/0.18.35...0.18.36) (2026-09-07)
 
 
