@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.36](https://github.com/rak200/workflow/compare/0.18.35...0.18.36) (2026-09-07)
+
+
+### Bug Fixes
+
+* the style-commit bot never existed, and the --admin exception went with it ([#139](https://github.com/rak200/workflow/issues/139)) ([d50367e](https://github.com/rak200/workflow/commit/d50367e93d63211db2eac08f19d0cb184813d8fd))
+
 ## [0.18.35](https://github.com/rak200/workflow/compare/0.18.34...0.18.35) (2026-09-05)
 
 
