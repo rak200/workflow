@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.39](https://github.com/rak200/workflow/compare/0.18.38...0.18.39) (2026-09-08)
+
+
+### Documentation
+
+* the blame-ignore gate has a canary, and it has been fired ([#148](https://github.com/rak200/workflow/issues/148)) ([8f16690](https://github.com/rak200/workflow/commit/8f166905bf125ce2479df1aa20e4fcf488e227e6))
+
 ## [0.18.38](https://github.com/rak200/workflow/compare/0.18.37...0.18.38) (2026-09-07)
 
 
