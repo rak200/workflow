@@ -82,6 +82,7 @@ Verify by **making the gate fail on purpose**:
 | badge conformance | a mirrored source moved with its badge left behind |
 | docs coverage | a new public class documented nowhere |
 | roadmap pruning | a PR closing an issue whose roadmap entry it left behind |
+| blame-ignore entries | an entry naming a commit that does not exist, and a second abbreviated to seven characters |
 
 A gate that has never failed has never been tested. Three of the five defects this rule exists to
 catch were invisible in the GitHub UI.
