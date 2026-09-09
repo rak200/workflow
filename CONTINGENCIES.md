@@ -83,6 +83,8 @@ Verify by **making the gate fail on purpose**:
 | docs coverage | a new public class documented nowhere |
 | roadmap pruning | a PR closing an issue whose roadmap entry it left behind |
 | blame-ignore entries | an entry naming a commit that does not exist, and a second abbreviated to seven characters |
+| docs are mandatory | `docs/` renamed away in a repository that has a `src/` |
+| a mandated value weakened | a floor restated below the pinned standard's — **with its badge moved to match**, or the badge gate stops the run first |
 
 A gate that has never failed has never been tested. Three of the five defects this rule exists to
 catch were invisible in the GitHub UI.
