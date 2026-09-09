@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.42](https://github.com/rak200/workflow/compare/0.18.41...0.18.42) (2026-09-09)
+
+
+### Documentation
+
+* labels travel by hand, and that is the decision rather than the gap ([#157](https://github.com/rak200/workflow/issues/157)) ([20dd430](https://github.com/rak200/workflow/commit/20dd4305ae2a342378f5a4d7815dadae189cef0c))
+
 ## [0.18.41](https://github.com/rak200/workflow/compare/0.18.40...0.18.41) (2026-09-09)
 
 
