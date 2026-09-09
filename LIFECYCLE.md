@@ -81,9 +81,10 @@ standing still.
 **The labels row is the exception, and in the other direction: it arrives once and is checked
 never.** `new-repo.sh` step 6 POSTs them during onboarding (`REPOSITORY.md` §1.1); after that, a
 label added to `labels.yml` reaches **no existing repository** — not on a submodule bump, not on a
-push — and nothing reports the difference. Adding one is therefore a manual pass over the estate.
-Measured: the set has changed once, at rak200/workflow#134, and the two new labels reached all seven
-repositories by hand. rak200/workflow#71
+push — and nothing reports the difference. **That is decided, not pending**: editing `labels.yml`
+owes a pass over the existing repositories by hand, in the same piece of work, and the file says so
+where whoever edits it will be looking. Seven repositories against a set that has changed once in
+four months does not pay for a sync to build, permission and carry. rak200/workflow#71
 
 ```bash
 # clone a conformant repo with its conventions

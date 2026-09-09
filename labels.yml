@@ -1,8 +1,16 @@
-# Canonical labels, applied ADDITIVELY to every repository — the sync never deletes.
-# Labels outside this set belong to automations (Dependabot's `dependencies` and
-# `github_actions`, release-please's `autorelease:*`) and deleting them breaks releases.
+# Canonical labels, applied ADDITIVELY to every repository — never pruned. Labels outside
+# this set belong to automations (Dependabot's `dependencies` and `github_actions`,
+# release-please's `autorelease:*`) and deleting them breaks releases.
 #
 # Renames go through `aliases`, which preserves the association of existing issues.
+#
+# THIS FILE REACHES A REPOSITORY ONCE, AT ONBOARDING, AND THAT IS DELIBERATE. `new-repo.sh`
+# step 6 POSTs it; nothing carries a later change, because the file travels in a tag-pinned
+# submodule and there is no label sync — editing this file therefore owes a pass over the
+# existing repositories, by hand, in the same piece of work. Seven repositories, and this set
+# has changed once in four months: a sync would have to be built, permissioned and carried for
+# a job that has come up once. Measured at rak200/workflow#134, where `docs` and `test` reached
+# all seven that way. rak200/workflow#71
 #
 # There are no PR type labels. A pull request's type is its title, which CI enforces and
 # release-please reads, and which the squash merge turns into the trunk's own type index.
