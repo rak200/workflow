@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.43](https://github.com/rak200/workflow/compare/0.18.42...0.18.43) (2026-09-09)
+
+
+### Documentation
+
+* the last two gates without a canary have one, and it has been fired ([#159](https://github.com/rak200/workflow/issues/159)) ([d1c7b36](https://github.com/rak200/workflow/commit/d1c7b3682a0b25ceecd432764745485f39948c52))
+
 ## [0.18.42](https://github.com/rak200/workflow/compare/0.18.41...0.18.42) (2026-09-09)
 
 
