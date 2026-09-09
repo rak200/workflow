@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.40](https://github.com/rak200/workflow/compare/0.18.39...0.18.40) (2026-09-09)
+
+
+### Documentation
+
+* what the symbol check asserts, and why nothing stricter is available ([#152](https://github.com/rak200/workflow/issues/152)) ([308daef](https://github.com/rak200/workflow/commit/308daefdcd1c671780ce0f2f879c0fe15986cacc))
+
 ## [0.18.39](https://github.com/rak200/workflow/compare/0.18.38...0.18.39) (2026-09-08)
 
 
