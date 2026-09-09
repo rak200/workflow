@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.41](https://github.com/rak200/workflow/compare/0.18.40...0.18.41) (2026-09-09)
+
+
+### Bug Fixes
+
+* §2 justified a clone rule with a job that has never existed ([#155](https://github.com/rak200/workflow/issues/155)) ([4b8f381](https://github.com/rak200/workflow/commit/4b8f381e8c230274ef6ff4e4960ea49ea0128f14))
+
 ## [0.18.40](https://github.com/rak200/workflow/compare/0.18.39...0.18.40) (2026-09-09)
 
 
