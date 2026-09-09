@@ -56,7 +56,7 @@ onboarded — see `REPOSITORY.md` §1.
 | Ecosystem conventions | `.rak200/CONVENTIONS.md` | git submodule, tag-pinned |
 | This document | `.rak200/LIFECYCLE.md` | same submodule |
 | RFC template | `.rak200/proposals/TEMPLATE.md` | same submodule |
-| Canonical labels | `.rak200/labels.yml` | same submodule, applied additively |
+| Canonical labels | `.rak200/labels.yml` | same submodule, applied additively — **once, at onboarding** |
 | Editor settings | `.editorconfig` | copied from the scaffold |
 | Agent instructions | `CLAUDE.md` | per-repo; imports `@.rak200/CONVENTIONS.md` |
 | PHP lint/analysis config | `rak200/coding-standard-php` | Composer dev dependency |
@@ -78,6 +78,13 @@ pinned `.rak200/scaffold/` — a drifted copy reds the gate. The check compares 
 *pinned* version, so it turns red only when a submodule bump changes a seed (§3.9), never from
 standing still.
 
+**The labels row is the exception, and in the other direction: it arrives once and is checked
+never.** `new-repo.sh` step 6 POSTs them during onboarding (`REPOSITORY.md` §1.1); after that, a
+label added to `labels.yml` reaches **no existing repository** — not on a submodule bump, not on a
+push — and nothing reports the difference. Adding one is therefore a manual pass over the estate.
+Measured: the set has changed once, at rak200/workflow#134, and the two new labels reached all seven
+repositories by hand. rak200/workflow#71
+
 ```bash
 # clone a conformant repo with its conventions
 git clone --recurse-submodules https://github.com/rak200/<repo>.git
@@ -96,9 +103,11 @@ git config blame.ignoreRevsFile .git-blame-ignore-revs
 > backstop for clones that skipped onboarding; a hit *there* means the credential is already in
 > history — see `CONTINGENCIES.md` §4.
 
-> **Why `--recurse-submodules` matters.** Without it `.rak200/` is empty, and anything reading a
-> file from it fails. That failure is loud by design — the label sync reports
-> `Can't access config file` and the job fails rather than silently syncing nothing.
+> **Why `--recurse-submodules` matters.** Without it `.rak200/` is empty, and every import and
+> document that reads from it fails — beginning with `CLAUDE.md`'s own import, which is why that
+> file carries the recovery command next to it. **No gate catches this**: CI checks out its own
+> copy with `submodules: recursive`, so a clone that skipped them fails locally and on the first
+> read, and is invisible to the pipeline. rak200/workflow#71
 
 ---
 

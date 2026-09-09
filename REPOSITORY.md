@@ -203,7 +203,8 @@ without it the Release PR is never opened, and the failure arrives late and dirt
 
 **6. Labels — additively, then the one-shot deletion.**
 
-Apply `.rak200/labels.yml` with the label-sync action or by hand; **never prune**, because labels
+Apply `.rak200/labels.yml` **by hand** — `new-repo.sh` step 6 does it for a new repository, and
+there is no label sync in this estate to do it for an existing one; **never prune**, because labels
 outside the canonical set belong to automations (Dependabot creates `dependencies` and
 `github_actions` on its own within minutes). GitHub's stock labels (`bug`, `enhancement`,
 `good first issue`, …) are deleted **once, by hand, now** — this is the only moment the repo has no
