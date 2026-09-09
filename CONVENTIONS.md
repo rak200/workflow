@@ -203,6 +203,16 @@ presence: a script that cannot run is worse than a missing one, because it reads
   — a `-config` package declares commands and configuration entry points, and its `src/` exists so
   those can be tested — the repository passes an empty `symbol-pattern` and documents the units its
   manifest declares. rak200/.github#67
+- **`appears` is the whole of that assertion, and it does not distinguish documenting a symbol
+  from mentioning it.** The check greps `docs/` for the word, so a sentence *denying* that a
+  symbol is public API satisfies it as readily as a reference page — measured, on prose that said
+  exactly that. What it does catch is the symbol nobody wrote about at all, which is the mistake
+  that actually happens: across the 432 public symbols in the repositories this check grades, it
+  produced no false pass. **Nothing stricter is available without contradicting a rule above it.**
+  Requiring a heading per symbol is the granularity *sized by unit, not by class* rejects;
+  requiring a signature block is free in PHP and fails 26 of 37 symbols in a component library
+  documented by attribute and event; requiring a backtick misses the denying sentence, which
+  carried all three of its symbols in backticks. rak200/workflow#129
 - Every public unit and every public member carries a doc comment. Tags that merely restate the
   signature are noise; add one when it carries something the signature cannot (units, semantics,
   edge cases, the condition of a throw).
