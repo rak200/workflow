@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.45](https://github.com/rak200/workflow/compare/0.18.44...0.18.45) (2026-09-10)
+
+
+### Bug Fixes
+
+* a git-dependency consumer receives the files array, not the git archive ([#164](https://github.com/rak200/workflow/issues/164)) ([4285705](https://github.com/rak200/workflow/commit/42857054520552f0398d7b49a7d7d1844646fe35))
+
 ## [0.18.44](https://github.com/rak200/workflow/compare/0.18.43...0.18.44) (2026-09-10)
 
 
