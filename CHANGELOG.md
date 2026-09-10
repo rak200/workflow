@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.44](https://github.com/rak200/workflow/compare/0.18.43...0.18.44) (2026-09-10)
+
+
+### Bug Fixes
+
+* §3.9 stated the schedule twice, and the superseded version came first ([#162](https://github.com/rak200/workflow/issues/162)) ([ba706d7](https://github.com/rak200/workflow/commit/ba706d79746705e893680c7590e834b112acbc22))
+
 ## [0.18.43](https://github.com/rak200/workflow/compare/0.18.42...0.18.43) (2026-09-09)
 
 
