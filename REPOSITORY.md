@@ -128,7 +128,7 @@ grep -hoE 'workflows/[a-z0-9-]+\.yml@[0-9.]+' .github/workflows/*.yml   # read i
 ```
 
 Skip it and the repository's **first pull request fails `CONTINGENCIES.md` §8** — for a line its
-author did not write. Dependabot would clear it on the weekly `github-actions` pass, so the cost
+author did not write. Dependabot would clear it on the daily `github-actions` pass, so the cost
 of forgetting is bounded; the cost of remembering is one command.
 
 **Left as a step rather than fixed in the scaffold, knowingly.** The structural fixes were designed

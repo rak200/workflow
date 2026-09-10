@@ -367,13 +367,15 @@ A new release reaches consumers as a Dependabot bump PR — `composer`, `npm`, `
 review applies, the maintainer approves, merge is normal. A new conventions tag on
 `rak200/workflow` arrives the same way.
 
-**`gitsubmodule` runs daily; everything else runs weekly.** The asymmetry is deliberate. Since
-conformance began failing on an obsolete pin (`CONTINGENCIES.md` §7), the baseline is the only
-dependency whose staleness **blocks a merge** rather than merely lagging: between a baseline
-release and the next Dependabot pass, every pull request in an affected repository opens red, and
-the only way through is a hand-written bump. Weekly made that window seven days wide, against a
-baseline that has cut seven tags in a single day. An outdated library is outdated; an outdated
-baseline stops the work.
+**`gitsubmodule` and `github-actions` run daily; the library ecosystems run weekly.** The
+asymmetry follows from what **blocks**, not from what matters most. Two pins are graded by a check
+that reds on staleness — the baseline (`CONTINGENCIES.md` §7) and the pipeline (§8) — so between
+either release and the next Dependabot pass, every pull request in an affected repository opens red
+and the only way through is a hand-written bump. An outdated library is merely outdated; an
+outdated baseline or pipeline stops the work. Weekly made that window seven days wide against a
+baseline that has cut seven tags in a single day, and `github-actions` was weekly until 2026-08-30
+for the same reason — the seeded `dependabot.yml` carries that measurement beside the schedule it
+explains. rak200/workflow#143
 
 **The submodule updater resolves *latest* to a tagged commit.** It enumerates candidates from the
 default branch's history, but an untagged commit is not a version to it — so a bump PR always pins
