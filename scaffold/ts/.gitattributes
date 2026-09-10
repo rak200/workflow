@@ -24,7 +24,14 @@
 /ARCHITECTURE.md         export-ignore
 
 # npm packs from package.json's `files`, not from export-ignore — this list governs
-# `git archive` only, which is what a git-dependency consumer receives.
+# `git archive` only: GitHub's source tarballs and zips. **A git-dependency
+# consumer does not receive this list either.** npm clones the repository, runs
+# `prepare` and packs by `files`, so a git install ships what a registry install
+# ships. Measured on `npm install github:rak200/coding-standard-ts`, where
+# `CHANGELOG.md` — hidden by no export-ignore line — was absent from the install.
+# Keep the two lists saying the same thing anyway: the tarball a human downloads
+# should not disagree with what npm installs about what this package is.
+# rak200/workflow#65
 /tsconfig.json                  export-ignore
 /tsconfig.build.json            export-ignore
 /eslint.config.js               export-ignore
