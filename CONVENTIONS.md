@@ -397,4 +397,11 @@ whoever runs the lifecycle. Everything here appears there; the difference is aud
 4. **Audit a pipeline on each step's `outcome`**, never its `conclusion` — `continue-on-error`
    relabels a failure as success.
 5. **A gate that has never failed has never been tested.** Make each one fail on purpose once,
-   and confirm it blocks.
+   and confirm it blocks. **`gates.tsv` carries the reference per gate** and `gates.sh` refuses a
+   `gate` row whose canary field is empty, so a new gate cannot enter the pipeline without someone
+   either naming the pull request that fired it or writing down that nobody has. **It records that
+   one fired once, and nothing further**: a gate can rot after being proven, which is how a
+   mutation floor spent weeks reporting 5.62% while its suite killed every mutant. **The converse
+   has no mechanism at all** — a gate that cannot *pass* argues for its own removal as surely as
+   one that cannot fail argues for its own sufficiency, and that argument reached a written
+   proposal before the measurement caught it. rak200/.github#86
