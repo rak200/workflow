@@ -86,6 +86,12 @@ Verify by **making the gate fail on purpose**:
 | docs are mandatory | `docs/` renamed away in a repository that has a `src/` |
 | a mandated value weakened | a floor restated below the pinned standard's — **with its badge moved to match**, or the badge gate stops the run first |
 
+**This table is how to fire a canary, not a record of which have been fired.** It names the gates
+whose failure mode is subtle enough to be worth writing the recipe down; a gate absent from it is
+not a gate nobody proved. **The record is `gates.tsv` in `rak200/.github`**, one row per gate, where
+`gates.sh` counts what is still owed. Reading coverage out of this table instead is how
+rak200/workflow#149 came to claim that thirty-seven gates owed a canary when the answer was three.
+
 A gate that has never failed has never been tested. Three of the five defects this rule exists to
 catch were invisible in the GitHub UI.
 
