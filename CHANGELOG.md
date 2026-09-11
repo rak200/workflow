@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.46](https://github.com/rak200/workflow/compare/0.18.45...0.18.46) (2026-09-11)
+
+
+### Documentation
+
+* the canary rule names its mechanism, and the table says what it is ([#167](https://github.com/rak200/workflow/issues/167)) ([c64bc13](https://github.com/rak200/workflow/commit/c64bc13c1d21676c2782c323a4657920d96acfca))
+
 ## [0.18.45](https://github.com/rak200/workflow/compare/0.18.44...0.18.45) (2026-09-10)
 
 
