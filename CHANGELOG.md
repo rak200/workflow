@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.51](https://github.com/rak200/workflow/compare/0.18.50...0.18.51) (2026-09-19)
+
+
+### Bug Fixes
+
+* onboarding writes the Latest tag badge it calls mandatory ([#182](https://github.com/rak200/workflow/issues/182)) ([29b88a2](https://github.com/rak200/workflow/commit/29b88a2531c19c8ea4f37d468c97e7dcf13a6cfc))
+
 ## [0.18.50](https://github.com/rak200/workflow/compare/0.18.49...0.18.50) (2026-09-19)
 
 
