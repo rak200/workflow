@@ -85,6 +85,7 @@ Verify by **making the gate fail on purpose**:
 | blame-ignore entries | an entry naming a commit that does not exist, and a second abbreviated to seven characters |
 | docs are mandatory | `docs/` renamed away in a repository that has a `src/` |
 | a mandated value weakened | a floor restated below the pinned standard's — **with its badge moved to match**, or the badge gate stops the run first |
+| the manifest's license | a `license` field naming what `LICENSE` does not grant — badge moved to match, and an identifier with **no hyphen**: the badge check reads to the first one, so `Apache-2.0` fails *that* gate instead |
 
 **This table is how to fire a canary, not a record of which have been fired.** It names the gates
 whose failure mode is subtle enough to be worth writing the recipe down; a gate absent from it is
