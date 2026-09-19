@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.49](https://github.com/rak200/workflow/compare/0.18.48...0.18.49) (2026-09-19)
+
+
+### Bug Fixes
+
+* a carry with no seed to move commits nothing, except where nothing else moves the pin ([#176](https://github.com/rak200/workflow/issues/176)) ([5f001e8](https://github.com/rak200/workflow/commit/5f001e8465ed3fde8b0522fd999dc8345eca4b69))
+
 ## [0.18.48](https://github.com/rak200/workflow/compare/0.18.47...0.18.48) (2026-09-19)
 
 
