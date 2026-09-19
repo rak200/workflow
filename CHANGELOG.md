@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.53](https://github.com/rak200/workflow/compare/0.18.52...0.18.53) (2026-09-19)
+
+
+### Documentation
+
+* what a mirror badge proves, and how far the comparison behind it reaches ([#186](https://github.com/rak200/workflow/issues/186)) ([04f210b](https://github.com/rak200/workflow/commit/04f210bdd241bda34acce0ab2c00ae044ff75450))
+
 ## [0.18.52](https://github.com/rak200/workflow/compare/0.18.51...0.18.52) (2026-09-19)
 
 
