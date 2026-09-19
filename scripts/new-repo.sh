@@ -68,7 +68,10 @@ case "$VARIANT" in
   *)                           template=none ;;
 esac
 cp -a ".rak200/scaffold/templates/CLAUDE.$template.md" CLAUDE.md
-printf '# %s\n\n%s\n' "$NAME" "$DESC" > README.md
+# The Latest tag badge is mandatory in every README.md, and as a live badge no check asks
+# for it — so it is written here, not left to whoever remembers. rak200/workflow#181
+printf '# %s\n\n[![Latest tag](https://img.shields.io/github/v/tag/%s?sort=semver)](https://github.com/%s/tags)\n\n%s\n' \
+  "$NAME" "$REPO" "$REPO" "$DESC" > README.md
 # Driven by what the seeds actually laid down, not by the variant's name: every variant
 # now carries release-please-config.json, and the two pieces of per-repo release state
 # are bootstrapped from what it says rather than from $VARIANT.

@@ -38,17 +38,19 @@ git init -b master
 ```
 
 `README.md` is per-repo content and therefore **not a seed**, which means no conformance check
-ever looks at it. One line in it is still mandatory, in every variant, published or not:
+ever looks at it. One line in it is still mandatory, in every variant, published or not, and step 3
+writes it:
 
 ```markdown
 [![Latest tag](https://img.shields.io/github/v/tag/rak200/<repo>?sort=semver)](https://github.com/rak200/<repo>/tags)
 ```
 
 It is the *live* badge class from `CONVENTIONS.md` — driven by a service, never hand-edited, and
-nothing in the release path touches it (`LIFECYCLE.md` §3.8). It appears here as a checklist item
-precisely because it cannot appear as a gate: six of ten repositories had gone without it, every
-one of them onboarded after the convention was written, and no mechanism in this document could
-have noticed.
+nothing in the release path touches it (`LIFECYCLE.md` §3.8). No gate can ask for it, so onboarding
+writes it instead of listing it: six of ten repositories had gone without it, every one of them
+onboarded after the convention was written. It is the same line in every variant. The language
+badges are not written here: each is a mirror badge, demanded by CI once its source exists — a
+manifest, or the standard it installs — and at onboarding none does. rak200/workflow#181
 
 **3. Pin the conventions, then copy the seeds out of them.**
 
@@ -79,7 +81,7 @@ git add .githooks/pre-push
 git update-index --chmod=+x .githooks/pre-push
 
 # Per-repo content, not seeds — written only where absent, since §1.2 runs this step too.
-[ -e README.md ] || printf '# %s\n\n<one line>\n' "<repo>" > README.md
+[ -e README.md ] || printf '# <repo>\n\n[![Latest tag](https://img.shields.io/github/v/tag/rak200/<repo>?sort=semver)](https://github.com/rak200/<repo>/tags)\n\n<one line>\n' > README.md
 case "<variant>" in
   php|php-config|ts|ts-config) template=<variant> ;;
   *)                           template=none ;;
@@ -393,8 +395,9 @@ on `master`.
 Same procedure minus steps **1, 2 and 4** (the repository, its tree and its default branch already
 exist). Verify the dist surface (`git archive HEAD | tar -t` against the `export-ignore` list).
 Step 3 keeps the `README.md` and `CLAUDE.md` the repository already has and writes whichever it
-lacks. A kept `CLAUDE.md` still owes the imports its variant's template carries, and nothing
-checks that it has them — add them by hand.
+lacks. A kept `README.md` still owes the *Latest tag* line from step 2 — which this path skips —
+and a kept `CLAUDE.md` the imports its variant's template carries. Nothing checks either; add them
+by hand.
 
 > **Step 3 is not skipped**, and this line used to say `1–4`, which read as skipping it. Step 3 is
 > where the submodule pin, the seed copy loop and the pipeline-pin bump live — an existing
