@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.50](https://github.com/rak200/workflow/compare/0.18.49...0.18.50) (2026-09-19)
+
+
+### Documentation
+
+* onboarding by hand writes CLAUDE.md, and never over a file that exists ([#179](https://github.com/rak200/workflow/issues/179)) ([cab6910](https://github.com/rak200/workflow/commit/cab6910332f1f0f79b2dfff9940a50917a3ef9cc))
+
 ## [0.18.49](https://github.com/rak200/workflow/compare/0.18.48...0.18.49) (2026-09-19)
 
 
