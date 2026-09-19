@@ -57,12 +57,15 @@ while IFS=$'\t' read -r v _form seed dest; do
   cp -a ".rak200/scaffold/$seed" "$dest"
 done < .rak200/scaffold/seeds.tsv
 chmod +x .githooks/pre-push
-# The Layer 2 import is language-specific, so the template is too. A `-config`
-# variant takes its language's template: it consumes the standard it publishes.
+# The Layer 2 import is language-specific, so the template is too — and a `-config`
+# variant has its own, because it IS the standard rather than a consumer of it. Neither
+# Composer nor npm installs a package into its own tree, so the vendor/ or node_modules/
+# path every consumer imports never exists there; its Layer 2 is the CONVENTIONS.md at
+# its root. That import resolves to nothing without an error, which is how both -config
+# repositories went without one of their two layers. rak200/workflow#86
 case "$VARIANT" in
-  php|php-config) template=php ;;
-  ts|ts-config)   template=ts ;;
-  *)              template=none ;;
+  php|php-config|ts|ts-config) template=$VARIANT ;;
+  *)                           template=none ;;
 esac
 cp -a ".rak200/scaffold/templates/CLAUDE.$template.md" CLAUDE.md
 printf '# %s\n\n%s\n' "$NAME" "$DESC" > README.md
