@@ -164,6 +164,13 @@ never their directory name, and hidden directories included: `*/` skips a dotted
 of `rak200/.github` is dotted by default. Neither reaches a consumer outside the account or one
 the token cannot see; a directory named on the line still carries those. rak200/workflow#147
 
+**A consumer with nothing to carry gets no commit.** When no seed its variant consumes changed, its
+files already match the tag's scaffold and Dependabot's bump goes green alone, so the run says so on
+that repository's line and leaves the pin to the bump — a commit would be the same change made
+twice, and two pull requests under `--push`. The exception is `none`, whose seed declares no
+`gitsubmodule` ecosystem (`LIFECYCLE.md` §3.9): there the carry is the only thing that moves the
+pin, and it still commits the gitlink alone. rak200/workflow#174
+
 **Carry it with the script, never by hand — two of the three check forms are not a copy.**
 `seeds.tsv` grades `.git-blame-ignore-revs` as `prefix:4`, so copying it verbatim deletes the
 repository's own blame entries, and it grades `ci.yml` and `release.yml` as `masked:` on the
