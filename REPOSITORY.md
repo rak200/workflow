@@ -10,8 +10,8 @@ that, which is why it is not in `LIFECYCLE.md`. That page carries the daily cycl
 ### 1.1 A new repository
 
 Run top to bottom. Every step that writes is followed by a step that reads it back — a response
-code is not evidence (rule 9). Substitute `<repo>`, `<variant>` (`php` or `ts`) and `<tag>` (the
-`rak200/workflow` version to pin).
+code is not evidence (rule 9). Substitute `<repo>`, `<variant>` (`php`, `php-config`, `ts`,
+`ts-config`, `none` or `github`) and `<tag>` (the `rak200/workflow` version to pin).
 
 **1. Create it empty.**
 
@@ -78,8 +78,21 @@ done < .rak200/scaffold/seeds.tsv
 git add .githooks/pre-push
 git update-index --chmod=+x .githooks/pre-push
 
-printf '# %s\n\n<one line>\n' "<repo>" > README.md   # not a seed: per-repo content
+# Per-repo content, not seeds — written only where absent, since §1.2 runs this step too.
+[ -e README.md ] || printf '# %s\n\n<one line>\n' "<repo>" > README.md
+case "<variant>" in
+  php|php-config|ts|ts-config) template=<variant> ;;
+  *)                           template=none ;;
+esac
+[ -e CLAUDE.md ] || cp -a ".rak200/scaffold/templates/CLAUDE.$template.md" CLAUDE.md
 ```
+
+**`README.md` and `CLAUDE.md` are written only where absent.** Neither is a seed, so nothing grades
+them once they exist, and §1.2 runs this step in a repository that already has both: an unguarded
+write replaces a hand-written file with a stub. The `CLAUDE.md` template follows the variant
+because it carries the Layer 2 import — and a `-config` package imports its own `CONVENTIONS.md`,
+since no package manager installs a package into its own tree. rak200/workflow#86,
+rak200/workflow#171
 
 > **Copy per row, never with a glob.** `cp <dir>/*` skips dotfiles, and the language variants are
 > mostly dotfiles — `.release-please-manifest.json` above all. It copies nothing, says nothing,
@@ -95,7 +108,7 @@ that apply everywhere.
 **Which pipeline a variant calls.** `none` and `github` call `base.yml`, the language-agnostic
 half: they have no package to install. Every other variant calls its language pipeline —
 **including `php-config` and `ts-config`**. A configuration package is a package: it ships
-executable code, and a package whose CI never installs it has no CI. Both `-config` variants
+executable code, and a package whose CI never installs it has no CI.
 The language pipelines take a `variant:` input for exactly this: a `-config` package must be
 graded against its own seed set, which *exports* the tool configs the library variants hide.
 rak200/workflow#28
@@ -379,6 +392,9 @@ on `master`.
 
 Same procedure minus steps **1, 2 and 4** (the repository, its tree and its default branch already
 exist). Verify the dist surface (`git archive HEAD | tar -t` against the `export-ignore` list).
+Step 3 keeps the `README.md` and `CLAUDE.md` the repository already has and writes whichever it
+lacks. A kept `CLAUDE.md` still owes the imports its variant's template carries, and nothing
+checks that it has them — add them by hand.
 
 > **Step 3 is not skipped**, and this line used to say `1–4`, which read as skipping it. Step 3 is
 > where the submodule pin, the seed copy loop and the pipeline-pin bump live — an existing
