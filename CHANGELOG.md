@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.48](https://github.com/rak200/workflow/compare/0.18.47...0.18.48) (2026-09-19)
+
+
+### Features
+
+* the carry knows the account's consumers, and names every one it missed ([#173](https://github.com/rak200/workflow/issues/173)) ([0ab841f](https://github.com/rak200/workflow/commit/0ab841fbe80b786d1210c4a400eb25fda133691a))
+
 ## [0.18.47](https://github.com/rak200/workflow/compare/0.18.46...0.18.47) (2026-09-19)
 
 
