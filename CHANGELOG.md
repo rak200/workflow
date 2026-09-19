@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.47](https://github.com/rak200/workflow/compare/0.18.46...0.18.47) (2026-09-19)
+
+
+### Bug Fixes
+
+* the -config variants import both layers, not a standard they cannot install ([#170](https://github.com/rak200/workflow/issues/170)) ([9e65892](https://github.com/rak200/workflow/commit/9e65892c6e6d961e78669f9ec1f7fac50b677c80))
+
 ## [0.18.46](https://github.com/rak200/workflow/compare/0.18.45...0.18.46) (2026-09-11)
 
 
