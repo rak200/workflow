@@ -129,9 +129,9 @@ holds a single commit — the most common shape there is.
 The change is on `master` and nothing publishes it; an empty release window is indistinguishable
 from a healthy one. `Release-As:` is **not** the recovery — it chooses which version, never whether
 the Release PR opens. The recovery is a commit whose type is **visible**: `feat`, `fix`, `perf`,
-`revert`, and `docs` in the `none` variant. Once one exists the whole window ships in the same tag,
-hidden commits included — they reach the tag without reaching the changelog, which is the right
-record of what a consumer received. rak200/workflow#120
+`revert`, and `docs` in the `workflow` and `none` variants. Once one exists the whole window ships
+in the same tag, hidden commits included — they reach the tag without reaching the changelog, which
+is the right record of what a consumer received. rak200/workflow#120
 
 ## 6. A Dependabot PR fails CI
 
@@ -167,9 +167,9 @@ the token cannot see; a directory named on the line still carries those. rak200/
 **A consumer with nothing to carry gets no commit.** When no seed its variant consumes changed, its
 files already match the tag's scaffold and Dependabot's bump goes green alone, so the run says so on
 that repository's line and leaves the pin to the bump — a commit would be the same change made
-twice, and two pull requests under `--push`. The exception is `none`, whose seed declares no
-`gitsubmodule` ecosystem (`LIFECYCLE.md` §3.9): there the carry is the only thing that moves the
-pin, and it still commits the gitlink alone. rak200/workflow#174
+twice, and two pull requests under `--push`. It holds for every variant a consumer can declare,
+since each one's seed moves the pin; the one that does not, `workflow`, is the scaffold source,
+which is never carried (`LIFECYCLE.md` §3.9). rak200/workflow#174, rak200/workflow#177
 
 **Carry it with the script, never by hand — two of the three check forms are not a copy.**
 `seeds.tsv` grades `.git-blame-ignore-revs` as `prefix:4`, so copying it verbatim deletes the

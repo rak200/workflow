@@ -1,7 +1,7 @@
 # variant	form	seed	destination
 #
-# variant     all | none | php | php-config | ts | ts-config | github — `all` applies everywhere, the rest match
-#             the repository's declared variant.
+# variant     all | none | php | php-config | ts | ts-config | github | workflow — `all` applies everywhere,
+#             the rest match the repository's declared variant.
 # form        exact       byte-identical
 #             prefix:N    the first N lines are the seed; the rest is per-repo history
 #             masked:RE   identical after RE is blanked on both sides
@@ -23,6 +23,13 @@
 # credential has no language. It is also seeded EMPTY on purpose — the file exists so
 # that the first legitimate high-entropy string has a place to be permitted, rather
 # than being permitted in a hurry against a red required check.
+#
+# `workflow` is this repository — the scaffold source — and nothing else; onboarding
+# never offers it. It shares `none`'s seeds except the two that must differ: its CI
+# caller names its own variant, and its dependabot.yml declares no `gitsubmodule`
+# ecosystem, because the source has no .gitmodules. That frees `none` to describe what
+# the scaffold builds with it — a consumer with no language layer, whose pin Dependabot
+# moves like any other.
 all	exact	all/.editorconfig	.editorconfig
 all	exact	all/CODEOWNERS	.github/CODEOWNERS
 all	exact	all/LICENSE	LICENSE
@@ -35,6 +42,12 @@ none	exact	none/dependabot.yml	.github/dependabot.yml
 none	masked:@[0-9]+\.[0-9]+\.[0-9]+	none/ci.yml	.github/workflows/ci.yml
 none	exact	none/release-please-config.json	release-please-config.json
 none	masked:@[0-9]+\.[0-9]+\.[0-9]+	none/release.yml	.github/workflows/release.yml
+workflow	exact	none/.gitattributes	.gitattributes
+workflow	exact	none/.gitignore	.gitignore
+workflow	exact	workflow/dependabot.yml	.github/dependabot.yml
+workflow	masked:@[0-9]+\.[0-9]+\.[0-9]+	workflow/ci.yml	.github/workflows/ci.yml
+workflow	exact	none/release-please-config.json	release-please-config.json
+workflow	masked:@[0-9]+\.[0-9]+\.[0-9]+	none/release.yml	.github/workflows/release.yml
 github	exact	github/.gitattributes	.gitattributes
 github	exact	github/.gitignore	.gitignore
 github	exact	github/dependabot.yml	.github/dependabot.yml

@@ -295,21 +295,16 @@ PY
   # Nothing to carry is not a carry. With no seed this variant consumes changed, the
   # repository's files already match the tag's scaffold, so Dependabot's bump goes green
   # on its own — a commit here is that bump made twice, and two pull requests for one
-  # change under --push. `none` is the exception: its seeded dependabot.yml declares no
-  # `gitsubmodule` ecosystem (LIFECYCLE.md section 3.9), so for a `none` consumer this
-  # is the only thing that moves the pin. rak200/workflow#174
-  if [ "$n" = 0 ] && [ "$variant" != none ]; then
+  # change under --push. It holds for every variant a consumer can declare, because each
+  # one's seeded dependabot.yml moves the pin; the one without, `workflow`, is the scaffold
+  # source, which is never carried. rak200/workflow#174, rak200/workflow#177
+  if [ "$n" = 0 ]; then
     echo "  $name ($variant): no seed it consumes changed in $TAG — the Dependabot bump is enough"
     drop_worktree
     git -C "$repo" branch -D --quiet "$BRANCH"
     continue
   fi
-  if [ "$variant" = none ]; then
-    why="The \`none\` variant's dependabot.yml declares no \`gitsubmodule\` ecosystem, so nothing but a carry moves this pin."
-  else
-    why="Dependabot moves the \`.rak200\` gitlink alone."
-  fi
-  [ "$n" = 0 ] || why+=" $TAG changed $n seed(s) this variant consumes, so conformance grades the repository against a scaffold it no longer pins until they travel with it."
+  why="Dependabot moves the \`.rak200\` gitlink alone. $TAG changed $n seed(s) this variant consumes, so conformance grades the repository against a scaffold it no longer pins until they travel with it."
   if ! git -C "$wt" commit --quiet -m "build: carry the baseline to $TAG" -m "$why" \
     -m "Carried by \`scripts/carry-seeds.sh\`, which reads \`seeds.tsv\` and honours each row's check form."
   then

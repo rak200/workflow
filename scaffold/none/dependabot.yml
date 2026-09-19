@@ -59,3 +59,16 @@ updates:
     groups:
       actions:
         patterns: ["*"]
+  # Daily for the reason given above, and this pin was daily first: it moves several times a
+  # day and its staleness stops the work. Conformance fails when a seed the repository consumes
+  # changed under an old pin, so every pull request opens red until it moves. An outdated
+  # library is merely outdated, which is why a library ecosystem stays weekly.
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    cooldown:
+      exclude: ["*"]
+    commit-message:
+      prefix: "build"
+      include: "scope"

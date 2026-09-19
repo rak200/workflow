@@ -91,9 +91,10 @@ the **pull request title**. In-branch commits are unconstrained — they are squ
 | `ci` | CI config only | none | none |
 | `chore` | anything else not user-facing | none | none |
 
-\* **The `docs` row is the one that varies by variant.** The `none` variant leaves the section
-visible, because there the prose *is* the product: `rak200/workflow` cuts a patch on a `docs:`
-commit and nothing else does. `LIFECYCLE.md` §3.9 carries the reasoning and the measurement.
+\* **The `docs` row is the one that varies by variant.** The `workflow` and `none` variants leave
+the section visible, because there the prose *is* the product: `rak200/workflow` cuts a patch on a
+`docs:` commit, as would a repository with no language layer, and nothing else does.
+`LIFECYCLE.md` §3.9 carries the reasoning and the measurement.
 
 The set is closed at these eleven — the stock `type-enum` of
 `@commitlint/config-conventional`, adopted without override. A breaking change forces a **major**

@@ -388,13 +388,17 @@ releases a day never leaves the window. The seeds carry `cooldown: { exclude: ["
 `default-days: 0` is not expressible, since the schema sets `minimum: 1` on every `*-days` field
 but `semver-patch-days`. rak200/workflow#44
 
-**The `none` variant declares no `gitsubmodule` ecosystem.** That variant is `rak200/workflow`
-itself, the scaffold source, which has no `.gitmodules`; Dependabot does not read that as *nothing
-to do* but as an error, once per scheduled run.
+**Only the `workflow` variant declares no `gitsubmodule` ecosystem.** That variant is
+`rak200/workflow` itself, the scaffold source, and nothing else — onboarding never offers it. It
+has no `.gitmodules`, and Dependabot does not read that as *nothing to do* but as an error, once
+per scheduled run. `none` is a consumer's variant, for a repository with no language layer, and
+its pin moves like any other. rak200/workflow#177
 
-**`docs:` cuts a release in the `none` variant, and nowhere else.** That variant is
+**`docs:` cuts a release in the `workflow` and `none` variants, and nowhere else.** `workflow` is
 `rak200/workflow` itself, where the product **is** prose: `LIFECYCLE.md` and `CONVENTIONS.md`
 reach consumers only inside a tag, so a documentation change that never gets one never arrives.
+`none` shares the seed, and the reason carries over: a repository with no language layer has
+nothing but its prose to ship.
 `release-please` releases on `feat:` and `fix:` by default and a `docs:` commit produces nothing —
 correct everywhere the product is code, and silently wrong here. It is enabled by listing `docs`
 un-hidden in `changelog-sections`; a hidden section neither appears in the changelog nor triggers
