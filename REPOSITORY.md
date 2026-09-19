@@ -102,16 +102,17 @@ rak200/workflow#171
 
 The scaffold is **flat**: `scaffold/php/ci.yml`, not
 `scaffold/php/.github/workflows/ci.yml`. Seeds live under one directory per variant — `all`,
-`none`, `github`, `php`, `php-config`, `ts`, `ts-config` — and each row carries its own
+`none`, `github`, `php`, `php-config`, `ts`, `ts-config`, `workflow` — and each row carries its own
 destination, so mirroring the destination tree inside the scaffold would imply a correspondence
 that does not exist. `all` is not a variant a repository declares; it is the row marker for seeds
-that apply everywhere.
+that apply everywhere. `workflow` is declared by one repository only, this one, and is never
+onboarded: it is the scaffold source's own seed set (`LIFECYCLE.md` §3.9).
 
-**Which pipeline a variant calls.** `none` and `github` call `base.yml`, the language-agnostic
-half: they have no package to install. Every other variant calls its language pipeline —
-**including `php-config` and `ts-config`**. A configuration package is a package: it ships
-executable code, and a package whose CI never installs it has no CI.
-The language pipelines take a `variant:` input for exactly this: a `-config` package must be
+**Which pipeline a variant calls.** `none`, `github` and `workflow` call `base.yml`, the
+language-agnostic half: they have no package to install. Every other variant calls its language
+pipeline — **including `php-config` and `ts-config`**. A configuration package is a package: it
+ships executable code, and a package whose CI never installs it has no CI. The language pipelines
+take a `variant:` input for exactly this: a `-config` package must be
 graded against its own seed set, which *exports* the tool configs the library variants hide.
 rak200/workflow#28
 
