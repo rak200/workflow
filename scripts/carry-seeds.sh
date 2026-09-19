@@ -2,6 +2,7 @@
 #
 # carry-seeds.sh — carry a baseline release into consumer repositories.
 #
+#   scripts/carry-seeds.sh [--tag <tag>] [--push] --all [<repo-dir>...]
 #   scripts/carry-seeds.sh [--tag <tag>] [--push] <repo-dir> [<repo-dir>...]
 #
 # This is the executable form of CONTINGENCIES.md section 7. Dependabot moves the
@@ -28,24 +29,100 @@
 # It is safe to run while you are working in a consumer: the carry happens in a worktree
 # of its own and the repository's checkout is never entered. See the comment on the
 # worktree below for what that replaced and why.
+#
+# THE REACH IS THE ACCOUNT, NOT THE COMMAND LINE. Every run lists the repositories in
+# the baseline's account whose .gitmodules names the baseline, and ends by naming each
+# one it did not reach, with a non-zero exit. A consumer left off the line used to be
+# one the run had nothing to say about, so it finished green — and a Dependabot bump
+# reddened two hours later. `--all` carries every consumer with a clone beside this
+# one. Directories stay valid input: they are the only way to reach a consumer outside
+# the account, or one the token cannot see. rak200/workflow#147
 
 set -euo pipefail
 
 TAG=''
 PUSH=0
+ALL=0
 REPOS=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --tag)  TAG=$2; shift 2 ;;
     --push) PUSH=1; shift ;;
+    --all)  ALL=1; shift ;;
     -*)     echo "unknown option: $1" >&2; exit 2 ;;
     *)      REPOS+=("$1"); shift ;;
   esac
 done
-[ ${#REPOS[@]} -gt 0 ] || { echo "usage: $0 [--tag <tag>] [--push] <repo-dir>..." >&2; exit 2; }
+[ ${#REPOS[@]} -gt 0 ] || [ "$ALL" = 1 ] \
+  || { echo "usage: $0 [--tag <tag>] [--push] {--all | <repo-dir>...}" >&2; exit 2; }
+
+slug_of() {   # owner/name from a GitHub remote URL, https or ssh
+  sed -E 's#^.*github\.com[:/]##; s#\.git$##; s#/$##' <<<"$1"
+}
 
 BASELINE=$(cd "$(dirname "$0")/.." && pwd)
+BASELINE_SLUG=$(slug_of "$(git -C "$BASELINE" remote get-url origin)")
 git -C "$BASELINE" fetch --quiet --tags origin
+
+# One GraphQL call, no local clone involved. A consumer is a repository whose default
+# branch's .gitmodules names the baseline; a fork or an archived repository is not one.
+consumers() {
+  gh api graphql --paginate -F owner="${BASELINE_SLUG%%/*}" -f query='
+    query($owner: String!, $endCursor: String) {
+      repositoryOwner(login: $owner) {
+        repositories(first: 100, after: $endCursor, isFork: false, ownerAffiliations: OWNER) {
+          pageInfo { hasNextPage endCursor }
+          nodes {
+            nameWithOwner isArchived
+            gitmodules: object(expression: "HEAD:.gitmodules") { ... on Blob { text } }
+          }
+        }
+      }
+    }' --jq '.data.repositoryOwner.repositories.nodes[] | select(.isArchived | not)
+      | .nameWithOwner as $r | (.gitmodules.text // "")
+      | [scan("(?m)^\\s*url\\s*=\\s*(\\S+)")] | .[] | "\($r) \(.[0])"' \
+  | while read -r r url; do
+      if [ "$(slug_of "$url")" = "$BASELINE_SLUG" ]; then echo "$r"; fi
+    done | sort -u
+}
+# A failed listing is not an empty one: it leaves the reach unknown, and the run says
+# so at the end rather than reporting that it missed nothing.
+KNOWN=1
+CONSUMERS=()
+if listed=$(consumers); then
+  mapfile -t CONSUMERS < <(printf '%s\n' "$listed" | grep . || true)
+else
+  KNOWN=0
+  [ "$ALL" = 0 ] || { echo "cannot list the consumers of $BASELINE_SLUG — --all has nothing to carry" >&2; exit 1; }
+fi
+
+declare -A REACHED=()   # consumer slug -> the directory this run takes it from
+for repo in "${REPOS[@]}"; do
+  url=$(git -C "$repo" remote get-url origin 2>/dev/null) || continue
+  REACHED[$(slug_of "$url")]=$repo
+done
+
+if [ "$ALL" = 1 ]; then
+  # Every directory beside this clone, hidden ones included — `*/` does not match a
+  # dotted name, and a clone of rak200/.github is dotted by default. A clone is known by
+  # its origin, never by its directory name.
+  parent=$(dirname "$BASELINE")
+  declare -A WANTED=()
+  for c in "${CONSUMERS[@]}"; do WANTED[$c]=1; done
+  while IFS= read -r d; do
+    [ -d "$d/.git" ] || continue
+    url=$(git -C "$d" remote get-url origin 2>/dev/null) || continue
+    s=$(slug_of "$url")
+    [ -n "${WANTED[$s]:-}" ] || continue
+    if [ -n "${REACHED[$s]:-}" ]; then
+      [ "$(cd "${REACHED[$s]}" && pwd)" = "$d" ] \
+        || echo "  $(basename "$d"): a second clone of $s — carrying ${REACHED[$s]} only"
+      continue
+    fi
+    REACHED[$s]=$d
+    REPOS+=("$d")
+  done < <(find "$parent" -mindepth 1 -maxdepth 1 -type d | sort)
+fi
 
 if [ -z "$TAG" ]; then
   TAG=$(git -C "$BASELINE" tag --list --sort=-creatordate | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
@@ -226,10 +303,21 @@ PY
   echo "  $name ($variant): $TAG, $n seed(s) — $(git -C "$wt" rev-parse --short HEAD)"
   if [ "$PUSH" = 1 ]; then
     git -C "$wt" push --quiet -u origin "$BRANCH"
-    gh pr create --repo "$(git -C "$repo" remote get-url origin | sed -E 's#.*github.com[:/]##; s#\.git$##')" \
+    gh pr create --repo "$(slug_of "$(git -C "$repo" remote get-url origin)")" \
       --base master --head "$BRANCH" --title "build: carry the baseline to $TAG" \
       --body "Dependabot moves the \`.rak200\` gitlink alone; \`$TAG\` changed $n seed(s) this variant consumes. Carried by \`scripts/carry-seeds.sh\`, verified against \`seeds.tsv\` before commit."
   fi
   drop_worktree
 done
+
+if [ "$KNOWN" = 0 ]; then
+  echo "could not list the consumers of $BASELINE_SLUG — this run's reach is unknown"; rc=1
+else
+  missed=()
+  for c in "${CONSUMERS[@]}"; do [ -n "${REACHED[$c]:-}" ] || missed+=("$c"); done
+  if [ ${#missed[@]} -gt 0 ]; then
+    if [ "$ALL" = 1 ]; then why="no clone in $(dirname "$BASELINE")"; else why='not named'; fi
+    echo "NOT CARRIED ($why): ${missed[*]}"; rc=1
+  fi
+fi
 exit $rc

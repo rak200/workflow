@@ -151,9 +151,18 @@ that moved. The Dependabot bump carried the gitlink and left the seeds behind. F
 the baseline:
 
 ```bash
-# --push opens the pull requests as well
-scripts/carry-seeds.sh [--tag <tag>] [--push] ../utils ../caster ...
+# every consumer with a clone beside this one; --push opens the pull requests as well
+scripts/carry-seeds.sh [--tag <tag>] [--push] --all
 ```
+
+**The run knows what it should have reached.** It lists the repositories in the account whose
+`.gitmodules` names the baseline and ends by naming each one it did not carry, with a non-zero exit
+— *not named* when directories were typed, *no clone* under `--all`. A typed list is whatever the
+operator remembers, and a repository that was never named had nothing to report, so a missed
+consumer used to finish the run green. `--all` finds clones beside the baseline by their `origin`,
+never their directory name, and hidden directories included: `*/` skips a dotted name, and a clone
+of `rak200/.github` is dotted by default. Neither reaches a consumer outside the account or one
+the token cannot see; a directory named on the line still carries those. rak200/workflow#147
 
 **Carry it with the script, never by hand — two of the three check forms are not a copy.**
 `seeds.tsv` grades `.git-blame-ignore-revs` as `prefix:4`, so copying it verbatim deletes the
