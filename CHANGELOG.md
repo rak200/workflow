@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.52](https://github.com/rak200/workflow/compare/0.18.51...0.18.52) (2026-09-19)
+
+
+### Features
+
+* the scaffold source has a variant of its own, and none moves a consumer's pin ([#184](https://github.com/rak200/workflow/issues/184)) ([20f5473](https://github.com/rak200/workflow/commit/20f547392ce6d7db346a5ad2d412b8fd51b7245b))
+
 ## [0.18.51](https://github.com/rak200/workflow/compare/0.18.50...0.18.51) (2026-09-19)
 
 
