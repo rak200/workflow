@@ -343,6 +343,18 @@ maintained:
   the repository first and falls back to the package after install. An absent badge fails wherever
   the source exists; a repository with no such source makes no claim and is not asked for one.
   rak200/.github#71
+
+  **A mirror proves the badge matches the configuration, never that the configuration matches the
+  convention.** That second comparison is made wherever the convention has a machine-readable form:
+  the language pipelines compare the analyser level, the mutation floor, the ESLint tier and the
+  runtime floor against the same file in the **pinned Layer 2 standard** — the floor as a floor, at
+  or above, the rest for equality — and the language-agnostic half compares the manifest's `license`
+  with the `LICENSE` seed. **Its reach is three-sided.** Those comparisons run on **one matrix
+  cell**, the lowest declared runtime. A value the prose mandates and the standard does not carry is
+  invisible to them, and the step says so rather than passing. And in the `-config` repositories,
+  which are where the values are defined, it exits with *no pinned standard under `vendor/`* — no
+  package manager installs a package into its own tree, so **the standard itself is graded by
+  nobody**. rak200/workflow#69
 - **Stable claims (revisit only if the practice changes):** code style, SemVer, Keep a Changelog.
 
 Prefer a verifiable badge over a vanity metric.
