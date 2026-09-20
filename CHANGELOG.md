@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.55](https://github.com/rak200/workflow/compare/0.18.54...0.18.55) (2026-09-20)
+
+
+### Documentation
+
+* the scanner canary names the subset the scan actually runs ([#193](https://github.com/rak200/workflow/issues/193)) ([e67bf7e](https://github.com/rak200/workflow/commit/e67bf7e5273c8117b26aceb85710c82e0ed0073b))
+
 ## [0.18.54](https://github.com/rak200/workflow/compare/0.18.53...0.18.54) (2026-09-20)
 
 
