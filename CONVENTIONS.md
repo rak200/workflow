@@ -292,10 +292,12 @@ out of step with it.
   **CI reads every `<owner>/<name>` reference** in a repository's markdown and `.github/`, and asks
   github.com **anonymously** whether it opens — which is the question the rule poses, and not the
   one a token would answer. A 404 fails, private and non-existent alike, because both are the same
-  404 to a reader outside the account. **A bare name in prose is invisible to it**: `devr` rather
-  than `rak200/devr` reads as a word. `CHANGELOG.md` is exempt, and a private repository is skipped
-  entirely — its documentation is not public. It found the live instance the day it was built: the
-  issue templates every repository in the account inherits linked a private repository's proposals.
+  404 to a reader outside the account. **A bare name in prose is invisible to it**: without the
+  owner in front of it, a repository's name reads as a word. `CHANGELOG.md` is exempt, and a
+  private repository is skipped entirely — its documentation is not public. It found the live
+  instance the day it was built: the issue templates every repository in the account inherits
+  linked a private repository's proposals. It also reddened the first draft of this very
+  paragraph, which named one as its example.
   rak200/workflow#64
 - **It binds the whole public surface**, not only the documents: badges, workflow comments, issue
   templates, and the bodies of issues and pull requests. **`CHANGELOG.md` is the one exemption**,
