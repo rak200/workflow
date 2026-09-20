@@ -171,38 +171,24 @@ from step 1, because a rename leaves name-targeted rules pointing at the old nam
 **5. Platform settings, then read them back.**
 
 ```bash
-gh api -X PATCH repos/rak200/<repo> \
-  -F allow_squash_merge=true -F allow_merge_commit=false -F allow_rebase_merge=false \
-  -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=PR_BODY \
-  -F allow_auto_merge=true \
-  -F delete_branch_on_merge=true
-gh api -X PUT repos/rak200/<repo>/actions/permissions/workflow \
-  -f default_workflow_permissions=read -F can_approve_pull_request_reviews=true
-gh api -X PUT repos/rak200/<repo>/actions/permissions \
-  -F enabled=true -f allowed_actions=all -F sha_pinning_required=true
-gh api -X PUT repos/rak200/<repo>/private-vulnerability-reporting
-
-gh api repos/rak200/<repo> --jq '{allow_squash_merge,allow_merge_commit,allow_rebase_merge,squash_merge_commit_title,squash_merge_commit_message,allow_auto_merge,delete_branch_on_merge}'
-gh api repos/rak200/<repo>/actions/permissions/workflow
-gh api repos/rak200/<repo>/actions/permissions
-gh api repos/rak200/<repo>/private-vulnerability-reporting
+scripts/apply-settings.sh rak200/<repo>
+scripts/audit-settings.sh <repo>
 ```
 
-**`allow_auto_merge` is not optional.** It defaults to off, and `--auto` — the merge command
-`LIFECYCLE.md` §3.6 and `LIFECYCLE.md` §6 both prescribe — needs it: `gh pr merge --auto` enables
-auto-merge through a mutation the platform refuses outright when the repository has the feature
-disabled.
+**The values are not written here, and that is the point.** `scripts/settings.tsv` declares them
+once; the first command writes from it and the second grades against it, so there is no list in
+this document to fall out of step with the one the script applies. There used to be, and the cost
+was exactly the failure the file now prevents: `allow_auto_merge` was decided, written down as
+decided, and left **false in nine of ten repositories**, because a setting nobody wrote appeared in
+neither the write nor the read-back — the reasons for each value live beside it in the manifest.
+rak200/workflow#78
 
 **`sha_pinning_required` lives one path segment above the token defaults**, on the repository's
 Actions *policy* rather than its token settings, and the two endpoints are easy to mistake for one.
 It is what makes rule 6 — third-party actions pinned by full commit SHA — a platform rule instead of
-a review habit, and the Actions allowlist was dropped in exchange for it. Two properties matter when
-writing it:
-
-- **The PUT replaces the whole policy object.** Send `enabled` and `allowed_actions` with it or they
-  are rewritten to defaults. The read-back above is what proves they were not.
-- **It does not reach reusable-workflow references.** `uses: rak200/.github/…@<tag>` is untouched,
-  so rule 11 — exact tag, never a moving alias — stands beside it rather than against it.
+a review habit. **It does not reach reusable-workflow references**: `uses: rak200/.github/…@<tag>`
+is untouched, so rule 11 — exact tag, never a moving alias — stands beside it rather than against
+it.
 
 A floating tag then fails at `Set up job`, with the platform's own message and as a **red check
 rather than an absent one**:
@@ -386,10 +372,11 @@ Branch the canary **from the current tip of `master`**. Under `strict_required_s
 a stale branch is refused for being behind, which looks identical to being refused for the red
 gate — and proves nothing.
 
-**11. Final read-back.** `default_branch` = `master`; two rulesets `active`; the seven merge/permission
-fields as written in step 5; `sha_pinning_required` **true** with `allowed_actions` still `all`; the
-canonical labels present and the stock ones gone; `git submodule status` clean at `<tag>`; `ci` green
-on `master`.
+**11. Final read-back.** `scripts/audit-settings.sh <repo>` silent — it compares every field
+`settings.tsv` declares and reports a divergence per line, so a clean run is the read-back for all
+of them, the rulesets' presence included. Then, by eye, what it deliberately does not compare:
+`default_branch` = `master`; the rulesets' bypass mode; the canonical labels present and the stock
+ones gone; `git submodule status` clean at `<tag>`; `ci` green on `master`.
 
 ### 1.2 An existing repository
 

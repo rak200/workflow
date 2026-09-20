@@ -474,7 +474,10 @@ submodule bump carries: `.rak200` moves, conformance re-checks every seeded file
 whose protection is three releases stale reports nothing at all. After a `rak200/.github` release
 that changes `rulesets/branch.json` or `rulesets/tag.json`, run the sweep: re-apply per repo via
 `gh api`, then **read back** (§4, rule 9). No scheduled audit exists — that would need a stored
-admin credential.
+admin credential — and `scripts/audit-settings.sh` is the maintainer-run one that stands in for
+part of it: it reads every repository in the account against `scripts/settings.tsv` and reports a
+ruleset that is **missing or not active**, never one whose contents drifted from the canonical
+JSON. rak200/workflow#78
 
 ---
 
