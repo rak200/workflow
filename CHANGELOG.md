@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.54](https://github.com/rak200/workflow/compare/0.18.53...0.18.54) (2026-09-20)
+
+
+### Documentation
+
+* five silent rules name their mechanism, and how far it reaches ([#189](https://github.com/rak200/workflow/issues/189)) ([2c8d294](https://github.com/rak200/workflow/commit/2c8d294926dd84dcb86675022fcb88a3304bbea0))
+
 ## [0.18.53](https://github.com/rak200/workflow/compare/0.18.52...0.18.53) (2026-09-19)
 
 
