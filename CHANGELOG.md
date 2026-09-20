@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.56](https://github.com/rak200/workflow/compare/0.18.55...0.18.56) (2026-09-20)
+
+
+### Features
+
+* platform settings are declared once, and read back against the declaration ([#195](https://github.com/rak200/workflow/issues/195)) ([d9d5510](https://github.com/rak200/workflow/commit/d9d55106d8881ce15f23e19b833afb6aaecd003e))
+
 ## [0.18.55](https://github.com/rak200/workflow/compare/0.18.54...0.18.55) (2026-09-20)
 
 
