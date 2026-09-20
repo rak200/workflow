@@ -76,7 +76,7 @@ Verify by **making the gate fail on purpose**:
 | aggregator | a matrix job forced to fail |
 | SHA pinning | a step using `actions/setup-node@v4` — refused at `Set up job` |
 | PR title check | a PR titled `wip` |
-| scanner | a fixture with `eval($_POST[…])` |
+| scanner | a fixture with `eval($_POST[…])` in PHP. **In TypeScript the rule name is not the guide**: `p/javascript` and `p/typescript` resolve unauthenticated to a subset of themselves — 68 rules, a number the scan prints — and the `eslint-plugin-security` ports are not in it, so a fixture written from those names scans clean while the gate reports, correctly, that it found nothing. Plant several shapes at once and read the count |
 | `gitleaks` | a planted credential |
 | coverage floor | a deliberate coverage drop — and, for the ratchet, a gain left unrecorded |
 | badge conformance | a mirrored source moved with its badge left behind |
