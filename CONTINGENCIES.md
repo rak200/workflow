@@ -86,6 +86,8 @@ Verify by **making the gate fail on purpose**:
 | docs are mandatory | `docs/` renamed away in a repository that has a `src/` |
 | a mandated value weakened | a floor restated below the pinned standard's — **with its badge moved to match**, or the badge gate stops the run first |
 | the manifest's license | a `license` field naming what `LICENSE` does not grant — badge moved to match, and an identifier with **no hyphen**: the badge check reads to the first one, so `Apache-2.0` fails *that* gate instead |
+| public documentation | a reference to a repository a reader outside the account cannot open — planted as a name that does **not exist**, never a private one: the pull request body is public surface too, and naming one there commits the violation under test |
+| a workflow's security or shape | the violation in a **new** workflow file. The seeded `ci.yml` is the obvious place and the wrong one: editing it reddens seed conformance, and the red stops being evidence about the gate under test |
 
 **This table is how to fire a canary, not a record of which have been fired.** It names the gates
 whose failure mode is subtle enough to be worth writing the recipe down; a gate absent from it is

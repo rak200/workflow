@@ -580,8 +580,8 @@ you meant to write afterwards cannot be written. Everything lands first; the fla
    **no maintenance branch** for an old major anywhere here — the consumer is upgraded instead.
    Nine majors have shipped across the estate and not one `release/x.y` has ever existed. What
    happened instead, and nothing recorded it: consumers were left frozen — `sql-builder` requiring
-   `utils ^1.0.0` while `utils` was at `4.5.0`, `devr` requiring `caster ^1.0.0` while `caster`
-   was at `3.x`. The old major was never patched **and** the consumer was never upgraded; the
+   `utils ^1.0.0` while `utils` was at `4.5.0`, and another consumer requiring `caster ^1.0.0`
+   while `caster` was at `3.x`. The old major was never patched **and** the consumer was never upgraded; the
    version simply froze. A maintenance branch would not have prevented that. 6. **Archive, then
    read it back.**
 

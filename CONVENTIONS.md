@@ -181,7 +181,10 @@ presence: a script that cannot run is worse than a missing one, because it reads
 - **Mutation floor: `minCoveredMsi: 100`.** Every mutant on covered code must die. A survivor is
   killed by strengthening the test; it is *ignored* only when provably equivalent — no input
   distinguishes it — and then with the narrowest possible annotation. **The threshold is never
-  lowered to accommodate a survivor.**
+  lowered to accommodate a survivor**, and a repository that restates it is compared with the
+  pinned Layer 2 standard's: a lower number fails. One that does not restate it runs the standard's.
+  The comparison has the reach §README badges describes — one matrix cell, and absent in the
+  `-config` repositories, which is where the number is defined. rak200/workflow#64
 - **Mutation runs over the changed lines on a pull request, and in full off that path.** A full
   run is tens of minutes on a real library, and a required check that slow is one people learn to
   route around. The threshold is identical in both; only *what* is mutated differs. The full run
@@ -253,12 +256,13 @@ with a repository open and the process document closed.
 done. `CHANGELOG.md` is the historical record; `ROADMAP.md` is only what is still pending. CI
 enforces it against the PR's `Closes #N`.
 
-**Two of those rows are checked, and neither check asserts presence.** The mirror-badge and
-roadmap-pruning steps each open with a guard that passes when the file is absent — *no README.md*,
-*no ROADMAP.md*. They verify content where the file exists, never that it exists. `docs/` was the
-third and no longer is: a repository with a `src/` must have a `docs/`, and the check fails when it
-does not. Onboarding writes `README.md` and `CLAUDE.md`; every other row appears when someone
-writes it, and its absence is caught by a reader or not at all. rak200/.github#67
+**Two of those rows are checked for content by a step that passes when the file is absent.** The
+mirror-badge and roadmap-pruning steps each open with a guard — *no README.md*, *no ROADMAP.md* —
+and verify content where the file exists. Two rows are nevertheless asserted to exist, each by a
+step of its own: a repository with a `src/` must have a `docs/`, and `README.md` must exist to carry
+the required version badge below. Onboarding writes `README.md` and `CLAUDE.md`; every other row
+appears when someone writes it, and its absence is caught by a reader or not at all.
+rak200/.github#67, rak200/workflow#64
 
 **`CLAUDE.md` states no rule that is not written somewhere a human reads.** Its job is to deliver,
 to an agent, context that is spread across the other files — so a rule that lives only there binds
@@ -284,6 +288,17 @@ out of step with it.
   order to understand a decision goes in that repository's own public `ARCHITECTURE.md`**; the
   proposal behind it stays internal history, cited by number alone — `RFC 0016`, no URL and no
   repository name.
+
+  **CI reads every `<owner>/<name>` reference** in a repository's markdown and `.github/`, and asks
+  github.com **anonymously** whether it opens — which is the question the rule poses, and not the
+  one a token would answer. A 404 fails, private and non-existent alike, because both are the same
+  404 to a reader outside the account. **A bare name in prose is invisible to it**: without the
+  owner in front of it, a repository's name reads as a word. `CHANGELOG.md` is exempt, and a
+  private repository is skipped entirely — its documentation is not public. It found the live
+  instance the day it was built: the issue templates every repository in the account inherits
+  linked a private repository's proposals. It also reddened the first draft of this very
+  paragraph, which named one as its example.
+  rak200/workflow#64
 - **It binds the whole public surface**, not only the documents: badges, workflow comments, issue
   templates, and the bodies of issues and pull requests. **`CHANGELOG.md` is the one exemption**,
   being generated from released commits — the control point there is the pull request that feeds it.
@@ -366,6 +381,11 @@ it ships is published anywhere:
 [![Latest tag](https://img.shields.io/github/v/tag/rak200/<repo>?sort=semver)](https://github.com/rak200/<repo>/tags)
 ```
 
+**CI asserts it in every repository** — the shield and the link it carries, both naming that
+repository — and, alone among these steps, asserts that `README.md` exists at all: a repository
+with none makes the claim nowhere. It is the one badge no mirror can grade, being live, which is
+how six of ten repositories came to be without it. rak200/workflow#64
+
 The **git tag** is the source, uniformly — not the registry the package happens to be installed
 from. Every repository here has tags; only some have a registry, and a rule that changes shape per
 variant is a rule that gets applied to some of them. A registry badge may be added alongside it,
@@ -386,6 +406,12 @@ never instead of it.
   `workflow_run`.
 - **Untrusted values** — PR titles, branch names, issue bodies — reach a script through `env:`,
   never through template interpolation.
+
+  **That rule and `secrets: inherit` above are checked together**, in every repository, over its
+  own `.github/workflows/`. The first is a literal. The second reads the **shape of the line**: an
+  untrusted expression embedded in a command, a condition or a larger string fails, and one that is
+  the whole value of a mapping key passes, because that is exactly what an `env:` assignment looks
+  like — so a value handed to an action's `with:` is not reached. rak200/workflow#64
 - **`gitleaks` runs twice**: locally in `.githooks/pre-push` (prevention) and in CI (the
   backstop). A hit in CI means the credential is already in history.
 - **The `scan` verb is bound to `semgrep` in every language**, with the ruleset varying by
@@ -409,6 +435,12 @@ whoever runs the lifecycle. Everything here appears there; the difference is aud
    publishes *no check*, and the PR waits forever.
 4. **Audit a pipeline on each step's `outcome`**, never its `conclusion` — `continue-on-error`
    relabels a failure as success.
+
+   **Rules 2, 3 and 4 are checked where the workflows are**, in `rak200/.github`, by a step of its
+   own — the aggregator's `always()` and its equality with `success`, the absent `paths:` filter,
+   and `conclusion` read anywhere. A consumer's caller is a seeded file, so a `paths:` filter added
+   to one is caught as seed drift instead; a consumer's **other** workflows are graded by nobody.
+   rak200/workflow#64
 5. **A gate that has never failed has never been tested.** Make each one fail on purpose once,
    and confirm it blocks. **`gates.tsv` carries the reference per gate** and `gates.sh` refuses a
    `gate` row whose canary field is empty, so a new gate cannot enter the pipeline without someone
