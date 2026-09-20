@@ -94,25 +94,18 @@ git push -q -u origin master
 branch=$(gh api "repos/$REPO" --jq '.default_branch')
 [ "$branch" = master ] || die "default branch read back as '$branch', not master — delete the repo and start again; a rename leaves name-targeted rules behind"
 
-say "5/9  platform settings"
-# `allow_auto_merge` is off by default and was never written here, so `gh pr merge --auto` —
-# the merge command this lifecycle documents — could not work in any repository. Nobody hit
-# it because merges were made in the web UI. Written now, and read back below.
-gh api -X PATCH "repos/$REPO" \
-  -F allow_squash_merge=true -F allow_merge_commit=false -F allow_rebase_merge=false \
-  -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=PR_BODY \
-  -F allow_auto_merge=true \
-  -F delete_branch_on_merge=true >/dev/null
-gh api -X PUT "repos/$REPO/actions/permissions/workflow" \
-  -f default_workflow_permissions=read -F can_approve_pull_request_reviews=true >/dev/null
-# One path segment shorter, and a different object: the repository's Actions policy rather
-# than its token defaults. `sha_pinning_required` is what makes SHA pinning a platform rule
-# instead of a review habit, and the Actions allowlist was dropped in exchange for it. The
-# PUT replaces the whole policy, so `enabled` and `allowed_actions` go with it or they are
-# rewritten to defaults; the read-back below is what proves they were not.
-gh api -X PUT "repos/$REPO/actions/permissions" \
-  -F enabled=true -f allowed_actions=all -F sha_pinning_required=true >/dev/null
-gh api -X PUT "repos/$REPO/private-vulnerability-reporting" >/dev/null
+say "5/9  platform settings, from the pinned scripts/settings.tsv"
+# THE LIST IS NOT THIS SCRIPT'S. `.rak200/scripts/settings.tsv` declares the platform state a
+# rak200 repository is configured to, and step 8 reads it back through that same file — one list,
+# applied and graded, which is what `scaffold/seeds.tsv` is for files. A setting decided and never
+# written here used to appear in NEITHER half of the run, so the read-back reported a clean pass
+# over an incomplete configuration: `allow_auto_merge` was false in nine of ten repositories until
+# `gh pr merge --auto` was finally run and the platform refused it. rak200/workflow#78
+#
+# It comes from the pin rather than from the operator's checkout, for the reason the seeds do: a
+# repository is onboarded to a tag, not to whatever happens to be on someone's master.
+[ -f .rak200/scripts/settings.tsv ] || die "$PIN has no scripts/settings.tsv"
+.rak200/scripts/apply-settings.sh "$REPO"
 
 say "6/9  canonical labels, additively — then GitHub's stock set, deleted once"
 python - "$REPO" <<'PY'
@@ -161,10 +154,14 @@ for r in branch tag; do
 done
 
 say "8/9  read back every write — rule 9"
-gh api "repos/$REPO" --jq '{default_branch,allow_squash_merge,allow_merge_commit,allow_rebase_merge,squash_merge_commit_title,squash_merge_commit_message,allow_auto_merge,delete_branch_on_merge}'
-gh api "repos/$REPO/actions/permissions/workflow"
-gh api "repos/$REPO/actions/permissions"
-gh api "repos/$REPO/private-vulnerability-reporting"
+# The settings and the presence of the rulesets are read back by the auditor, against the very
+# manifest step 5 wrote from: one comparison, so the read-back cannot drift from the write the way
+# two hand-maintained lists did. It exits non-zero on any divergence, and `set -e` ends the run
+# there. rak200/workflow#78
+.rak200/scripts/audit-settings.sh "$NAME"
+# Not the auditor's, and read here: the default branch is established by the first push rather
+# than written, and the rulesets' bypass mode is a field the auditor deliberately does not compare.
+gh api "repos/$REPO" --jq '{default_branch}'
 gh api "repos/$REPO/rulesets" --jq '[.[] | {name,target,enforcement}]'
 gh api "repos/$REPO/rulesets" --jq '.[].id' | while read -r id; do
   gh api "repos/$REPO/rulesets/$id" --jq '{name, bypass_mode: (.bypass_actors[0].bypass_mode // "NONE")}'

@@ -1,0 +1,57 @@
+# object	field	type	value
+#
+# The platform state every rak200 repository is configured to, declared once. `new-repo.sh`
+# writes from this file and reads it back; `audit-settings.sh` sweeps the account against it.
+# Same idiom as `scaffold/seeds.tsv`: one list, read by the thing that applies it and by the
+# thing that grades it, so the two cannot disagree.
+#
+# Written because a decision about platform state could be made, written down as made, and never
+# applied — with nothing to notice. Two were. `allow_auto_merge` was false in nine of ten
+# repositories until `gh pr merge --auto`, the merge command this lifecycle documents, was finally
+# run and the platform refused it. `sha_pinning_required` was false in six of six until
+# `CONVENTIONS.md` §Security was read against the API by hand. One was found by using the estate
+# and the other by auditing prose against reality; neither was found by a mechanism.
+#
+# A READ-BACK CANNOT FIND THIS CLASS, and it is the estate's own rule that cannot. Non-negotiable 1
+# verifies that the write just made took effect — it is silent on the write nobody made. Every
+# field `new-repo.sh` read back corresponded to a write earlier in the same script, so a setting it
+# never wrote appeared in neither half and the audit reported a clean run over an incomplete
+# configuration. The stronger the read-back looks, the more convincing the omission is.
+#
+# A ROW DECLARES WHAT A `GET` MUST RETURN, never the call that gets there. The objects below are
+# written with three different methods and one of them takes no body at all, so a declaration of
+# results is the only shape a writer and a reader can share.
+#
+# Not here, and not by oversight: **rulesets and labels have canonical sources of their own** —
+# `rulesets/*.json` in `rak200/.github`, `labels.yml` here — and a copy of them in this file would
+# be the duplication it exists to remove. `audit-settings.sh` checks that the rulesets are present
+# and active, and nothing compares them field by field.
+#
+# object   the path under `repos/<owner>/<name>`, or `.` for the repository object itself
+# type     `bool` or `string` — how the value is compared, and how the writer passes it
+#
+# rak200/workflow#78
+# Squash-only, with the PR title and body as the commit: `CONVENTIONS.md` §Commits enforces the
+# pull request title because that is what the squash carries, and these two fields are what make
+# that true of the merge rather than of the reviewer.
+.	allow_squash_merge	bool	true
+.	allow_merge_commit	bool	false
+.	allow_rebase_merge	bool	false
+.	squash_merge_commit_title	string	PR_TITLE
+.	squash_merge_commit_message	string	PR_BODY
+# Off by GitHub's default, and `gh pr merge --auto` is the merge command this lifecycle documents.
+.	allow_auto_merge	bool	true
+.	delete_branch_on_merge	bool	true
+# Least privilege for the workflow token — `CONVENTIONS.md` §Security — widened per job, never here.
+actions/permissions/workflow	default_workflow_permissions	string	read
+actions/permissions/workflow	can_approve_pull_request_reviews	bool	true
+# One path segment above the token defaults, and a different object: the repository's Actions
+# policy. `sha_pinning_required` is what makes SHA pinning a platform rule rather than a review
+# habit, and the Actions allowlist was dropped in exchange for it. The PUT that writes this object
+# REPLACES it, so all three fields are declared or the ones left out are rewritten to defaults.
+actions/permissions	enabled	bool	true
+actions/permissions	allowed_actions	string	all
+actions/permissions	sha_pinning_required	bool	true
+# A public-repository feature: the endpoint does not exist on a private one, where the audit says
+# so rather than passing quietly.
+private-vulnerability-reporting	enabled	bool	true

@@ -20,6 +20,9 @@ repository's own CI. Nothing here tracks a moving target, and nothing pushes int
 | [`proposals/`](proposals) | the RFC template and the process every repository's proposals follow |
 | [`scripts/new-repo.sh`](scripts/new-repo.sh) | onboarding, executable — the form of `REPOSITORY.md` §1.1 |
 | [`scripts/carry-seeds.sh`](scripts/carry-seeds.sh) | carrying a release into consumers, executable — the form of `CONTINGENCIES.md` §7 |
+| [`scripts/settings.tsv`](scripts/settings.tsv) | the platform state every repository is configured to, declared once |
+| [`scripts/apply-settings.sh`](scripts/apply-settings.sh) | writing that state, executable — what `REPOSITORY.md` §1.1 step 5 runs |
+| [`scripts/audit-settings.sh`](scripts/audit-settings.sh) | reading the account back against it, executable — the answer a read-back cannot give |
 
 **These three carry commands, and a procedure is not changed until it has been run.** The last time
 `REPOSITORY.md` §1 was rewritten from correct premises it still broke three times on its first
