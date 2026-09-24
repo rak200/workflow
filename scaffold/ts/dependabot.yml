@@ -100,3 +100,30 @@ updates:
         dependency-type: "production"
       dev:
         dependency-type: "development"
+    # The Vitest MAJOR is held, across the whole family; minors and patches flow normally.
+    #
+    # `@stryker-mutator/vitest-runner@10` cannot drive Vitest 5 in a suite that runs in
+    # browser mode: zero tests per mutant, every mutant reported survived, and no error
+    # anywhere — so the mutation floor reads a number it never measured and the pipeline
+    # stays green. The measurement is in `stryker.base.js` in `@rak200/coding-standard-ts`,
+    # beside the gate it protects, and this repository's own `overrides` entry is the other
+    # half of the same decision.
+    #
+    # **What belongs here is that the proposal cannot even install.** `overrides` holds
+    # `vitest` at 4, so the updater moves the siblings and leaves the core behind — and
+    # `vitest@4.1.11` declares `peerOptional @vitest/coverage-v8` at `4.1.11` exactly, so a
+    # root asking for `^5.0.1` ERESOLVEs and `npm ci` never runs. The pin that protects the
+    # floor is what makes the pull request incoherent. Measured twice, as rak200/ui#183 and
+    # rak200/coding-standard-ts#101 — unmergeable by construction, and reopening on every
+    # 5.x release until this block exists.
+    #
+    # REMOVE THIS WHEN Stryker publishes a runner that drives Vitest 5 —
+    # stryker-mutator/stryker-js#6210. **The peer range cannot answer that question**: the
+    # runner declares `vitest: ">=2.0.0"`, unbounded above, so it already admits the major
+    # it does not drive. Lift this, the `overrides` entry and the standard's own pin in one
+    # pass, and read the score in browser mode rather than trusting a green pipeline.
+    ignore:
+      - dependency-name: "vitest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@vitest/*"
+        update-types: ["version-update:semver-major"]
