@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.57](https://github.com/rak200/workflow/compare/0.18.56...0.18.57) (2026-09-24)
+
+
+### Bug Fixes
+
+* the Vitest major is refused in the seed, not once per pull request ([#198](https://github.com/rak200/workflow/issues/198)) ([a325f32](https://github.com/rak200/workflow/commit/a325f32d15587567359f9de0c11a32c87b82a529))
+
 ## [0.18.56](https://github.com/rak200/workflow/compare/0.18.55...0.18.56) (2026-09-20)
 
 
