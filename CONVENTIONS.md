@@ -192,6 +192,20 @@ presence: a script that cannot run is worse than a missing one, because it reads
   killing a mutant in a file the diff never touched — and is triggered manually before a
   significant release. The vocabulary still holds one mutation verb: Layer 1 owns the word, the
   pipeline owns when and over what it runs.
+
+  **What the diff path does not grade is the engine.** A pull request that changes no mutable
+  source mutates nothing and passes, twice over and both times correctly: Infection
+  short-circuits with *Could not find any modified files in the configured sources* before a
+  threshold applies, and where the diff does touch source without changing a mutable line — a
+  docblock inside `src/`, which these repositories produce constantly — it is
+  `--ignore-msi-with-no-mutations` that keeps `0 mutations were generated` from failing. **So a
+  dependency bump is the one change this gate cannot grade**: it touches a manifest and a
+  lockfile, so the run that would notice a broken mutation engine is the run that mutates nothing.
+  A breakage that leaves every covered mutant surviving is caught loudly by the next pull request
+  that touches `src/`; one that leaves the engine generating nothing is indistinguishable from the
+  legitimate zero above, and separating them means reimplementing the engine's own notion of what
+  is mutable. The full run, and whoever runs the verb locally before committing, are what cover
+  it. rak200/workflow#202
 - **Coverage floor: a per-repo absolute in `.coverage-floor`,** hard-floored at 95%, monotonic —
   it ratchets up as coverage improves and never down. It is per-repo state, not a seed.
 
