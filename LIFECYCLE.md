@@ -301,6 +301,21 @@ check is still queued. It merges when the gate turns green. It works **because t
 already happened**: auto-merge waits for the requirements to be satisfied, and an approval
 satisfies them.
 
+**One bump is not covered by `gh pr checks`.** A bump of the mutation engine or of its
+test-runner plugin — `infection/infection`, `@stryker-mutator/*` — changes a manifest and a
+lockfile and nothing under `src/`, so the mutation floor mutates nothing and passes whatever the
+engine now does; `CONVENTIONS.md` §Testing carries why no cheaper check separates that from a
+legitimate zero. It is also the one class of pull request nobody runs locally, because the bot
+wrote it. Run the full verb before approving that one:
+
+```bash
+composer mutation     # or: npm run mutation
+```
+
+A collapsed score is the expected shape of the failure — `rak200/coding-standard-ts` met it as
+every covered mutant surviving on Vitest 5, and what caught it there was the bump being incomplete
+enough to break `npm ci` first.
+
 **Requesting changes.** On either path, review comments and `gh pr review --request-changes` work
 normally. A new push **dismisses the existing approval** — deliberately, so an approval never
 carries over to code it did not see. Conversations must be resolved before merge.
