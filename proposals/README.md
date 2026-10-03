@@ -13,14 +13,18 @@ already settled.
 ## Steps
 
 1. Copy `TEMPLATE.md` to `NNNN-short-title.md`, using the next available number.
-2. Fill in **Motivation**, set the status to `Draft`, declare the **Scope**, and add it to the
-   local index.
-3. Grow **Study** and **Proposed design** over time. Move the status to `Exploring` while
-   actively researching.
-4. When ready, fill in **Decision** with the outcome and its reasoning, and set the status to
-   `Accepted` or `Rejected`.
-5. Once an accepted proposal is built, set the status to `Implemented` and link the relevant
-   commits or pull requests from the Decision section.
+2. Fill in **Motivation**, declare the **Scope**, and add it to the local index with the status
+   `Draft`.
+3. Grow **Study** and **Proposed design** over time. Move its status in the index to `Exploring`
+   while actively researching.
+4. When ready, fill in **Decision** with the outcome and its reasoning, and set its status in the
+   index to `Accepted` or `Rejected`.
+5. Once an accepted proposal is built, set its status in the index to `Implemented` and link the
+   relevant commits or pull requests from the Decision section.
+
+**The index is the only place a status is written.** The proposal carries none, because a second
+copy of one fact is a second place for it to go stale, and every transition would be made twice.
+Nothing compares the two, which is why there is only one.
 
 ## Statuses
 
