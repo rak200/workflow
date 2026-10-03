@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.18.59](https://github.com/rak200/workflow/compare/0.18.58...0.18.59) (2026-10-03)
+
+
+### Documentation
+
+* the doc-comment rule names its mechanism ([#208](https://github.com/rak200/workflow/issues/208)) ([a034459](https://github.com/rak200/workflow/commit/a03445982e593f81b86a00e493ab0ea1d3d091eb))
+* the test-tree rule says why nothing checks it ([#209](https://github.com/rak200/workflow/issues/209)) ([8aefb4f](https://github.com/rak200/workflow/commit/8aefb4f68686704d6b9aa3980f82be7b539d9363))
+
 ## [0.18.58](https://github.com/rak200/workflow/compare/0.18.57...0.18.58) (2026-09-26)
 
 
