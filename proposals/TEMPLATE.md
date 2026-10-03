@@ -1,6 +1,5 @@
 # RFC NNNN — Title
 
-- **Status**: Draft
 - **Scope**: framework | library | application | tooling
 - **Created**: YYYY-MM-DD
 
