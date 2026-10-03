@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.60](https://github.com/rak200/workflow/compare/0.18.59...0.18.60) (2026-10-03)
+
+
+### Documentation
+
+* a proposal's status is written in its index, and nowhere else ([#211](https://github.com/rak200/workflow/issues/211)) ([cfd3de3](https://github.com/rak200/workflow/commit/cfd3de33690bccd51f986243ff2bac76da9c4ca8))
+
 ## [0.18.59](https://github.com/rak200/workflow/compare/0.18.58...0.18.59) (2026-10-03)
 
 
