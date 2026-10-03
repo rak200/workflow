@@ -240,6 +240,14 @@ presence: a script that cannot run is worse than a missing one, because it reads
   signature are noise; add one when it carries something the signature cannot (units, semantics,
   edge cases, the condition of a throw).
 
+  **Each language's analyser enforces it**, with a rule its Layer 2 standard ships:
+  `rak200.docSummary` in PHP, `@rak200/coding-standard-ts/doc-summary` in TypeScript. Both read
+  `src/` unless a repository says otherwise, because a doc comment on public code is the
+  documentation that travels with it and a test does not travel. Both ask that the doc comment
+  opens with prose rather than a tag; neither can ask that the prose is right. What counts as a
+  member follows each language's shape, and each standard says what it reads.
+  rak200/coding-standard-php#10, rak200/coding-standard-ts#25
+
 ## Proposals
 
 The process — what a proposal is for, its steps, its statuses, its template — is
