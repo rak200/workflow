@@ -173,8 +173,13 @@ presence: a script that cannot run is worse than a missing one, because it reads
 
 ## Testing
 
-- **The test tree mirrors the source tree**, one test file per unit, and the test namespace
-  mirrors the source namespace.
+- **The test tree mirrors the source tree**, one test file per unit. **Nothing checks it, and that
+  is deliberate.** A runner collects a test by its file pattern, so one in the wrong place runs
+  exactly as it would in the right one, and a test never ships: `export-ignore` keeps it out of a
+  PHP tarball, `files` out of an npm one. Some tests correctly mirror no unit — a check that spans
+  components, an assertion file the analyser reads — and a mirror check would have to be taught
+  each of them, to guard code that never travels. How a test's namespace follows its path is a
+  question for the language, and the PHP standard answers it. rak200/workflow#205
 - **Assert the contract, not the implementation**: return values, thrown exceptions, edge cases
   (empty input, boundaries, multibyte where it applies). Cover the error paths. Time-sensitive
   tests assert structural properties, never literal values.
