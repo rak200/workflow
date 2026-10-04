@@ -186,10 +186,13 @@ presence: a script that cannot run is worse than a missing one, because it reads
 - **Mutation floor: `minCoveredMsi: 100`.** Every mutant on covered code must die. A survivor is
   killed by strengthening the test; it is *ignored* only when provably equivalent — no input
   distinguishes it — and then with the narrowest possible annotation. **The threshold is never
-  lowered to accommodate a survivor**, and a repository that restates it is compared with the
-  pinned Layer 2 standard's: a lower number fails. One that does not restate it runs the standard's.
-  The comparison has the reach §README badges describes — one matrix cell, and absent in the
-  `-config` repositories, which is where the number is defined. rak200/workflow#64
+  lowered to accommodate a survivor**, and the pipeline compares it, as the mutation tool resolves
+  it, with the pinned Layer 2 standard's: a lower number fails, and so does a config that sets
+  none, because a mutation tool with no floor configured never fails. Neither tool here can be
+  trusted to inherit it — Infection has no `includes`, and a Stryker config that leaves the standard
+  out runs Stryker's own default. The comparison has the reach §README badges describes — one
+  matrix cell, and absent in the `-config` repositories, which is where the number is defined.
+  rak200/workflow#64, rak200/coding-standard-ts#25
 - **Mutation runs over the changed lines on a pull request, and in full off that path.** A full
   run is tens of minutes on a real library, and a required check that slow is one people learn to
   route around. The threshold is identical in both; only *what* is mutated differs. The full run
@@ -388,10 +391,13 @@ maintained:
 
   **A mirror proves the badge matches the configuration, never that the configuration matches the
   convention.** That second comparison is made wherever the convention has a machine-readable form:
-  the language pipelines compare the analyser level, the mutation floor, the ESLint tier and the
-  runtime floor against the same file in the **pinned Layer 2 standard** — the floor as a floor, at
-  or above, the rest for equality — and the language-agnostic half compares the manifest's `license`
-  with the `LICENSE` seed. **Its reach is three-sided.** Those comparisons run on **one matrix
+  the language pipelines compare the analyser's settings, the mutation floor, the lint rules, the
+  compiler options and the runtime floor against the **pinned Layer 2 standard** — the runtime floor
+  as a floor, at or above, the rest for equality — and the language-agnostic half compares the
+  manifest's `license` with the `LICENSE` seed. **Each value is compared as its tool resolves it,
+  never as a file spells it**: a config that leaves the standard out restates nothing, and reading
+  that silence as the standard's value is how a repository once ran with no mutation floor while
+  the comparison said 100. **Its reach is three-sided.** Those comparisons run on **one matrix
   cell**, the lowest declared runtime. A value the prose mandates and the standard does not carry is
   invisible to them, and the step says so rather than passing. And in the `-config` repositories,
   which are where the values are defined, it exits with *no pinned standard under `vendor/`* — no
