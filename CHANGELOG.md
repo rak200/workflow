@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.61](https://github.com/rak200/workflow/compare/0.18.60...0.18.61) (2026-10-04)
+
+
+### Documentation
+
+* the mandated-value comparisons read what the tools resolve ([#213](https://github.com/rak200/workflow/issues/213)) ([05614db](https://github.com/rak200/workflow/commit/05614db5212dc4e4e68b81bd1831abe522a74bc4))
+
 ## [0.18.60](https://github.com/rak200/workflow/compare/0.18.59...0.18.60) (2026-10-03)
 
 
